@@ -1,8 +1,8 @@
 import './map.css';
 
-function Map(){
+function Map({role}){
 
-    return<>MAP PAGE</>
+    return<p>ruolo: {role}</p>
 }
 
 export default Map
