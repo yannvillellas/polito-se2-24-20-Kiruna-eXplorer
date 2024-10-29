@@ -6,6 +6,8 @@ import session from 'express-session';
 import passport from 'passport';
 import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
+import { listDocuments } from './src/dao/documentDAO.mjs';
+import { listPositions } from './src/dao/positionDAO.mjs';
 
 const app = express();
 const PORT = 3001;
@@ -86,4 +88,27 @@ app.delete('/api/sessions/current', (req, res) => {
     });
 });
 
+//documentAPI
+app.get('/api/documents',[], async(req, res) => {
+    try{
+        const documents = await listDocuments();
+        res.status(200).json(documents);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+//positionAPI
+app.get('/api/positions',[], async(req, res) => {
+    try{
+        const positions = await listPositions();
+        res.status(200).json(positions);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+
 app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+
+export default app;
