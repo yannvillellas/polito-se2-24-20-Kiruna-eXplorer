@@ -7,8 +7,12 @@ export const listDocuments = () => {
             if (err) {
                 reject(err);
             } else {
-                const documents = rows.map(row => new Document(row.docId, row.title, row.description, row.stackeholders, row.scale, row.issuanceDate, row.type, row.connections, row.language, row.pages));
-                resolve(documents);
+                if(rows){
+                    const documents = rows.map(row => new Document(row.docId, row.title, row.description, row.stackeholders, row.scale, row.issuanceDate, row.type, row.connections, row.language, row.pages));
+                    resolve(documents);
+                }else{
+                    resolve([]);
+                }
             }
         });
     });
