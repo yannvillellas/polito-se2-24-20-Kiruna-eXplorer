@@ -110,3 +110,5 @@ app.get('/api/positions',[], async(req, res) => {
 
 
 app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+
+export default app;
