@@ -5,6 +5,8 @@ function Login({ login }) {  // Destruttura `login` direttamente dai props
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false); 
+
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -47,7 +49,7 @@ function Login({ login }) {  // Destruttura `login` direttamente dai props
 
                     <div className="input_box">
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             id="pass"
                             className="input-field"
                             placeholder=""
@@ -56,7 +58,11 @@ function Login({ login }) {  // Destruttura `login` direttamente dai props
                             required
                         />
                         <label htmlFor="pass" className="label">Password</label>
-                        <i className="bx bx-lock-alt icon"></i>
+                        <i 
+                            className={showPassword ? "bx bx-lock-open-alt icon" : "bx bx-lock-alt icon"} // Cambia icona
+                            onClick={() => setShowPassword(!showPassword)} // Cambia visibilità della password al clic
+                            style={{ cursor: "pointer" }}
+                        />
                     </div>
 
                     {error && <div className="error">{error}</div>}
