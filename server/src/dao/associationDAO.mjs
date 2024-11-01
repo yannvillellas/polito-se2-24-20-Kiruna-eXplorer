@@ -2,11 +2,11 @@ import { db } from "../database/db.mjs"
 import Association from "../models/association.mjs"
 import { getTypeIdByType } from "./LinkTypeDAO.mjs";
 
-
-export const getAssociations = () => {
+//get association for a specific docId
+export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM Association'
-        db.all(sql, [], (err, rows) => {
+        const sql = 'SELECT * FROM Association WHERE doc1=? OR doc2=?'
+        db.all(sql, [docId,docId], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -17,18 +17,18 @@ export const getAssociations = () => {
     });
 }
 
-// association={doc1,doc2,type}; where type is a string not the typeId--> we have to search it
+// association={doc1,doc2,type}; where type is a string not the typeId--> we have to search it, where doc1, doc2 are the docId of the documents
 
 export const insertAssociation = (association) => {
     return new Promise(async (resolve, reject) => {
         try {
             const typeId = await getTypeIdByType(association.type);
             const insertSql = 'INSERT INTO Association (doc1, doc2, typeId) VALUES (?, ?, ?)';
-            db.run(insertSql, [association.doc1, association.doc2, typeId], (err) => {
+            db.run(insertSql, [association.doc1, association.doc2, typeId], function (err) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve();
+                    resolve(this.lastID);
                 }
             });
         } catch (err) {

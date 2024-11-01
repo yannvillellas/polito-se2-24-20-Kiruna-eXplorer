@@ -8,6 +8,8 @@ import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
 import { listDocuments } from './src/dao/documentDAO.mjs';
 import { listPositions } from './src/dao/positionDAO.mjs';
+import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
+import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
 
 const app = express();
 const PORT = 3001;
@@ -107,6 +109,95 @@ app.get('/api/positions',[], async(req, res) => {
         res.status(500).json({error: err.message});
     }
 });
+
+//linksAPI
+
+let validTypes = [];
+// load the valid links type at the server start
+const loadValidTypes = async () => {
+    try {
+        validTypes = await getLinksType();
+    } catch (error) {
+        console.error('Error fetching link types on startup:', error);
+    }
+};
+loadValidTypes();
+
+app.get('/api/linkTypes',[], async(req, res) => {
+    try{
+        const types = await getLinksType();
+        res.status(200).json(types);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.get('/api/associations/:docId',[], async(req, res) => {
+    try{
+        const associations = await getAssociations(req.params.docId);
+        res.status(200).json(associations);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.post('/api/associations', isUrbanPlanner, [
+    check('doc1').notEmpty().isString(),
+    check('doc2').notEmpty().isString(),
+    check('type').notEmpty().isString().isIn(validTypes), //controllare
+  ], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const association = {
+        doc1: req.body.doc1,
+        doc2: req.body.doc2,
+        type: req.body.type
+    };
+
+    try {
+        const newId=await insertAssociation(association);
+        res.status(200).json({ id: newId });  //return the Id of the new association to the frontend
+    } catch (e) {
+        res.status(500).json({ error: 'Error adding a new link between documents' });
+    }
+});
+
+app.delete('api/association/:aId',isUrbanPlanner,[],async (req, res)=>{
+    try{
+        await deleteAssociation(req.params.idUtente);
+        res.status(200).end();
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.put('/api/associations/:aId', isUrbanPlanner, [
+    check('doc1').notEmpty().isString(),
+    check('doc2').notEmpty().isString(),
+    check('type').notEmpty().isString().isIn(validTypes),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const association = {
+        aId: req.params.aId,
+        doc1: req.body.doc1,
+        doc2: req.body.doc2,
+        type: req.body.type
+    };
+
+    try {
+        await UpdateAssociation(association);
+        res.status(200).end();
+    } catch (e) {
+        res.status(500).json({ error: 'Error updating the association' });
+    }
+});
+
 
 
 app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });

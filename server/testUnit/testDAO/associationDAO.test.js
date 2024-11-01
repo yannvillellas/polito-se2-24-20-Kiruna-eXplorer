@@ -15,7 +15,7 @@ describe("getAssociations", () => {
     });
 
     test("correct getAssociations DAO", async () => {
-        const DBdata=[
+        /*const DBdata=[
             {aId:"a1",doc1:"docA",doc2:"docB",typeId:"t1"},
             {aId:"a2",doc1:"docA",doc2:"docB",typeId:"t2"},
             {aId:"a3",doc1:"docC",doc2:"docB",typeId:"t2"},
@@ -27,25 +27,38 @@ describe("getAssociations", () => {
             new Association("a2","docA","docB","t2"),
             new Association("a3","docC","docB","t2"),
             new Association("a4","docD","docC","t4"),
+        ]*/
+
+        const docId="docC"
+
+        const DBdata = [
+            { aId: "a3", doc1: "docC", doc2: "docB", typeId: "t2" },
+            { aId: "a4", doc1: "docD", doc2: "docC", typeId: "t4" },
         ]
-        
+
+        const resultData = [
+            new Association("a3", "docC", "docB", "t2"),
+            new Association("a4", "docD", "docC", "t4"),
+        ]
+
         jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
             callback(null, DBdata);
             return ({});
         });
 
-        await expect(getAssociations()).resolves.toStrictEqual(resultData);
+        await expect(getAssociations(docId)).resolves.toStrictEqual(resultData);
         expect(Database.prototype.all).toHaveBeenCalledTimes(1);
     });
 
     test("getAssociations DAO - Error from DB", async () => {
-        
+
+        const docId="docC"
         jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
             callback(Error);
             return ({});
         });
 
-        await expect(getAssociations()).rejects.toBe(Error);
+        await expect(getAssociations(docId)).rejects.toBe(Error);
         expect(Database.prototype.all).toHaveBeenCalledTimes(1);
     });
 });
@@ -59,12 +72,13 @@ describe("insertAssociation", () => {
     });
 
     test("correct insertAssociation DAO", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
-        const typeId="t1"
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
+        const typeId = "t1"
+        const newAId="a5";
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockResolvedValueOnce(typeId)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockResolvedValueOnce(typeId)
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-            callback(null);
+            callback.call({ lastId: newAId }, null);
             return ({});
         });
 
@@ -73,10 +87,10 @@ describe("insertAssociation", () => {
     });
 
     test("insertAssociation DAO - Error from DB", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
-        const typeId="t1"
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
+        const typeId = "t1"
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockResolvedValueOnce(typeId)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockResolvedValueOnce(typeId)
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
             callback(Error);
             return ({});
@@ -87,9 +101,9 @@ describe("insertAssociation", () => {
     });
 
     test("insertAssociation DAO - Error from getTypeIdByType", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockRejectedValueOnce(Error)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockRejectedValueOnce(Error)
 
         await expect(insertAssociation(association)).rejects.toBe(Error);
         expect(Database.prototype.run).toHaveBeenCalledTimes(0);
@@ -104,7 +118,7 @@ describe("deleteAssociation", () => {
     });
 
     test("correct deleteAssociation DAO", async () => {
-        const aId="a1"
+        const aId = "a1"
 
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
             callback(null);
@@ -116,7 +130,7 @@ describe("deleteAssociation", () => {
     });
 
     test("insertAssociation DAO - Error from DB", async () => {
-        const aId="a1"
+        const aId = "a1"
 
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
             callback(Error);
@@ -136,10 +150,10 @@ describe("UpdateAssociation", () => {
     });
 
     test("correct UpdateAssociation DAO", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
-        const typeId="t1"
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
+        const typeId = "t1"
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockResolvedValueOnce(typeId)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockResolvedValueOnce(typeId)
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
             callback(null);
             return ({});
@@ -150,10 +164,10 @@ describe("UpdateAssociation", () => {
     });
 
     test("UpdateAssociation DAO - Error from DB", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
-        const typeId="t1"
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
+        const typeId = "t1"
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockResolvedValueOnce(typeId)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockResolvedValueOnce(typeId)
         jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
             callback(Error);
             return ({});
@@ -164,9 +178,9 @@ describe("UpdateAssociation", () => {
     });
 
     test("UpdateAssociation DAO - Error from getTypeIdByType", async () => {
-        const association={doc1:"docA",doc2:"docB",type:"direct consequence"}
+        const association = { doc1: "docA", doc2: "docB", type: "direct consequence" }
 
-        jest.spyOn(LinkTypeDAO,"getTypeIdByType").mockRejectedValueOnce(Error)
+        jest.spyOn(LinkTypeDAO, "getTypeIdByType").mockRejectedValueOnce(Error)
 
         await expect(UpdateAssociation(association)).rejects.toBe(Error);
         expect(Database.prototype.run).toHaveBeenCalledTimes(0);
