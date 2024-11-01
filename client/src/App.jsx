@@ -5,6 +5,7 @@ import Map from "./components/map/Map";
 import Login from "./components/login/Login";
 import FirstPage from "./components/firstPage";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 function App() {
   useEffect(() => {}, []);
 
