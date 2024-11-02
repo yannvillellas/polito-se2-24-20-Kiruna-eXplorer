@@ -10,6 +10,7 @@ import { listDocuments } from './src/dao/documentDAO.mjs';
 import { listPositions } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
+import { isUrbanPlanner,isValidType} from './middleware.mjs';
 
 const app = express();
 const PORT = 3001;
@@ -55,12 +56,7 @@ app.use(session({
 
 app.use(passport.authenticate('session'));
 
-const isUrbanPlanner = (req, res, next) => {
-    if (req.isAuthenticated() && req.user.role === 'urbanPlanner') {
-        return next();
-    }
-    return res.status(401).json({ error: 'Not authorized' });
-};
+
 
 //authAPI
 app.post('/api/sessions', (req, res, next) => {
@@ -112,16 +108,8 @@ app.get('/api/positions',[], async(req, res) => {
 
 //linksAPI
 
-let validTypes = [];
 // load the valid links type at the server start
-const loadValidTypes = async () => {
-    try {
-        validTypes = await getLinksType();
-    } catch (error) {
-        console.error('Error fetching link types on startup:', error);
-    }
-};
-loadValidTypes();
+//let validTypes = loadValidTypes();
 
 app.get('/api/linkTypes',[], async(req, res) => {
     try{
@@ -134,17 +122,17 @@ app.get('/api/linkTypes',[], async(req, res) => {
 
 app.get('/api/associations/:docId',[], async(req, res) => {
     try{
-        const associations = await getAssociations(req.params.docId);
+        const associations = await getAssociations(parseInt(req.params.docId)); // verify if docId are integers
         res.status(200).json(associations);
     }catch(err){
         res.status(500).json({error: err.message});
     }
 });
 
-app.post('/api/associations', isUrbanPlanner, [
+app.post('/api/associations', isUrbanPlanner, isValidType,[
     check('doc1').notEmpty().isString(),
     check('doc2').notEmpty().isString(),
-    check('type').notEmpty().isString().isIn(validTypes), //controllare
+    check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare
   ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -165,26 +153,26 @@ app.post('/api/associations', isUrbanPlanner, [
     }
 });
 
-app.delete('api/association/:aId',isUrbanPlanner,[],async (req, res)=>{
+app.delete('/api/associations/:aId',isUrbanPlanner,[],async (req, res)=>{
     try{
-        await deleteAssociation(req.params.idUtente);
+        await deleteAssociation(parseInt(req.params.aId)); // verify if aId is integer
         res.status(200).end();
     }catch(err){
         res.status(500).json({error: err.message});
     }
 });
 
-app.put('/api/associations/:aId', isUrbanPlanner, [
+app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
     check('doc1').notEmpty().isString(),
     check('doc2').notEmpty().isString(),
-    check('type').notEmpty().isString().isIn(validTypes),
+    check('type').notEmpty().isString()/*.isIn(validTypes),*/
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
     const association = {
-        aId: req.params.aId,
+        aId: parseInt(req.params.aId),      //verify if aId is Int
         doc1: req.body.doc1,
         doc2: req.body.doc2,
         type: req.body.type
