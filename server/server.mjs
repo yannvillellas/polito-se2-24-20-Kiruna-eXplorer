@@ -6,8 +6,8 @@ import session from 'express-session';
 import passport from 'passport';
 import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
-import { listDocuments } from './src/dao/documentDAO.mjs';
-import { listPositions } from './src/dao/positionDAO.mjs';
+import { listDocuments, addDocument } from './src/dao/documentDAO.mjs';
+import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
 
 const app = express();
 const PORT = 3001;
@@ -98,6 +98,35 @@ app.get('/api/documents',[], async(req, res) => {
     }
 });
 
+// addDocument
+app.post('/api/documents', isUrbanPlanner, [
+    check('id').isInt(),
+    check('title').isString(),
+    check('stakeholders').isString(),
+    check('scale').isString(),
+    check('issuanceDate').isDate(),
+    check('type').isString(),
+    check('connections').isString(),
+    check('language').isString(),
+    check('pages').isInt(),
+    check('description').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    console.log("sono in server.mjs: sto aggiungendo il corpo del documento", req.body);
+    // Here i manage teh first infos of the document
+    await addDocument(req.body);
+
+    res.status(201).end();
+});
+
+
+
+
+
 //positionAPI
 app.get('/api/positions',[], async(req, res) => {
     try{
@@ -106,6 +135,28 @@ app.get('/api/positions',[], async(req, res) => {
     }catch(err){
         res.status(500).json({error: err.message});
     }
+});
+
+// addPosition
+app.post('/api/positions', isUrbanPlanner, [
+    check('docId').isInt(),
+    check('lat').isFloat(),
+    check('lng').isFloat(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    console.log("sono in server.mjs: sto aggiungendo la posizione:", req.body);
+
+    // Here i manage the (lat, long), float values
+    const docId = req.body.docId;
+    const lat = req.body.lat;
+    const lng = req.body.lng;
+    await addPosition(docId, lat, lng);
+
+    res.status(201).end();
 });
 
 

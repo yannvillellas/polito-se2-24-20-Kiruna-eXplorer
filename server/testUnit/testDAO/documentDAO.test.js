@@ -1,5 +1,5 @@
 import { test, expect, jest } from "@jest/globals";
-import { listDocuments } from "../../src/dao/documentDAO.mjs";
+import { listDocuments, addDocument } from "../../src/dao/documentDAO.mjs";
 import Document from "../../src/models/document.mjs"; // Importa la classe Document
 import sqlite3 from "sqlite3";
 const { Database } = sqlite3.verbose();
@@ -46,5 +46,109 @@ describe("Document DAO Tests", () => {
 
             await expect(listDocuments()).rejects.toThrow("Database error");
         });
+    });
+
+    describe("addDocument", () => {
+        test("should correctly add a document to the database (no error) ", async () => {
+            const validDocument = {
+                id: 1,
+                title: 'Test Document',
+                description: 'This is a test document.',
+                stakeholders: 'Stakeholder1',
+                scale: '1:100',
+                issuanceDate: '2024-11-01',
+                type: 'Report',
+                connections: 'Connection1',
+                language: 'EN',
+                pages: 10
+            };
+            
+            jest.spyOn(Database.prototype, "get").mockImplementation((sql, params, callback) => {
+                callback(null, null); // Simulate no existing document 8i used a test for already existing id)
+            });
+
+            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
+                callback(null); // Simulate successful insert
+            });
+
+            const result = await addDocument(validDocument);
+            expect(result).toBeUndefined();
+            expect(Database.prototype.get).toHaveBeenCalledTimes(1);
+            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
+
+        });
+
+        
+        test("should reject on insert error", async () => {
+            const validDocument = {
+                id: 1,
+                title: 'Test Document',
+                description: 'This is a test document.',
+                stakeholders: 'Stakeholder1',
+                scale: '1:100',
+                issuanceDate: '2024-11-01',
+                type: 'Report',
+                connections: 'Connection1',
+                language: 'EN',
+                pages: 10
+            };
+
+            jest.spyOn(Database.prototype, "get").mockImplementation((sql, params, callback) => {
+                callback(null, null); // Simulate no existing document
+            });
+
+            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
+                callback(new Error("Insert error")); // Simulate insert error
+            });
+
+            await expect(addDocument(validDocument)).rejects.toThrow("Insert error");
+            expect(Database.prototype.get).toHaveBeenCalledTimes(1);
+            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
+        });
+
+        test("should reject if the document already exists", async () => {
+            const existingDocument = {
+                id: 1,
+                title: 'Test Document',
+                description: 'This is a test document.',
+                stakeholders: 'Stakeholder1',
+                scale: '1:100',
+                issuanceDate: '2024-11-01',
+                type: 'Report',
+                connections: 'Connection1',
+                language: 'EN',
+                pages: 10
+            };
+
+            jest.spyOn(Database.prototype, "get").mockImplementation((sql, params, callback) => {
+                callback(null, existingDocument); // Simulate existing document
+            });
+
+            await expect(addDocument(existingDocument)).rejects.toThrow("Document already exists");
+            expect(Database.prototype.get).toHaveBeenCalledTimes(1);
+        });
+
+        test("should reject on database error", async () => {
+            const validDocument = {
+                id: 1,
+                title: 'Test Document',
+                description: 'This is a test document.',
+                stakeholders: 'Stakeholder1',
+                scale: '1:100',
+                issuanceDate: '2024-11-01',
+                type: 'Report',
+                connections: 'Connection1',
+                language: 'EN',
+                pages: 10
+            };
+
+            jest.spyOn(Database.prototype, "get").mockImplementation((sql, params, callback) => {
+                callback(new Error("Database error"), null); // Simulate database error
+            });
+
+            await expect(addDocument(validDocument)).rejects.toThrow("Database error");
+            expect(Database.prototype.get).toHaveBeenCalledTimes(1);
+        });
+
     });
 });
