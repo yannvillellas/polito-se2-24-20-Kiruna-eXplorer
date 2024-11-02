@@ -16,6 +16,43 @@ const listPositions = async () => {
     }
 }
 
+
+const addPosition = async (position) => {
+    console.log("sono in positionAPI.js: sto aggiungendo la posizione", position);
+    const response = await fetch(`${SERVER_URL}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'}, 
+
+      body: JSON.stringify({
+        docId: position.docId, lat: position.lat, lng: position.lng
+      }),
+
+      credentials: 'include'
+    });
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function mapPositions(positions){
     return positions.map(position => {
         new Position (
@@ -28,7 +65,8 @@ function mapPositions(positions){
 }
 
 const PositionAPI = {
-    listPositions
+    listPositions,
+    addPosition
 }
 
 export default PositionAPI;
