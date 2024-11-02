@@ -83,180 +83,202 @@ function Map(props) {
         </Col>
       </Row>
 
-      <Modal show={showModal} onHide={handleClose}>
+      <Modal show={showModal} onHide={handleClose} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>Insert New Document</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSaveDocument}>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Title:
-              </Form.Label>
-              <Col sm="8">
+          <Row>
+            <Col md={6}>
+              <Form onSubmit={handleSaveDocument}>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Title:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          title: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Stakeholders:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          stakeholders: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Scale:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          scale: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Issuance Date:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          issuanceDate: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Type:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Select
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          type: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">Select type</option>
+                      <option value="Informative document">
+                        Informative document
+                      </option>
+                      <option value="Prescriptive document">
+                        Prescriptive document
+                      </option>
+                      <option value="Design document">Design document</option>
+                      <option value="Technical document">
+                        Technical document
+                      </option>
+                      <option value="Material effect">Material effect</option>
+                    </Form.Select>
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Connections:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="number"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          connections: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Language:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          language: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Latitude:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          lat: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                  <Form.Label column sm="4">
+                    Longitude:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      required
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          lng: e.target.value,
+                        })
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+                <Button variant="primary" type="submit">
+                  Submit
+                </Button>
+              </Form>
+            </Col>
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Description:</Form.Label>
                 <Form.Control
-                  type="text"
-                  placeholder="Title"
-                  required
+                  as="textarea"
+                  rows={17}
+                  placeholder="Enter description here..."
+                  value={selectedDocument.description}
                   onChange={(e) =>
                     setSelectedDocument({
                       ...selectedDocument,
-                      title: e.target.value,
+                      description: e.target.value,
                     })
                   }
                 />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Stakeholders:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      stakeholders: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Scale:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      scale: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Issuance Date:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      issuanceDate: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Type:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Select
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      type: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select type</option>
-                  <option value="Informative document">
-                    Informative document
-                  </option>
-                  <option value="Prescriptive document">
-                    Prescriptive document
-                  </option>
-                  <option value="Design document">Design document</option>
-                  <option value="Technical document">Technical document</option>
-                  <option value="Material effect">Material effect</option>
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Connections:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="number"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      connections: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Language:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      language: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Latitude:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      lat: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm="4">
-                Longitude:
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="text"
-                  required
-                  onChange={(e) =>
-                    setSelectedDocument({
-                      ...selectedDocument,
-                      lng: e.target.value,
-                    })
-                  }
-                />
-              </Col>
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </Form>
+              </Form.Group>
+            </Col>
+          </Row>
         </Modal.Body>
       </Modal>
 
