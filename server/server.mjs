@@ -238,7 +238,8 @@ app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
     }
 });
 
-
-app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
-
+// Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
+//if (require.main === module) {
+    app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+//}
 export default app;
