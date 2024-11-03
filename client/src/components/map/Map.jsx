@@ -22,16 +22,25 @@ function Map(props) {
     language: "",
     pages: 0,
     description: "",
-    lat: 0,
-    lng: 0,
+    lat: "",
+    lng: "",
   });
 
+  const handleMunicipalitiesChange = (e) => {
+    const isChecked = e.target.checked;
+    setSelectedDocument({
+      ...selectedDocument,
+      lat: isChecked ? "67.856348" : "",
+      lng: isChecked ? "20.225785" : "",
+    });
+  };
   const handleSaveDocument = async (event) => {
     event.preventDefault();
     const newDocument = {
       ...selectedDocument,
       id: documents.length,
     };
+
     setDocuments([...documents, newDocument]);
     setShowModal(false);
 
@@ -46,8 +55,8 @@ function Map(props) {
       language: "",
       pages: 0,
       description: "",
-      lat: 0,
-      lng: 0,
+      lat: "",
+      lng: "",
     });
 
     try {
@@ -224,16 +233,16 @@ function Map(props) {
                 </Form.Group>
                 <Form.Group as={Row} className="mb-3">
                   <Form.Label column sm="4">
-                    Latitude:
+                    Page:
                   </Form.Label>
                   <Col sm="8">
                     <Form.Control
-                      type="text"
+                      type="number"
                       required
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
-                          lat: e.target.value,
+                          stakeholders: e.target.value,
                         })
                       }
                     />
@@ -241,21 +250,63 @@ function Map(props) {
                 </Form.Group>
                 <Form.Group as={Row} className="mb-3">
                   <Form.Label column sm="4">
+                    All municipalities:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Check
+                      type="checkbox"
+                      label="Select for all municipalities"
+                      onChange={handleMunicipalitiesChange}
+                    />
+                  </Col>
+                </Form.Group>
+
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  style={{ display: selectedDocument.lat ? "none" : "flex" }}
+                >
+                  <Form.Label column sm="4">
+                    Latitude:
+                  </Form.Label>
+                  <Col sm="8">
+                    <Form.Control
+                      type="text"
+                      value={selectedDocument.lat}
+                      onChange={(e) =>
+                        setSelectedDocument({
+                          ...selectedDocument,
+                          lat: e.target.value,
+                        })
+                      }
+                      disabled={selectedDocument.lat === "67.856348"}
+                    />
+                  </Col>
+                </Form.Group>
+
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  style={{ display: selectedDocument.lng ? "none" : "flex" }}
+                >
+                  <Form.Label column sm="4">
                     Longitude:
                   </Form.Label>
                   <Col sm="8">
                     <Form.Control
                       type="text"
-                      required
+                      value={selectedDocument.lng}
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
                           lng: e.target.value,
                         })
                       }
+                      disabled={selectedDocument.lng === "20.225785"}
                     />
                   </Col>
                 </Form.Group>
+
                 <Button variant="primary" type="submit">
                   Submit
                 </Button>
