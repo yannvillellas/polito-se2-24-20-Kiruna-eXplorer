@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import associationAPI from "../../api/associationAPI"; 
 import "./Link.css";
+import { Modal } from "react-bootstrap";
 
-function Link() {
+function Link(props) {
   const [doc1, setDoc1] = useState("");
   const [link, setLink] = useState("");
   const [doc2, setDoc2] = useState("");
@@ -36,19 +37,17 @@ function Link() {
     } catch (error) {
       console.error("Failed to create association:", error);
     }
+
+    props.handleClose();
   };
 
   return (
-    <div className="container">
-      <header className="header">
-        <h2>Header</h2>
-        <button className="logout">Logout</button>
-      </header>
-      <aside className="sidebar">
-        <h3>Map</h3>
-        {/* Placeholder for map, could be replaced with a map component later */}
-      </aside>
-      <main className="mainContent">
+    <Modal show={props.showModalLink} onHide={props.handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Link Documents</Modal.Title>
+        </Modal.Header> 
+      <Modal.Body>
+      <main className="text-center">
         <h2>Add Link</h2>
         <form onSubmit={handleSubmit} className="form">
           <div className="formGroup">
@@ -86,19 +85,20 @@ function Link() {
               </select>
             </label>
           </div>
-          <div className="buttons">
+          <div className="buttons justify-content-center">
             <button type="submit" className="submitButton">Submit</button>
             <button 
               type="button" 
               className="cancelButton" 
               onClick={() => { setDoc1(""); setLink(""); setDoc2(""); }}
-            >
+              >
               Cancel
             </button>
           </div>
         </form>
       </main>
-    </div>
+    </Modal.Body>
+  </Modal>
   );
 }
 

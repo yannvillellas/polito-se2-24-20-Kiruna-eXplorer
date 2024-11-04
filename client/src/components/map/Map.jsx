@@ -5,9 +5,12 @@ import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
 
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
+import Link from "../link/Link";
 
 function Map(props) {
-  const [showModal, setShowModal] = useState(false);
+  const [showModalAdd, setShowModalAdd] = useState(false);
+  const [showModalLink, setShowModalLink] = useState(false);
+
 
   const [documents, setDocuments] = useState([]);
 
@@ -42,7 +45,9 @@ function Map(props) {
     };
 
     setDocuments([...documents, newDocument]);
-    setShowModal(false);
+    setShowModalAdd(false);
+    setShowModalLink(false);
+    
 
     setSelectedDocument({
       id: null,
@@ -73,26 +78,45 @@ function Map(props) {
     }
   };
 
-  const handleClose = () => setShowModal(false);
-  const onBtnSelect = () => setShowModal(true);
+  const handleClose = () => {
+    setShowModalAdd(false);
+    setShowModalLink(false);
+  };
+  const onBtnSelectAdd = () => setShowModalAdd(true);
+  const onBtnSelectLink = () => setShowModalLink(true);
+
 
   return (
     <Container fluid>
       <Row className="mb-4">
         <Col className="d-flex justify-content-between align-items-center">
           <h1 className="text-primary">Welcome to Kiruna</h1>
+          <div className="d-flex">
+
           <Button
-            onClick={onBtnSelect}
+            onClick={onBtnSelectLink}
+            className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+            variant="warning"
+            style={{ width: "50px", height: "50px" }}
+            >
+            <i className="bi bi-link-45deg" style={{ fontSize: "1.5rem" }}></i>
+          </Button>
+          <Button
+            onClick={onBtnSelectAdd}
             className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
             variant="primary"
             style={{ width: "50px", height: "50px" }}
-          >
+            >
             <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
           </Button>
+          </div>
+          
         </Col>
       </Row>
 
-      <Modal show={showModal} onHide={handleClose} size="xl">
+    <Link showModalLink={showModalLink} handleClose={handleClose}/> 
+
+      <Modal show={showModalAdd} onHide={handleClose} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>Insert New Document</Modal.Title>
         </Modal.Header>
