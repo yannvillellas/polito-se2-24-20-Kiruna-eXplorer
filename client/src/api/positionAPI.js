@@ -16,16 +16,19 @@ const listPositions = async () => {
     }
 }
 
-function mapPositions(positions){
-    return positions.map(position => {
-        new Position (
-            position.posId,
-            position.docId,
-            position.latitude,
-            position.longitude
-        )        
-    })
+function mapPositions(positions) {
+    return positions
+        .filter(position => position.latitude !== undefined && position.longitude !== undefined)
+        .map(position => 
+            new Position(
+                position.posId,
+                position.docId,
+                position.latitude,
+                position.longitude
+            )
+        );
 }
+
 
 const PositionAPI = {
     listPositions
