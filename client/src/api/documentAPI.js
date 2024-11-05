@@ -19,7 +19,7 @@ const listDocuments = async () => {
 function mapDocuments(documents){
     return documents.map(document => {
         new Document (
-            document.docId,
+            document.id,
             document.title,
             document.description,
             document.stackeholders,

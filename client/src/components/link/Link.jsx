@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import associationAPI from "../../api/associationAPI"; 
-import { Modal } from "react-bootstrap";
+import associationAPI from "../../api/associationAPI";
+import { Modal, Row, Col, Form, Button } from "react-bootstrap";
 import "./Link.css";
 
 function Link(props) {
-  const [doc1, setDoc1] = useState("");
+  const [doc1, setDoc1] = useState(""); // here there is the id so it is an integer!
   const [link, setLink] = useState("");
   const [doc2, setDoc2] = useState("");
-  const [documents, setDocuments] = useState([]); // State for documents
+  // const [documents, setDocuments] = useState([]); // State for documents
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
 
   // Static link types if not fetching from backend
@@ -18,6 +18,14 @@ function Link(props) {
     setLinkTypes(staticLinkTypes); // Use static link types
   }, []);
 
+  useEffect(() => {
+    console.log("doc1: ", doc1);
+    console.log("Documents", props.documents);
+    console.log("First document: ", props.documents[1].id);
+  }, [doc1]);
+
+
+  /*
   // Fetch documents from the API
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -30,13 +38,19 @@ function Link(props) {
     };
     fetchDocuments();
   }, []);
+  */
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const association = { doc1, link, doc2 };
+    const association = {
+      doc1: /*parseInt(*/doc1/*, 10)*/,
+      link,
+      doc2: /*parseInt(*/doc2/*, 10)*/
+    };
 
     try {
+      console.log("Sono in link.jsx: sto spedendo,", association);
       const createdAssociation = await associationAPI.createAssociation(association); // Create association using API
       console.log("Association created:", createdAssociation);
       // Reset form fields after successful submission
@@ -53,62 +67,91 @@ function Link(props) {
     <Modal show={props.showModalLink} onHide={props.handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Link Documents</Modal.Title>
-      </Modal.Header> 
+      </Modal.Header>
       <Modal.Body>
-        <main className="text-center">
-          <h2>Add Link</h2>
-          <form onSubmit={handleSubmit} className="form">
-            <div className="formGroup">
-              <label>
-                Doc1:
-                <select value={doc1} onChange={(e) => setDoc1(e.target.value)} required>
-                  <option value="">Select Document 1</option>
-                  {documents.map((doc) => (
-                    <option key={doc.docId} value={doc.docId}>
-                      {doc.title}
+        <Row>
+          <Col md={6}>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group as={Row} className="mb-3">
+
+                <Form.Label column sm="4">
+                  Document 1
+                </Form.Label>
+
+                <Col sm="8">
+                  <Form.Select
+                    value={doc1} // doc1 will be the ID of the document, i don't do parseInt() so it will remain string
+                    onChange={(e) => setDoc1(/*parseInt(*/e.target.value/*, 10)*/)} // Save ID in doc1
+                  >
+                    {props.documents.map((doc) => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.title} {/* Show document title */}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+
+              </Form.Group>
+
+              <Form.Group as={Row} className="mb-3">
+                <Form.Label column sm="4">
+                  Link Type
+                </Form.Label>
+
+                <Col sm="8">
+                  <Form.Select
+                    value={link} // link is a string
+                    onChange={(e) => setLink(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select a document
                     </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="formGroup">
-              <label>
-                Link Type:
-                <select value={link} onChange={(e) => setLink(e.target.value)} required>
-                  <option value="">Select Link Type</option>
-                  {linkTypes.map((type, index) => (
-                    <option key={index} value={type}>
-                      {type}
+                    {linkTypes.map((linkType) => (
+                      <option key={linkType} value={linkType}>
+                        {linkType}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+              </Form.Group>
+
+
+              <Form.Group as={Row} className="mb-3">
+                <Form.Label column sm="4">
+                  Document 2
+                </Form.Label>
+
+                <Col sm="8">
+                  <Form.Select
+                    value={doc2} // doc2 is the ID, i don't do parseInt() so it will remain string
+                    onChange={(e) => setDoc2(/*parseInt(e.target.value, 10)*/e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select a document
                     </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="formGroup">
-              <label>
-                Doc2:
-                <select value={doc2} onChange={(e) => setDoc2(e.target.value)} required>
-                  <option value="">Select Document 2</option>
-                  {documents.map((doc) => (
-                    <option key={doc.docId} value={doc.docId}>
-                      {doc.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="buttons justify-content-center">
-              <button type="submit" className="submitButton">Submit</button>
-              <button 
-                type="button" 
-                className="cancelButton" 
-                onClick={() => { setDoc1(""); setLink(""); setDoc2(""); props.handleClose(); }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </main>
+                    {props.documents
+                      //.filter((doc) => parseInt(doc.id, 10) !== parseInt(doc1, 10)) // Exclude doc1 from the list here you need to parse the id-string to integer
+                      .filter((doc) => doc.id != doc1)
+                      .map((doc) => (
+                        <option key={doc.id} value={doc.id}>
+                          {doc.title} {/* Show document title */}
+                        </option>
+                      ))}
+                  </Form.Select>
+                </Col>
+              </Form.Group>
+              <Form.Group>
+                { doc1 && link && doc2 &&
+                  <Button variant="primary" type="submit" >
+                    Submit
+                  </Button>
+                }
+              </Form.Group>
+
+
+            </Form>
+          </Col>
+        </Row>
       </Modal.Body>
     </Modal>
   );

@@ -1,7 +1,18 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
+import React, { useEffect, useState} from "react";
+import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
+
+import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
@@ -11,9 +22,12 @@ function Map(props) {
   const [showModalAdd, setShowModalAdd] = useState(false);
   const [showModalLink, setShowModalLink] = useState(false);
 
+  const [isAllMunicipality, setIsAllMunicipality] = useState(false);
+  const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
+  const navigate = useNavigate();
 
   const [documents, setDocuments] = useState([]);
-
+  
   const [selectedDocument, setSelectedDocument] = useState({
     id: null,
     title: "",
@@ -25,18 +39,30 @@ function Map(props) {
     language: "",
     pages: 0,
     description: "",
-    lat: "",
-    lng: "",
+    lat: 0,
+    lng: 0,
   });
 
   const handleMunicipalitiesChange = (e) => {
-    const isChecked = e.target.checked;
-    setSelectedDocument({
-      ...selectedDocument,
-      lat: isChecked ? "67.856348" : "",
-      lng: isChecked ? "20.225785" : "",
-    });
-  };
+      const isChecked = e.target.checked;
+
+      setIsAllMunicipality(isChecked);
+
+      if(isChecked) {
+        setSelectedDocument({
+          ...selectedDocument,
+          lat: 67.856348 ,
+          lng: 20.225785
+        });
+      } else {
+        setSelectedDocument({
+          ...selectedDocument,
+          lat: 0,
+          lng: 0
+        });
+      }
+
+  } 
   const handleSaveDocument = async (event) => {
     event.preventDefault();
     const newDocument = {
@@ -60,9 +86,11 @@ function Map(props) {
       language: "",
       pages: 0,
       description: "",
-      lat: "",
-      lng: "",
+      lat: 0,
+      lng: 0,
     });
+
+    setIsAllMunicipality(false);
 
     try {
       console.log("Adding document:", newDocument);
@@ -93,29 +121,40 @@ function Map(props) {
           <h1 className="text-primary">Welcome to Kiruna</h1>
           <div className="d-flex">
 
-          <Button
-            onClick={onBtnSelectLink}
-            className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-            variant="warning"
-            style={{ width: "50px", height: "50px" }}
-            >
-            <i className="bi bi-link-45deg" style={{ fontSize: "1.5rem" }}></i>
-          </Button>
-          <Button
-            onClick={onBtnSelectAdd}
-            className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-            variant="primary"
-            style={{ width: "50px", height: "50px" }}
-            >
-            <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
-          </Button>
+          
+          {isUrbanPlanner &&
+          <>
+            { documents.length > 1 &&
+              <Button
+                onClick={onBtnSelectLink}
+                className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                variant="warning"
+                style={{ width: "50px", height: "50px" }}
+                >
+                <i className="bi bi-link-45deg" style={{ fontSize: "1.5rem" }}></i>
+              </Button>
+            }
+            <Button
+              onClick={onBtnSelectAdd}
+              className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+              variant="primary"
+              style={{ width: "50px", height: "50px" }}
+              >
+              <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+            </Button>
+
+            <Button onClick={props.handleLogout}> Logout</Button>
+
+          </>
+          }
+          
           </div>
           
         </Col>
       </Row>
-
-    <Link showModalLink={showModalLink} handleClose={handleClose}/> 
-
+    { documents.length > 1 &&
+      <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose}/> 
+    }
       <Modal show={showModalAdd} onHide={handleClose} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>Insert New Document</Modal.Title>
@@ -229,6 +268,7 @@ function Map(props) {
                     <Form.Control
                       type="number"
                       required
+                      min={0}
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
@@ -266,7 +306,7 @@ function Map(props) {
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
-                          stakeholders: e.target.value,
+                          pages: e.target.value,
                         })
                       }
                     />
@@ -285,51 +325,48 @@ function Map(props) {
                   </Col>
                 </Form.Group>
 
-                <Form.Group
-                  as={Row}
-                  className="mb-3"
-                  style={{ display: selectedDocument.lat ? "none" : "flex" }}
-                >
-                  <Form.Label column sm="4">
-                    Latitude:
-                  </Form.Label>
-                  <Col sm="8">
-                    <Form.Control
-                      type="text"
-                      value={selectedDocument.lat}
-                      onChange={(e) =>
-                        setSelectedDocument({
-                          ...selectedDocument,
-                          lat: e.target.value,
-                        })
-                      }
-                      disabled={selectedDocument.lat === "67.856348"}
-                    />
-                  </Col>
-                </Form.Group>
+                {!isAllMunicipality && 
+                  <>
+                    <Form.Group
+                            as={Row}
+                            className="mb-3">
+                            <Form.Label column sm="4">
+                              Latitude:
+                            </Form.Label>
+                            <Col sm="8">
+                              <Form.Control
+                                type="text"
+                                onChange={(e) =>
+                                  setSelectedDocument({
+                                    ...selectedDocument,
+                                    lat: parseFloat(e.target.value),
+                                  })
+                                }
+                              />
+                            </Col>
+                    </Form.Group>
 
-                <Form.Group
-                  as={Row}
-                  className="mb-3"
-                  style={{ display: selectedDocument.lng ? "none" : "flex" }}
-                >
-                  <Form.Label column sm="4">
-                    Longitude:
-                  </Form.Label>
-                  <Col sm="8">
-                    <Form.Control
-                      type="text"
-                      value={selectedDocument.lng}
-                      onChange={(e) =>
-                        setSelectedDocument({
-                          ...selectedDocument,
-                          lng: e.target.value,
-                        })
-                      }
-                      disabled={selectedDocument.lng === "20.225785"}
-                    />
-                  </Col>
-                </Form.Group>
+                    <Form.Group
+                            as={Row}
+                            className="mb-3"
+                    >
+                            <Form.Label column sm="4">
+                              Longitude:
+                            </Form.Label>
+                            <Col sm="8">
+                              <Form.Control
+                                type="text"
+                                onChange={(e) =>
+                                  setSelectedDocument({
+                                    ...selectedDocument,
+                                    lng: parseFloat(e.target.value),
+                                  })
+                                }
+                              />
+                            </Col>
+                    </Form.Group>
+                    </>
+                  } 
 
                 <Button variant="primary" type="submit">
                   Submit
@@ -359,18 +396,23 @@ function Map(props) {
 
       <Row>
         <Col>
-          <div
-            className="border border-2 rounded bg-light"
-            style={{
-              height: "500px",
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <span className="text-muted fs-4">Map Area</span>
-          </div>
+              <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+              />
+
+                {documents && documents.length > 0 && (
+                      documents.map((doc) => (
+                        <Marker key={doc.id} position={[doc.lat, doc.lng]}>
+                          <Popup>
+                            Document Description: {doc.description}
+                          </Popup>
+                        </Marker>
+                      ))
+                    )}
+
+              </MapContainer>
         </Col>
       </Row>
     </Container>

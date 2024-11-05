@@ -6,7 +6,7 @@ import { getTypeIdByType } from "./LinkTypeDAO.mjs";
 export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM Association WHERE doc1=? OR doc2=?'
-        db.all(sql, [docId,docId], (err, rows) => {
+        db.all(sql, [Integer.parseInt(docId),Integer.parseInt(docId)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -24,7 +24,7 @@ export const insertAssociation = (association) => {
         try {
             const typeId = await getTypeIdByType(association.type);
             const insertSql = 'INSERT INTO Association (doc1, doc2, typeId) VALUES (?, ?, ?)';
-            db.run(insertSql, [association.doc1, association.doc2, typeId], function (err) {
+            db.run(insertSql, [Integer.parseInt(association.doc1), Integer.parseInt(association.doc2), Integer.parseInt(typeId)], function (err) {
                 if (err) {
                     reject(err);
                 } else {
@@ -42,7 +42,7 @@ export const insertAssociation = (association) => {
 export const deleteAssociation = (aId) => {
     return new Promise((resolve, reject) => {
         const sql = 'DELETE FROM Association where aId= ?'
-        db.run(sql, [aId], (err, rows) => {
+        db.run(sql, [Integer.parseInt(aId)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -57,7 +57,7 @@ export const UpdateAssociation = (association) => {
         try {
             const typeId = await getTypeIdByType(association.type);
             const updateSql = 'UPDATE Association SET doc1=?, doc2=?, typeId=? WHERE aId=?';
-            db.run(updateSql, [association.doc1, association.doc2, typeId, association.aId], (err) => {
+            db.run(updateSql, [Integer.parseInt(association.doc1), Integer.parseInt(association.doc2), Integer.parseInt(typeId), Integer.parseInt(association.aId)], (err) => {
                 if (err) {
                     reject(err);
                 } else {

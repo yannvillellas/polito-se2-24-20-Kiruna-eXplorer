@@ -7,8 +7,9 @@ const SERVER_URL = 'http://localhost:3001/api/associations';
  * @param {string} association.link - Type of link between documents.
  * @param {string} association.doc2 - ID of the second document.
  */
-export const createAssociation = async (association) => {
+const createAssociation = async (association) => {
   try {
+    console.log("association api: sto spedendo",association)
     const response = await fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,6 +27,7 @@ export const createAssociation = async (association) => {
  * Fetch all associations from the server.
  * @returns {Array} List of all associations.
  */
+/*
 export const getAllAssociations = async () => {
   try {
     const response = await fetch(SERVER_URL, { method: 'GET' });
@@ -35,15 +37,15 @@ export const getAllAssociations = async () => {
     console.error("Error fetching associations:", error);
     throw error;
   }
-};
+};*/
 
 /**
  * Fetch available link types for associations.
  * @returns {Array} List of link types.
  */
-export const getLinkTypes = async () => {
+const getLinkTypes = async () => {
   try {
-    const response = await fetch(`${SERVER_URL}/types`, { method: 'GET' });
+    const response = await fetch(`http://localhost:3001/api/linkTypes`, { method: 'GET' });
     if (!response.ok) throw new Error('Failed to fetch link types');
     return await response.json();
   } catch (error) {
@@ -52,4 +54,6 @@ export const getLinkTypes = async () => {
   }
 };
 
-export default { createAssociation, getAllAssociations, getLinkTypes };
+const associationApi={ createAssociation/*, getAllAssociations*/, getLinkTypes };
+
+export default associationApi;
