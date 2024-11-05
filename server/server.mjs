@@ -181,11 +181,12 @@ app.get('/api/associations/:docId',[], async(req, res) => {
     }
 });
 
-app.post('/api/associations', isUrbanPlanner, isValidType,[
+app.post('/api/associations', /*isUrbanPlanner,*/ isValidType,[
     check('doc1').notEmpty().isString(),
     check('doc2').notEmpty().isString(),
     check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare
   ], async (req, res) => {
+    console.log("sono in server.mjs: mi è arrivato",req.body)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });

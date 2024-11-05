@@ -12,6 +12,7 @@ const createAssociation = async (association) => {
     console.log("association api: sto spedendo",association)
     const response = await fetch(SERVER_URL, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(association),
     });

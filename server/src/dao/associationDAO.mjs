@@ -23,8 +23,9 @@ export const insertAssociation = (association) => {
     return new Promise(async (resolve, reject) => {
         try {
             const typeId = await getTypeIdByType(association.type);
+            console.log("sono in associationDAO: ho ritornato typeId",typeId);
             const insertSql = 'INSERT INTO Association (doc1, doc2, typeId) VALUES (?, ?, ?)';
-            db.run(insertSql, [Integer.parseInt(association.doc1), Integer.parseInt(association.doc2), Integer.parseInt(typeId)], function (err) {
+            db.run(insertSql, [parseInt(association.doc1,10), parseInt(association.doc2,10), parseInt(typeId,10)], function (err) {
                 if (err) {
                     reject(err);
                 } else {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import associationAPI from "../../api/associationAPI";
 import { Modal, Row, Col, Form, Button } from "react-bootstrap";
 import "./Link.css";
+import associationApi from "../../api/associationAPI";
 
 function Link(props) {
   const [doc1, setDoc1] = useState(""); // here there is the id so it is an integer!
@@ -14,8 +15,20 @@ function Link(props) {
   const staticLinkTypes = ["Direct Consequence", "Collateral Consequence", "Projection"];
 
   // Set link types to static values
-  useEffect(() => {
+  /*useEffect(() => {
     setLinkTypes(staticLinkTypes); // Use static link types
+  }, []);*/
+
+  useEffect(() => {
+    const fetchLinkTypes = async () => {
+      try {
+        const types = await associationApi.getLinkTypes();
+        setLinkTypes(types);
+      } catch (error) {
+        console.error("Failed to fetch documents:", error);
+      }
+    };
+    fetchLinkTypes();
   }, []);
 
   useEffect(() => {
@@ -45,7 +58,7 @@ function Link(props) {
     e.preventDefault();
     const association = {
       doc1: /*parseInt(*/doc1/*, 10)*/,
-      link,
+      type:link,
       doc2: /*parseInt(*/doc2/*, 10)*/
     };
 
@@ -83,6 +96,9 @@ function Link(props) {
                     value={doc1} // doc1 will be the ID of the document, i don't do parseInt() so it will remain string
                     onChange={(e) => setDoc1(/*parseInt(*/e.target.value/*, 10)*/)} // Save ID in doc1
                   >
+                    <option value="" disabled>
+                      Select a link
+                    </option>
                     {props.documents.map((doc) => (
                       <option key={doc.id} value={doc.id}>
                         {doc.title} {/* Show document title */}
@@ -104,7 +120,7 @@ function Link(props) {
                     onChange={(e) => setLink(e.target.value)}
                   >
                     <option value="" disabled>
-                      Select a document
+                      Select a link
                     </option>
                     {linkTypes.map((linkType) => (
                       <option key={linkType} value={linkType}>
@@ -141,7 +157,7 @@ function Link(props) {
                 </Col>
               </Form.Group>
               <Form.Group>
-                { doc1 && link && doc2 &&
+                {doc1 && link && doc2 &&
                   <Button variant="primary" type="submit" >
                     Submit
                   </Button>

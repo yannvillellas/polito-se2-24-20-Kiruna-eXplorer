@@ -43,6 +43,20 @@ function Map(props) {
     lng: 0,
   });
 
+/*
+  useEffect(()=>{
+    const fetchDocuments = async () => {
+      try {
+        const docs = await DocumentAPI.listDocuments();
+        setDocuments(docs);
+      } catch (error) {
+        console.error("Failed to fetch documents:", error);
+      }
+    };
+    fetchDocuments();
+    console.log(documents)
+  }, [])*/
+
   const handleMunicipalitiesChange = (e) => {
       const isChecked = e.target.checked;
 
