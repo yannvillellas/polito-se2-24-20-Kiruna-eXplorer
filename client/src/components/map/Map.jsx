@@ -231,7 +231,6 @@ function Map(props) {
                   <Col sm="8">
                     <Form.Control
                       type="text"
-                      required
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
@@ -248,7 +247,6 @@ function Map(props) {
                   <Col sm="8">
                     <Form.Control
                       type="text"
-                      required
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
@@ -287,7 +285,7 @@ function Map(props) {
                     </Form.Select>
                   </Col>
                 </Form.Group>
-                <Form.Group as={Row} className="mb-3">
+                {/*<Form.Group as={Row} className="mb-3">
                   <Form.Label column sm="4">
                     Connections:
                   </Form.Label>
@@ -304,7 +302,7 @@ function Map(props) {
                       }
                     />
                   </Col>
-                </Form.Group>
+                </Form.Group>*/}
                 <Form.Group as={Row} className="mb-3">
                   <Form.Label column sm="4">
                     Language:
@@ -312,7 +310,6 @@ function Map(props) {
                   <Col sm="8">
                     <Form.Control
                       type="text"
-                      required
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
@@ -329,7 +326,6 @@ function Map(props) {
                   <Col sm="8">
                     <Form.Control
                       type="number"
-                      required
                       onChange={(e) =>
                         setSelectedDocument({
                           ...selectedDocument,
@@ -407,6 +403,7 @@ function Map(props) {
                   as="textarea"
                   rows={17}
                   placeholder="Enter description here..."
+                  required
                   value={selectedDocument.description}
                   onChange={(e) =>
                     setSelectedDocument({
@@ -451,17 +448,20 @@ function Map(props) {
             <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
                 
                 <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+                    <Offcanvas.Title>{selectedDoc ?<strong>{selectedDoc.title}</strong>:""}</Offcanvas.Title>
                 </Offcanvas.Header>
 
                 <Offcanvas.Body>
                   {selectedDoc ? (
                     <>
-                      {Object.entries(selectedDoc).map(([key, value]) => (
+                      {Object.entries(selectedDoc).filter(([key,value])=>key!="id" && key!="connections" && key!="title" && key!="lat" && key!="lng").map(([key, value]) => (
                         <p key={key}>
                           <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                         </p>
                       ))}
+                      <p key="position">
+                          <strong>Position:</strong>{(selectedDoc.lat==67.856348 && selectedDoc.lng==20.225785)? " All municipalities":`(${selectedDoc.lat}, ${selectedDoc.lng})`}
+                      </p>
                     </>
                   ) : (
                     <p>Seleziona un marker per visualizzare i dettagli.</p>

@@ -72,9 +72,9 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={loggedIn ? <Navigate replace to='/map' /> : <Navigate replace to='/login' />} />
-            <Route path='/map' element={loggedIn ? <Map role={user?.role}/> : <Map role={user?.role}  handleLogout={handleLogout} />} /> {/* Passa il ruolo come prop */}
+            <Route path='/map' element={loggedIn ? <Map role={user?.role} handleLogout={handleLogout}/> : <Map role={user?.role}  handleLogout={handleLogout} />} />{/*to fix later*/}
             <Route path='/login' element={loggedIn ? <Navigate replace to='/' /> : <Login login={handleLogin} />} />
-            <Route path='/link' element={<Link />} /> {/* Add the Link component route */}
+            {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
         </Routes>
     );
 }
