@@ -2,7 +2,7 @@ import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState} from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -21,6 +21,8 @@ import Link from "../link/Link";
 function Map(props) {
   const [showModalAdd, setShowModalAdd] = useState(false);
   const [showModalLink, setShowModalLink] = useState(false);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
 
   const [isAllMunicipality, setIsAllMunicipality] = useState(false);
   const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
@@ -127,6 +129,17 @@ function Map(props) {
   const onBtnSelectAdd = () => setShowModalAdd(true);
   const onBtnSelectLink = () => setShowModalLink(true);
 
+  const handleCloseOffcanvas = () => {
+    setShowOffcanvas(false);
+  };
+
+  const handleMarkerClick = (doc) => {
+    setSelectedDoc(doc);
+    setShowOffcanvas(true); // Apri OffCanvas
+
+  };
+
+  
 
   return (
     <Container fluid>
@@ -418,17 +431,49 @@ function Map(props) {
 
                 {documents && documents.length > 0 && (
                       documents.map((doc) => (
-                        <Marker key={doc.id} position={[doc.lat, doc.lng]}>
-                          <Popup>
-                            Document Description: {doc.description}
-                          </Popup>
-                        </Marker>
+                        <Marker 
+                          key={doc.id} 
+                          position={[doc.lat, doc.lng]} 
+                          eventHandlers={{
+                            click: () => handleMarkerClick(doc)
+                          }}
+                        />
                       ))
                     )}
 
               </MapContainer>
         </Col>
       </Row>
+
+      <Row>
+        <Col>
+
+            <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
+                
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+                </Offcanvas.Header>
+
+                <Offcanvas.Body>
+                  {selectedDoc ? (
+                    <>
+                      {Object.entries(selectedDoc).map(([key, value]) => (
+                        <p key={key}>
+                          <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                        </p>
+                      ))}
+                    </>
+                  ) : (
+                    <p>Seleziona un marker per visualizzare i dettagli.</p>
+                  )}
+                </Offcanvas.Body>
+            
+            </Offcanvas>
+        </Col>
+      </Row>
+
+
+
     </Container>
   );
 }
