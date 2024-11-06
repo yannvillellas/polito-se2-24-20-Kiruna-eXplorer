@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
 import Map from './components/map/Map';
 import Login from './components/login/Login';
+import Link from './components/link/Link';
 import AuthAPI from './api/authAPI';
 
 import './App.css';
@@ -71,8 +72,9 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={loggedIn ? <Navigate replace to='/map' /> : <Navigate replace to='/login' />} />
-            <Route path='/map' element={<Map role={user?.role} />} /> {/* Passa il ruolo come prop */}
+            <Route path='/map' element={loggedIn ? <Map role={user?.role} handleLogout={handleLogout}/> : <Map role={user?.role}  handleLogout={handleLogout} />} />{/*to fix later*/}
             <Route path='/login' element={loggedIn ? <Navigate replace to='/' /> : <Login login={handleLogin} />} />
+            {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
         </Routes>
     );
 }
