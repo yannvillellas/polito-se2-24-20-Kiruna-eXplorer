@@ -16,7 +16,6 @@ const listPositions = async () => {
     }
 }
 
-
 const addPosition = async (position) => {
     //console.log("sono in positionAPI.js: sto aggiungendo la posizione", position);
     const response = await fetch(`${SERVER_URL}`, {
@@ -36,23 +35,6 @@ const addPosition = async (position) => {
     else return null;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function mapPositions(positions){
     //console.log("map position riceve: ",positions)
     return positions.map(position => {
@@ -64,6 +46,7 @@ function mapPositions(positions){
         )        
     })
 }
+
 
 const PositionAPI = {
     listPositions,
