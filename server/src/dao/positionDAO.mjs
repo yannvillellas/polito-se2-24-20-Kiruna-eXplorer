@@ -17,3 +17,16 @@ export const listPositions = () => {
         });
     });
 }
+
+
+export const addPosition = (docId, lat, lng) => {
+    return new Promise((resolve, reject) => {
+        db.run("INSERT INTO Position (docId, latitude, longitude) VALUES (?, ?, ?)", [docId, lat, lng], (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+}

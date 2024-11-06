@@ -9,6 +9,7 @@ const listDocuments = async () => {
         })
         .then(response => response.json())
         .then(mapDocuments);
+        //console.log("le api tornano: ", documents)
 
         return documents;
     }catch(err){
@@ -17,9 +18,10 @@ const listDocuments = async () => {
 }
 
 function mapDocuments(documents){
+    //console.log("mapDocuments riceve: ",documents)
     return documents.map(document => {
-        new Document (
-            document.docId,
+        return new Document (   ////// modifica messo return
+            document.docId, ///////////////modifica da document.id
             document.title,
             document.description,
             document.stackeholders,
@@ -33,8 +35,37 @@ function mapDocuments(documents){
     })
 }
 
+// First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
+const addDocument = async (document) => {
+    console.log("sono in documentAPI.js: sto aggiungendo:", document);
+    const response = await fetch(`${SERVER_URL}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'}, 
+
+      body: JSON.stringify({
+        
+        id: document.id, title: document.title, stakeholders: document.stakeholders, 
+        scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
+        connections: document.connections, language: document.language, pages: document.pages, 
+        description: document.description,
+      }),
+
+      credentials: 'include'
+    });
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
+}
+  
+
+
+
+
 const DocumentAPI = {
-    listDocuments
+    listDocuments,
+    addDocument
 }
 
 export default DocumentAPI;

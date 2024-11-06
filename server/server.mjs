@@ -6,8 +6,12 @@ import session from 'express-session';
 import passport from 'passport';
 import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
-import { listDocuments } from './src/dao/documentDAO.mjs';
-import { listPositions } from './src/dao/positionDAO.mjs';
+import { listDocuments, addDocument } from './src/dao/documentDAO.mjs';
+import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
+import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
+import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
+import { isUrbanPlanner,isValidType} from './middleware.mjs';
+
 
 const app = express();
 const PORT = 3001;
@@ -53,12 +57,7 @@ app.use(session({
 
 app.use(passport.authenticate('session'));
 
-const isUrbanPlanner = (req, res, next) => {
-    if (req.isAuthenticated() && req.user.role === 'urbanPlanner') {
-        return next();
-    }
-    return res.status(401).json({ error: 'Not authorized' });
-};
+
 
 //authAPI
 app.post('/api/sessions', (req, res, next) => {
@@ -92,23 +91,158 @@ app.delete('/api/sessions/current', (req, res) => {
 app.get('/api/documents',[], async(req, res) => {
     try{
         const documents = await listDocuments();
+        //console.log("il server riceve come documenti: ",documents)
         res.status(200).json(documents);
     }catch(err){
         res.status(500).json({error: err.message});
     }
 });
 
+// addDocument
+app.post('/api/documents', isUrbanPlanner, [
+    check('id').isInt(),
+    check('title').isString(),
+    check('stakeholders').isString(),
+    check('scale').isString(),
+    check('issuanceDate').isString(),
+    check('type').isString(),
+    check('connections').isString(),
+    check('language').isString(),
+    check('pages').isInt(),
+    check('description').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    console.log("sono in server.mjs: sto aggiungendo il corpo del documento", req.body);
+    // Here i manage teh first infos of the document
+    await addDocument(req.body);
+
+    res.status(201).end();
+});
+
+
+
+
+
 //positionAPI
 app.get('/api/positions',[], async(req, res) => {
     try{
         const positions = await listPositions();
+        //console.log("il server torna posizioni: ",positions)
         res.status(200).json(positions);
     }catch(err){
         res.status(500).json({error: err.message});
     }
 });
+// addPosition
+app.post('/api/positions', isUrbanPlanner, [
+    check('docId').isInt(),
+    check('lat').isFloat(),
+    check('lng').isFloat(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    console.log("sono in server.mjs: sto aggiungendo la posizione:", req.body);
+
+    // Here i manage the (lat, long), float values
+    const docId = req.body.docId;
+    const lat = req.body.lat;
+    const lng = req.body.lng;
+    await addPosition(docId, lat, lng);
+
+    res.status(201).end();
+});
 
 
-app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+//linksAPI
 
+// load the valid links type at the server start
+//let validTypes = loadValidTypes();
+
+app.get('/api/linkTypes',[], async(req, res) => {
+    try{
+        const types = await getLinksType();
+        res.status(200).json(types);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.get('/api/associations/:docId',[], async(req, res) => {
+    try{
+        const associations = await getAssociations(parseInt(req.params.docId)); // verify if docId are integers
+        res.status(200).json(associations);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.post('/api/associations', isUrbanPlanner, isValidType,[
+    check('doc1').notEmpty().isString(),
+    check('doc2').notEmpty().isString(),
+    check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare
+  ], async (req, res) => {
+    console.log("sono in server.mjs: mi è arrivato",req.body)
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const association = {
+        doc1: req.body.doc1,
+        doc2: req.body.doc2,
+        type: req.body.type
+    };
+
+    try {
+        const newId=await insertAssociation(association);
+        res.status(200).json({ id: newId });  //return the Id of the new association to the frontend
+    } catch (e) {
+        res.status(500).json({ error: 'Error adding a new link between documents' });
+    }
+});
+
+app.delete('/api/associations/:aId',isUrbanPlanner,[],async (req, res)=>{
+    try{
+        await deleteAssociation(parseInt(req.params.aId)); // verify if aId is integer
+        res.status(200).end();
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
+    check('doc1').notEmpty().isString(),
+    check('doc2').notEmpty().isString(),
+    check('type').notEmpty().isString()/*.isIn(validTypes),*/
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const association = {
+        aId: parseInt(req.params.aId),      //verify if aId is Int
+        doc1: req.body.doc1,
+        doc2: req.body.doc2,
+        type: req.body.type
+    };
+
+    try {
+        await UpdateAssociation(association);
+        res.status(200).end();
+    } catch (e) {
+        res.status(500).json({ error: 'Error updating the association' });
+    }
+});
+
+// Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
+//if (require.main === module) {
+    app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+//}
 export default app;
