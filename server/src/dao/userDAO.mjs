@@ -1,9 +1,10 @@
 import {db} from '../database/db.mjs'
+import crypto from 'crypto';
 import User from '../models/User.mjs'
 
 export const getUser = (username, password) => {
-  return new Promise((resolve, reject) => {
-      const getUserQuery = `SELECT userId, username, password, role FROM user WHERE username = ?`;
+    return new Promise((resolve, reject) => {
+      const getUserQuery = `SELECT * FROM user WHERE username = ?`;
       db.get(getUserQuery, [username], (err, row) => {
           if (err) {
               reject(err);
@@ -12,10 +13,11 @@ export const getUser = (username, password) => {
           
           if (!row) {
               resolve(false);
-          } else {
-              const user = new User(row.userId, row.username, row.password, row.role);
-              user.password === password ? resolve(user) : resolve(false);
-          }
+            } else {
+              resolve(user);
+            }
+          });
+        }
       });
-  });
+    });
 };
