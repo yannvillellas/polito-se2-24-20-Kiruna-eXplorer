@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 const { Database } = sqlite3.verbose();
 
 import { getAssociations, insertAssociation, deleteAssociation, UpdateAssociation } from "../../src/dao/associationDAO.mjs";
-import * as LinkTypeDAO from "../../src/dao/LinkTypeDAO.mjs";
+import * as LinkTypeDAO from "../../src/dao/linkTypeDAO.mjs"
 //import { getTypeIdByType } from "../../src/dao/LinkTypeDAO.mjs";
 import Association from "../../src/models/association.mjs";
 

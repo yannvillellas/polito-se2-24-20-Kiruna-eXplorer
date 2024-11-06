@@ -1,7 +1,7 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState} from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
@@ -29,7 +29,7 @@ function Map(props) {
   const navigate = useNavigate();
 
   const [documents, setDocuments] = useState([]);
-  
+
   const [selectedDocument, setSelectedDocument] = useState({
     id: null,
     title: "",
@@ -45,40 +45,52 @@ function Map(props) {
     lng: 0,
   });
 
-/*
-  useEffect(()=>{
-    const fetchDocuments = async () => {
-      try {
-        const docs = await DocumentAPI.listDocuments();
-        setDocuments(docs);
-      } catch (error) {
-        console.error("Failed to fetch documents:", error);
-      }
-    };
-    fetchDocuments();
-    console.log(documents)
-  }, [])*/
+  
+    useEffect(()=>{
+      const fetchDocuments = async () => {
+        try {
+          const docs = await DocumentAPI.listDocuments();
+          const positions = await PositionAPI.listPositions();
+          console.log(docs);
+          console.log(positions)
+          const joined = docs.map((doc) => {
+            const docPositions = positions.filter((pos) => pos.docId === doc.docId);
+            return {
+              ...doc,
+              lat: docPositions[0].latitude,
+              lng: docPositions[0].longitude
+            };
+          });
+          setDocuments(joined);
+        } catch (error) {
+          console.error("Failed to fetch documents:", error);
+        }
+      };
+      fetchDocuments();
+      console.log("documenti join: ",documents);
+    }, [])
+
 
   const handleMunicipalitiesChange = (e) => {
-      const isChecked = e.target.checked;
+    const isChecked = e.target.checked;
 
-      setIsAllMunicipality(isChecked);
+    setIsAllMunicipality(isChecked);
 
-      if(isChecked) {
-        setSelectedDocument({
-          ...selectedDocument,
-          lat: 67.856348 ,
-          lng: 20.225785
-        });
-      } else {
-        setSelectedDocument({
-          ...selectedDocument,
-          lat: 0,
-          lng: 0
-        });
-      }
+    if (isChecked) {
+      setSelectedDocument({
+        ...selectedDocument,
+        lat: 67.856348,
+        lng: 20.225785
+      });
+    } else {
+      setSelectedDocument({
+        ...selectedDocument,
+        lat: 0,
+        lng: 0
+      });
+    }
 
-  } 
+  }
   const handleSaveDocument = async (event) => {
     event.preventDefault();
     const newDocument = {
@@ -89,7 +101,7 @@ function Map(props) {
     setDocuments([...documents, newDocument]);
     setShowModalAdd(false);
     setShowModalLink(false);
-    
+
 
     setSelectedDocument({
       id: null,
@@ -139,49 +151,49 @@ function Map(props) {
 
   };
 
-  
+
 
   return (
     <Container fluid>
       <Row className="mb-4">
         <Col className="d-flex justify-content-between align-items-center">
-          <h1 className="text-primary">Welcome to Kiruna</h1>
+          <h1 className="text-dark">Welcome to Kiruna</h1>
           <div className="d-flex">
+            {isUrbanPlanner==false && <Button variant="primary" onClick={()=>navigate('/login')}>Login</Button>}
 
-          
-          {isUrbanPlanner &&
-          <>
-            { documents.length > 1 &&
-              <Button
-                onClick={onBtnSelectLink}
-                className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-                variant="warning"
-                style={{ width: "50px", height: "50px" }}
+            {isUrbanPlanner && 
+              <>
+                {documents.length > 1 &&
+                  <Button
+                    onClick={onBtnSelectLink}
+                    className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                    variant="warning"
+                    style={{ width: "50px", height: "50px" }}
+                  >
+                    <i className="bi bi-link-45deg" style={{ fontSize: "1.5rem" }}></i>
+                  </Button>
+                }
+                <Button
+                  onClick={onBtnSelectAdd}
+                  className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                  variant="primary"
+                  style={{ width: "50px", height: "50px" }}
                 >
-                <i className="bi bi-link-45deg" style={{ fontSize: "1.5rem" }}></i>
-              </Button>
+                  <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+                </Button>
+
+                <Button onClick={props.handleLogout}> Logout</Button>
+
+              </>
             }
-            <Button
-              onClick={onBtnSelectAdd}
-              className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-              variant="primary"
-              style={{ width: "50px", height: "50px" }}
-              >
-              <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
-            </Button>
 
-            <Button onClick={props.handleLogout}> Logout</Button>
-
-          </>
-          }
-          
           </div>
-          
+
         </Col>
       </Row>
-    { documents.length > 1 &&
-      <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose}/> 
-    }
+      {documents.length > 1 &&
+        <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
+      }
       <Modal show={showModalAdd} onHide={handleClose} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>Insert New Document</Modal.Title>
@@ -348,48 +360,48 @@ function Map(props) {
                   </Col>
                 </Form.Group>
 
-                {!isAllMunicipality && 
+                {!isAllMunicipality &&
                   <>
                     <Form.Group
-                            as={Row}
-                            className="mb-3">
-                            <Form.Label column sm="4">
-                              Latitude:
-                            </Form.Label>
-                            <Col sm="8">
-                              <Form.Control
-                                type="text"
-                                onChange={(e) =>
-                                  setSelectedDocument({
-                                    ...selectedDocument,
-                                    lat: parseFloat(e.target.value),
-                                  })
-                                }
-                              />
-                            </Col>
+                      as={Row}
+                      className="mb-3">
+                      <Form.Label column sm="4">
+                        Latitude:
+                      </Form.Label>
+                      <Col sm="8">
+                        <Form.Control
+                          type="text"
+                          onChange={(e) =>
+                            setSelectedDocument({
+                              ...selectedDocument,
+                              lat: parseFloat(e.target.value),
+                            })
+                          }
+                        />
+                      </Col>
                     </Form.Group>
 
                     <Form.Group
-                            as={Row}
-                            className="mb-3"
+                      as={Row}
+                      className="mb-3"
                     >
-                            <Form.Label column sm="4">
-                              Longitude:
-                            </Form.Label>
-                            <Col sm="8">
-                              <Form.Control
-                                type="text"
-                                onChange={(e) =>
-                                  setSelectedDocument({
-                                    ...selectedDocument,
-                                    lng: parseFloat(e.target.value),
-                                  })
-                                }
-                              />
-                            </Col>
+                      <Form.Label column sm="4">
+                        Longitude:
+                      </Form.Label>
+                      <Col sm="8">
+                        <Form.Control
+                          type="text"
+                          onChange={(e) =>
+                            setSelectedDocument({
+                              ...selectedDocument,
+                              lng: parseFloat(e.target.value),
+                            })
+                          }
+                        />
+                      </Col>
                     </Form.Group>
-                    </>
-                  } 
+                  </>
+                }
 
                 <Button variant="primary" type="submit">
                   Submit
@@ -417,58 +429,58 @@ function Map(props) {
           </Row>
         </Modal.Body>
       </Modal>
-
+      
       <Row>
         <Col>
-              <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-              />
+          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
 
-                {documents && documents.length > 0 && (
-                      documents.map((doc) => (
-                        <Marker 
-                          key={doc.id} 
-                          position={[doc.lat, doc.lng]} 
-                          eventHandlers={{
-                            click: () => handleMarkerClick(doc)
-                          }}
-                        />
-                      ))
-                    )}
+            {documents && documents.length > 0 && (
+              documents.map((doc) => (
+                <Marker
+                  key={doc.id}
+                  position={[doc.lat, doc.lng]}
+                  eventHandlers={{
+                    click: () => handleMarkerClick(doc)
+                  }}
+                />
+              ))
+            )}
 
-              </MapContainer>
+          </MapContainer>
         </Col>
       </Row>
 
       <Row>
         <Col>
 
-            <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
-                
-                <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>{selectedDoc ?<strong>{selectedDoc.title}</strong>:""}</Offcanvas.Title>
-                </Offcanvas.Header>
+          <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
 
-                <Offcanvas.Body>
-                  {selectedDoc ? (
-                    <>
-                      {Object.entries(selectedDoc).filter(([key,value])=>key!="id" && key!="connections" && key!="title" && key!="lat" && key!="lng").map(([key, value]) => (
-                        <p key={key}>
-                          <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                        </p>
-                      ))}
-                      <p key="position">
-                          <strong>Position:</strong>{(selectedDoc.lat==67.856348 && selectedDoc.lng==20.225785)? " All municipalities":`(${selectedDoc.lat}, ${selectedDoc.lng})`}
-                      </p>
-                    </>
-                  ) : (
-                    <p>Seleziona un marker per visualizzare i dettagli.</p>
-                  )}
-                </Offcanvas.Body>
-            
-            </Offcanvas>
+            <Offcanvas.Header closeButton>
+              <Offcanvas.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Offcanvas.Title>
+            </Offcanvas.Header>
+
+            <Offcanvas.Body>
+              {selectedDoc ? (
+                <>
+                  {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+                    <p key={key}>
+                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                    </p>
+                  ))}
+                  <p key="position">
+                    <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
+                  </p>
+                </>
+              ) : (
+                <p>Seleziona un marker per visualizzare i dettagli.</p>
+              )}
+            </Offcanvas.Body>
+
+          </Offcanvas>
         </Col>
       </Row>
 

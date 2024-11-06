@@ -97,10 +97,10 @@ function Link(props) {
                     onChange={(e) => setDoc1(/*parseInt(*/e.target.value/*, 10)*/)} // Save ID in doc1
                   >
                     <option value="" disabled>
-                      Select a link
+                      Select a document
                     </option>
                     {props.documents.map((doc) => (
-                      <option key={doc.id} value={doc.id}>
+                      <option key={doc.docId} value={doc.docId}>
                         {doc.title} {/* Show document title */}
                       </option>
                     ))}
@@ -147,9 +147,9 @@ function Link(props) {
                     </option>
                     {props.documents
                       //.filter((doc) => parseInt(doc.id, 10) !== parseInt(doc1, 10)) // Exclude doc1 from the list here you need to parse the id-string to integer
-                      .filter((doc) => doc.id != doc1)
+                      .filter((doc) => doc.docId != doc1)
                       .map((doc) => (
-                        <option key={doc.id} value={doc.id}>
+                        <option key={doc.docId} value={doc.docId}>
                           {doc.title} {/* Show document title */}
                         </option>
                       ))}

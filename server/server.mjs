@@ -91,6 +91,7 @@ app.delete('/api/sessions/current', (req, res) => {
 app.get('/api/documents',[], async(req, res) => {
     try{
         const documents = await listDocuments();
+        //console.log("il server riceve come documenti: ",documents)
         res.status(200).json(documents);
     }catch(err){
         res.status(500).json({error: err.message});
@@ -130,6 +131,7 @@ app.post('/api/documents', isUrbanPlanner, [
 app.get('/api/positions',[], async(req, res) => {
     try{
         const positions = await listPositions();
+        //console.log("il server torna posizioni: ",positions)
         res.status(200).json(positions);
     }catch(err){
         res.status(500).json({error: err.message});
@@ -181,7 +183,7 @@ app.get('/api/associations/:docId',[], async(req, res) => {
     }
 });
 
-app.post('/api/associations', /*isUrbanPlanner,*/ isValidType,[
+app.post('/api/associations', isUrbanPlanner, isValidType,[
     check('doc1').notEmpty().isString(),
     check('doc2').notEmpty().isString(),
     check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare

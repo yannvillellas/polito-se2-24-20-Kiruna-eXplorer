@@ -6,7 +6,7 @@ import { getTypeIdByType } from "./linkTypeDAO.mjs";
 export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM Association WHERE doc1=? OR doc2=?'
-        db.all(sql, [Integer.parseInt(docId),Integer.parseInt(docId)], (err, rows) => {
+        db.all(sql, [parseInt(docId,10),parseInt(docId,10)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -43,7 +43,7 @@ export const insertAssociation = (association) => {
 export const deleteAssociation = (aId) => {
     return new Promise((resolve, reject) => {
         const sql = 'DELETE FROM Association where aId= ?'
-        db.run(sql, [Integer.parseInt(aId)], (err, rows) => {
+        db.run(sql, [parseInt(aId,10)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -58,7 +58,7 @@ export const UpdateAssociation = (association) => {
         try {
             const typeId = await getTypeIdByType(association.type);
             const updateSql = 'UPDATE Association SET doc1=?, doc2=?, typeId=? WHERE aId=?';
-            db.run(updateSql, [Integer.parseInt(association.doc1), Integer.parseInt(association.doc2), Integer.parseInt(typeId), Integer.parseInt(association.aId)], (err) => {
+            db.run(updateSql, [parseInt(association.doc1,10), parseInt(association.doc2,10), parseInt(typeId,10), parseInt(association.aId,10)], (err) => {
                 if (err) {
                     reject(err);
                 } else {

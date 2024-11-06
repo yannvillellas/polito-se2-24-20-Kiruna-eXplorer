@@ -9,6 +9,7 @@ const listDocuments = async () => {
         })
         .then(response => response.json())
         .then(mapDocuments);
+        //console.log("le api tornano: ", documents)
 
         return documents;
     }catch(err){
@@ -17,9 +18,10 @@ const listDocuments = async () => {
 }
 
 function mapDocuments(documents){
+    //console.log("mapDocuments riceve: ",documents)
     return documents.map(document => {
-        new Document (
-            document.id,
+        return new Document (   ////// modifica messo return
+            document.docId, ///////////////modifica da document.id
             document.title,
             document.description,
             document.stackeholders,
