@@ -31,7 +31,7 @@ function Map(props) {
   const [documents, setDocuments] = useState(props.documents ? props.documents : []);
 
     
-    useEffect(()=>{
+    /*useEffect(()=>{
       const fetchDocuments = async () => {
         try {
           const docs = await DocumentAPI.listDocuments();
@@ -53,7 +53,7 @@ function Map(props) {
       };
       fetchDocuments();
       console.log("documenti join: ",documents);
-    }, [documents])
+    }, [])*/
 
 
 
@@ -77,9 +77,9 @@ function Map(props) {
   return (
     <Container fluid>
       
-      {documents.length > 1 &&
+      {/*documents.length > 1 &&
         <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
-      }
+      */}
 
       <Row>
         <Col>
@@ -89,8 +89,8 @@ function Map(props) {
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
             />
 
-            {documents && documents.length > 0 && (
-              documents.map((doc) => (
+            {props.documents && props.documents.length > 0 && (
+              props.documents.map((doc) => (
                 <Marker
                   key={doc.id}
                   position={[doc.lat, doc.lng]}
