@@ -68,6 +68,21 @@ function AddDocument(props){
     const [isArchitecturalScale, setIsArchitecturalScale] = useState(false);
     const [isArchitecturalScaleFormat, setIsArchitecturalScaleFormat] = useState(false);
 
+    const [issuanceDate, setIssuanceDate] = useState("");
+    const [isIssuanceDateValid, setIsIssuanceDateValid] = useState(true);
+
+    const handleDateChange = (e) => {
+        const value = e.target.value;
+        const regex = /^[1-9][0-9]{3}(\/(0[1-9]|1[0-2])(\/(0[1-9]|[1-2][0-9]|3[0-1]))?)?$/;
+        if (regex.test(value)) {
+            setIsIssuanceDateValid(true);
+            setNewDocument({ ...newDocument, issuanceDate: value });
+        } else {
+            setIsIssuanceDateValid(false);
+        }
+        setIssuanceDate(value);
+    };
+
     const [showModalAdd, setShowModalAdd] = useState(false);
 
     const onBtnSelectAdd = () => setShowModalAdd(true);
@@ -204,14 +219,18 @@ function AddDocument(props){
                                     </Form.Text>
                                 </Form.Group>
                             }
-
                             <Form.Group className="mb-3">
                                 <Form.Label>Issuance Date*</Form.Label>
                                 <Form.Control
-                                    type="date"
-                                    required={true}
-                                    onChange={(e) => setNewDocument({...newDocument, issuanceDate: e.target.value})}
+                                    type="text"
+                                    placeholder="Enter date in yyyy/mm/dd format"
+                                    value={issuanceDate}
+                                    onChange={handleDateChange}
+                                    isInvalid={!isIssuanceDateValid}
                                 />
+                                <Form.Text className="text-muted">
+                                    Please enter the date in "yyyy/mm/dd" format (e.g., 2024/07/26). Only year is mandatory.
+                                </Form.Text>
                             </Form.Group>
 
                             <Form.Group className="mb-3">
