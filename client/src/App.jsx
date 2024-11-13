@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import HomePage from './components/HomePage/HomePage';
+import PageNotFound from './components/pageNotFound/PageNotFound';
 import Map from './components/map/Map';
 import Login from './components/login/Login';
 import Link from './components/link/Link';
@@ -12,6 +14,8 @@ function App() {
     const [authChecked, setAuthChecked] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
     const navigate = useNavigate();
+
+
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -71,8 +75,8 @@ function App() {
 
     return (
         <Routes>
-            <Route path="/" element={loggedIn ? <Navigate replace to='/map' /> : <Navigate replace to='/login' />} />
-            <Route path='/map' element={loggedIn ? <Map role={user?.role} handleLogout={handleLogout}/> : <Map role={user?.role}  handleLogout={handleLogout} />} />{/*to fix later*/}
+            <Route path="/" element={loggedIn ? <Navigate replace to='/homePage' /> : <Navigate replace to='/login' />} />
+            <Route path='/homePage' element={loggedIn ? <HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/> : <PageNotFound/> }/>
             <Route path='/login' element={loggedIn ? <Navigate replace to='/' /> : <Login login={handleLogin} />} />
             {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
         </Routes>
