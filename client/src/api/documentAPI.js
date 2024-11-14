@@ -35,6 +35,9 @@ function mapDocuments(documents){
     })
 }
 
+
+
+
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
     console.log("sono in documentAPI.js: sto aggiungendo:", document);
@@ -44,7 +47,7 @@ const addDocument = async (document) => {
 
       body: JSON.stringify({
         
-        id: document.id, title: document.title, stakeholders: document.stakeholders, 
+        title: document.title, stakeholders: document.stakeholders, 
         scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
         connections: document.connections, language: document.language, pages: document.pages, 
         description: document.description,
@@ -55,8 +58,12 @@ const addDocument = async (document) => {
     if(!response.ok) {
       const errMessage = await response.json();
       throw errMessage;
+    } else {
+        const documentId = await response.json();
+        return documentId;
     }
-    else return null;
+
+    return null;
 }
   
 

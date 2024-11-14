@@ -21,22 +21,26 @@ export const listDocuments = () => {
 
 export const addDocument = (document) => {
     return new Promise((resolve, reject) => {
-        // controllo pirma se c'è già un documento con lo stesso id
-        db.get("SELECT * FROM Document WHERE docId = ?", [document.id], (err, row) => {
-            if (err) {
-                reject(err);
-            } else if (row) {
-                reject(new Error("Document already exists"));
-            } else {
-                db.run("INSERT INTO Document (docId, title, description, stackeholders, scale, issuanceDate, type, connections, language, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [document.id, document.title, document.description, document.stakeholders, document.scale, document.issuanceDate, document.type, document.connections, document.language, document.pages], (err) => {
+        db.run("INSERT INTO Document (title, description, stackeholders, scale, issuanceDate, type, connections, language, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            [
+                document.title, 
+                document.description, 
+                document.stakeholders, 
+                document.scale, 
+                document.issuanceDate, 
+                document.type, 
+                document.connections, 
+                document.language, 
+                document.pages
+            ],
+
+            function (err) { // I need it for enable this.lastID
                     if (err) {
                         reject(err);
                     } else {
-                        resolve();
+                        resolve(this.lastID);
                     }
-                });
             }
-        });
-
+        );
     });
-}
+};

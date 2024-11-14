@@ -36,29 +36,62 @@ function HomePage(props){
     const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === 'urbanPlanner' ? true : false);
 
     const [documents, setDocuments] = useState([]); // if is here will be easier for tehe shenzen diagram; position is different for the map and for shenzen diagram so will be managed in their componetns
+    
+    /* Da finire
+    useEffect(() => {
+        const fetchDocuments = async () => {
+            try {
+                const documents = await DocumentAPI.listDocuments();
+                const positions = await PositionAPI.getPositions();
+
+                documents.forEach(document => {
+                    const position = positions.find(position => position.docId === document.id);
+                    if (position) {
+                        document.lat = position.lat;
+                        document.lng = position.lng;
+                    }
+                });
+
+
+                setDocuments(documents);
+            } catch (error) {
+                console.error("Error fetching documents:", error);
+            }
+        }
+        fetchDocuments();
+    }, []);
+    */
+
+
     const [isJustBeenAddedADocument, setIsJustBeenAddedADocument] = useState(false); // to be able to manage add link after a document has been added
     const handleAddDocument = async (document) => {
-        setDocuments([...documents, document]);
-        console.log("Sono in HomePage.jsx, ho aggiunto un documento: ",document);
-        setIsJustBeenAddedADocument(true);
 
         try {
             console.log("Sono in HomePage.jsx, sto mandando il documento al db:", document);
-            document.id = documents.length + 3; // to be managed
-            await DocumentAPI.addDocument(document);
-            /*
+            document.id =  await DocumentAPI.addDocument(document); // to be implemented
+            console.log("Sono in HomePage.jsx, ho aggiunto il documento il db mi ha ritornato id: ",document);
+            
+            // must be inside the try because is async
+            setDocuments([...documents, document]);
+            console.log("Sono in HomePage.jsx, ho aggiunto un documento: ",document);
+            console.log("Sono in HomePage.jsx, i documenti, dopo aggiunta, sono: ",documents);
+            setIsJustBeenAddedADocument(true);
+
             const position = {
               docId: document.id,
               lat: document.lat,
               lng: document.lng,
             };
             await PositionAPI.addPosition(position);
-            */
+            console.log("Sono in HomePage.jsx, ho aggiunto la posizione al db:", position);
           } catch (error) {
             console.error("Error adding document:", error);
           }
 
+
+
     }
+
     const handleAddLink = () => {
         console.log("Sono in HomePage.jsx, ho cliccato su add link");
         setIsJustBeenAddedADocument(false);

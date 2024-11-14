@@ -100,15 +100,14 @@ app.get('/api/documents',[], async(req, res) => {
 
 // addDocument
 app.post('/api/documents', isUrbanPlanner, [
-    check('id').isInt(),
     check('title').isString(),
     check('stakeholders').isString(),
     check('scale').isString(),
-    check('issuanceDate').isString(),
+    check('issuanceDate').isDate(),
     check('type').isString(),
-    check('connections').isString(),
-    check('language').isString(),
-    check('pages').isInt(),
+    check('connections').isInt(),
+    check('language').optional().isString(),
+    check('pages').optional().isInt(),
     check('description').isString(),
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -118,9 +117,10 @@ app.post('/api/documents', isUrbanPlanner, [
 
     console.log("sono in server.mjs: sto aggiungendo il corpo del documento", req.body);
     // Here i manage teh first infos of the document
-    await addDocument(req.body);
+    const documentId = await addDocument(req.body);
+    console.log("sono in server.mjs: ho aggiunto il documento, mi è tornato id:", documentId);
 
-    res.status(201).end();
+    res.status(201).json(documentId);
 });
 
 
