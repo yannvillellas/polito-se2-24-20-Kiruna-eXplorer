@@ -68,6 +68,21 @@ function AddDocument(props){
     const [isArchitecturalScale, setIsArchitecturalScale] = useState(false);
     const [isArchitecturalScaleFormat, setIsArchitecturalScaleFormat] = useState(false);
 
+    const [issuanceDate, setIssuanceDate] = useState("");
+    const [isIssuanceDateValid, setIsIssuanceDateValid] = useState(true);
+
+    const handleDateChange = (e) => {
+        const value = e.target.value;
+        const regex = /^[1-9][0-9]{3}(\/(0[1-9]|1[0-2])(\/(0[1-9]|[1-2][0-9]|3[0-1]))?)?$/;
+        if (regex.test(value)) {
+            setIsIssuanceDateValid(true);
+            setNewDocument({ ...newDocument, issuanceDate: value });
+        } else {
+            setIsIssuanceDateValid(false);
+        }
+        setIssuanceDate(value);
+    };
+
     const [showModalAdd, setShowModalAdd] = useState(false);
 
     const onBtnSelectAdd = () => setShowModalAdd(true);
@@ -80,6 +95,15 @@ function AddDocument(props){
             return;
         }
 
+        if (!isIssuanceDateValid) {
+            alert("Please enter a valid issuance date.");
+            return;
+        }
+
+        if (isArchitecturalScale && !isArchitecturalScaleFormat) {
+            alert("Please enter a valid architectural scale format.");
+            return;
+        }
 
         console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", newDocument);
         props.handleAddDocument(newDocument);
@@ -199,19 +223,24 @@ function AddDocument(props){
                                         }}
                                         isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
                                     />
-                                    <Form.Text className="text-muted">
-                                        Please enter the scale in "x:y" format (e.g., 1:100).
-                                    </Form.Text>
+                                    <Form.Control.Feedback type="invalid">
+                                            Please enter the scale in "x:y" format (e.g., 1:100).
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             }
-
                             <Form.Group className="mb-3">
                                 <Form.Label>Issuance Date*</Form.Label>
                                 <Form.Control
-                                    type="date"
+                                    type="text"
                                     required={true}
-                                    onChange={(e) => setNewDocument({...newDocument, issuanceDate: e.target.value})}
+                                    placeholder="Enter date in yyyy/mm/dd format"
+                                    value={issuanceDate}
+                                    onChange={handleDateChange}
+                                    isInvalid={!isIssuanceDateValid}
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                        Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                                </Form.Control.Feedback>
                             </Form.Group>
 
                             <Form.Group className="mb-3">
