@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import listDocuments from "../../api/documentAPI";
+import DocumentAPI from "../../api/documentAPI";
 import { Table, Container } from "react-bootstrap";
 
 function DocList(props) {
@@ -10,8 +10,9 @@ function DocList(props) {
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      const docs = await listDocuments();
-      setDocuments(docs || []);
+      DocumentAPI.listDocuments().then((res) => {
+        setDocuments(res || []);
+      });
     };
     fetchDocuments();
   }, []);
