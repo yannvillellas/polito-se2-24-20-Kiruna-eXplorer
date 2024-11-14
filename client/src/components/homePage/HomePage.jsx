@@ -37,30 +37,33 @@ function HomePage(props){
 
     const [documents, setDocuments] = useState([]); // if is here will be easier for tehe shenzen diagram; position is different for the map and for shenzen diagram so will be managed in their componetns
     
-    /* Da finire
+    
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
                 const documents = await DocumentAPI.listDocuments();
-                const positions = await PositionAPI.getPositions();
-
+                console.log("Sono in HomePage.jsx, ho ricevuto dal db i documenti: ",documents);
+                const positions = await PositionAPI.listPositions();
+                console.log("Sono in HomePage.jsx, ho ricevuto dal db le posizioni: ",positions);
+                
                 documents.forEach(document => {
                     const position = positions.find(position => position.docId === document.id);
                     if (position) {
-                        document.lat = position.lat;
-                        document.lng = position.lng;
+                        document.lat = position.latitude;
+                        document.lng = position.longitude;
                     }
                 });
 
-
+                console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents);
                 setDocuments(documents);
+                
             } catch (error) {
                 console.error("Error fetching documents:", error);
             }
         }
         fetchDocuments();
     }, []);
-    */
+    
 
 
     const [isJustBeenAddedADocument, setIsJustBeenAddedADocument] = useState(false); // to be able to manage add link after a document has been added

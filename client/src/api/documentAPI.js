@@ -8,7 +8,7 @@ const listDocuments = async () => {
             credentials: 'include'
         })
         .then(response => response.json())
-        .then(mapDocuments);
+        console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
         //console.log("le api tornano: ", documents)
 
         return documents;
@@ -17,23 +17,6 @@ const listDocuments = async () => {
     }
 }
 
-function mapDocuments(documents){
-    //console.log("mapDocuments riceve: ",documents)
-    return documents.map(document => {
-        return new Document (   ////// modifica messo return
-            document.docId, ///////////////modifica da document.id
-            document.title,
-            document.description,
-            document.stackeholders,
-            document.scale,
-            document.issuanceDate,
-            document.type,
-            document.connections,
-            document.language,
-            document.pages
-        )        
-    })
-}
 
 
 

@@ -91,6 +91,7 @@ app.delete('/api/sessions/current', (req, res) => {
 app.get('/api/documents',[], async(req, res) => {
     try{
         const documents = await listDocuments();
+        console.log("il server.mjs, GET ALL Documents riceve dal DAO come documenti: ",documents)
         //console.log("il server riceve come documenti: ",documents)
         res.status(200).json(documents);
     }catch(err){
