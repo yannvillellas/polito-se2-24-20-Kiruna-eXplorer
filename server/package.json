@@ -28,6 +28,7 @@
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "server": "file:",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
