@@ -104,7 +104,7 @@ app.post('/api/documents', isUrbanPlanner, [
     check('title').isString(),
     check('stakeholders').isString(),
     check('scale').isString(),
-    check('issuanceDate').isDate(),
+    check('issuanceDate').isString(),
     check('type').isString(),
     check('connections').isInt(),
     check('language').optional().isString(),
