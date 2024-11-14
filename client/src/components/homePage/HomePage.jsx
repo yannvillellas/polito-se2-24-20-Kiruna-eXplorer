@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import Link from "../link/Link";
-import AddDocument from "../AddDocument/AddDocument";
+import AddDocument from "../addDocument/AddDocument";
 import FakeLink from "../fakeLink/FakeLink";
 import UnifiedForms from "../UnifiedForms/UnifiedForms";
 
@@ -72,12 +72,15 @@ function HomePage(props) {
         try {
             console.log("Sono in HomePage.jsx, sto mandando il documento al db:", document);
             let stateDocument=document;
-            document.id = documents.length + 3; // to be managed
-            stateDocument.docId= documents.length + 3; // to be managed
-            setDocuments([...documents, stateDocument]);
+            //document.id = documents.length + 3; // to be managed
+            //stateDocument.docId= documents.length + 3; // to be managed
+            
+            
+            const docId=await DocumentAPI.addDocument(document);
+            document.id =docId
+            stateDocument.docId=docId
             console.log("Sono in HomePage.jsx, ho aggiunto un documento: ", document);
-            await DocumentAPI.addDocument(document);
-
+            setDocuments([...documents, stateDocument]);
             const position = {
                 docId: document.id,
                 lat: document.lat,
@@ -96,6 +99,11 @@ function HomePage(props) {
         setIsJustBeenAddedADocument(false);
     }
 
+    const handleBackActionForm = (docId)=>{
+        const docs= documents.filter((d)=>d.docId!=docId)
+        setDocuments(docs)
+    }
+
 
 
     return (
@@ -107,7 +115,7 @@ function HomePage(props) {
                     <div className="d-flex">
                         {/*{isUrbanPlanner &&  !isJustBeenAddedADocument && <AddDocument handleAddDocument={handleAddDocument}/>}
                         {isUrbanPlanner && isJustBeenAddedADocument && <FakeLink isJustBeenAddedADocument={isJustBeenAddedADocument} handleAddLink={handleAddLink}/>}*/}
-                        {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />}
+                        {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} handleBackActionForm={handleBackActionForm}/>}
                         {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
                         {isLoggedIn && <Button variant="primary" onClick={props.handleLogout}>Logout</Button>}
                     </div>

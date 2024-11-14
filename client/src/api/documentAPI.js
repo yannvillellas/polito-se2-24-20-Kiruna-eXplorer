@@ -2,25 +2,25 @@ import Document from '../models/document.mjs'
 const SERVER_URL = 'http://localhost:3001/api/documents/'
 
 const listDocuments = async () => {
-    try{
-        const documents = await fetch(SERVER_URL,{
+    try {
+        const documents = await fetch(SERVER_URL, {
             method: 'GET',
             credentials: 'include'
         })
-        .then(response => response.json())
-        .then(mapDocuments);
+            .then(response => response.json())
+            .then(mapDocuments);
         //console.log("le api tornano: ", documents)
 
         return documents;
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }
 
-function mapDocuments(documents){
+function mapDocuments(documents) {
     //console.log("mapDocuments riceve: ",documents)
     return documents.map(document => {
-        return new Document (   ////// modifica messo return
+        return new Document(   ////// modifica messo return
             document.docId, ///////////////modifica da document.id
             document.title,
             document.description,
@@ -31,7 +31,7 @@ function mapDocuments(documents){
             document.connections,
             document.language,
             document.pages
-        )        
+        )
     })
 }
 
@@ -39,33 +39,57 @@ function mapDocuments(documents){
 const addDocument = async (document) => {
     console.log("sono in documentAPI.js: sto aggiungendo:", document);
     const response = await fetch(`${SERVER_URL}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'}, 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
 
-      body: JSON.stringify({
-        
-        id: document.id, title: document.title, stakeholders: document.stakeholders, 
-        scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
-        connections: document.connections, language: document.language, pages: document.pages, 
-        description: document.description,
-      }),
+        body: JSON.stringify({
 
-      credentials: 'include'
+            id: document.id, title: document.title, stakeholders: document.stakeholders,
+            scale: document.scale, issuanceDate: document.issuanceDate, type: document.type,
+            connections: document.connections, language: document.language, pages: document.pages,
+            description: document.description,
+        }),
+
+        credentials: 'include'
     });
-    if(!response.ok) {
-      const errMessage = await response.json();
-      throw errMessage;
+    if (!response.ok) {
+        const errMessage = await response.json();
+        throw errMessage;
+    } else {
+        const documentId = await response.json();
+        return documentId;
     }
-    else return null;
+
+    return null;
 }
-  
+
+const deleteDocument = async (docId) => {
+    try {
+        console.log("in API elimino: ", docId)
+        const response = await fetch(SERVER_URL, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ docId: docId }),
+        });
+        if (!response.ok) throw new Error('Failed to fetch link types');
+        return
+        //return await response.json();
+    }catch(e){
+        console.error("Error removing a document:", e);
+        throw e;
+    }
+
+}
+
 
 
 
 
 const DocumentAPI = {
     listDocuments,
-    addDocument
+    addDocument,
+    deleteDocument
 }
 
 export default DocumentAPI;

@@ -45,7 +45,7 @@ function Link(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const association = {
-      doc1: /*parseInt(*/doc1/*, 10)*/,
+      doc1: `${props.docId}`, ///*parseInt(*/doc1/*, 10)*/,
       type: link,
       doc2: /*parseInt(*/doc2/*, 10)*/
     };
@@ -70,12 +70,12 @@ function Link(props) {
         <Form onSubmit={handleSubmit}>
           <Form.Group as={Row} className="mb-3">
 
-            <Form.Label column sm="4">
+            <Form.Label column sm="5">
               Document 1
             </Form.Label>
 
-            <Col sm="8">
-              <Form.Select
+            <Col sm="7">
+              {/*<Form.Select
                 value={doc1} // doc1 will be the ID of the document, i don't do parseInt() so it will remain string
                 onChange={(e) => setDoc1(e.target.value)} // Save ID in doc1  // ?*parseInt(*?e.target.value?*, 10)*?
               >
@@ -87,31 +87,34 @@ function Link(props) {
                     {doc.title}
                   </option>
                 ))}
-              </Form.Select>
+              </Form.Select>*/}
+              <Form.Label>
+                {props.title}
+              </Form.Label>
             </Col>
 
           </Form.Group>
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="4">
+            <Form.Label column sm="5">
               Link Type
             </Form.Label>
 
-            <Col sm="8">
-              {/*<Form.Select
-                    value={link} // link is a string
-                    onChange={(e) => setLink(e.target.value)}
-                  >
-                    <option value="" disabled>
-                      Select a link
-                    </option>
-                    {linkTypes.map((linkType) => (
-                      <option key={linkType} value={linkType}>
-                        {linkType}
-                      </option>
-                    ))}
-                  </Form.Select>*/}
-              {properties.map((linkType) => (
+            <Col sm="7">
+              {<Form.Select
+                value={link} // link is a string
+                onChange={(e) => setLink(e.target.value)}
+              >
+                <option value="" disabled>
+                  Select a link
+                </option>
+                {linkTypes.map((linkType) => (
+                  <option key={linkType} value={linkType}>
+                    {linkType}
+                  </option>
+                ))}
+              </Form.Select>}
+              {/*properties.map((linkType) => (
                 <Form.Check
                   key={linkType}
                   type="checkbox"
@@ -120,17 +123,17 @@ function Link(props) {
                   checked={selectedProperties.some((item) => item.id === property.id)}
                   onChange={() => handleCheckboxChange(property)}
                 />
-              ))}
+              ))*/}
             </Col>
           </Form.Group>
 
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="4">
+            <Form.Label column sm="5">
               Document 2
             </Form.Label>
 
-            <Col sm="8">
+            <Col sm="7">
               <Form.Select
                 value={doc2} // doc2 is the ID, i don't do parseInt() so it will remain string
                 onChange={(e) => { setDoc2(e.target.value); console.log(props.documents) }} // ?*parseInt(e.target.value, 10)*?e.target.value
@@ -140,7 +143,7 @@ function Link(props) {
                 </option>
                 {props.documents
                   //.filter((doc) => parseInt(doc.id, 10) !== parseInt(doc1, 10)) // Exclude doc1 from the list here you need to parse the id-string to integer
-                  //.filter((doc) => doc.docId != doc1)
+                  .filter((doc) => doc.docId != doc1)
                   .map((doc) => (
                     <option key={doc.docId} value={doc.docId}>
                       {doc.title} {doc.docId}
@@ -151,7 +154,7 @@ function Link(props) {
           </Form.Group>
           <Form.Group>
             <Button onClick={() => props.handlePrev()}>Previous</Button>
-            {doc1 && link && doc2 &&
+            {/*doc1 && */link && doc2 &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>

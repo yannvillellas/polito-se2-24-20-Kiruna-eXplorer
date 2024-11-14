@@ -2,9 +2,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
-import AddDocument from "../AddDocument/AddDocument";
+import AddDocument from "../addDocument/AddDocument";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "../link/Link"
+import DocumentAPI from "../../api/documentAPI";
 
 
 
@@ -13,15 +14,52 @@ function UnifiedForms(props) {
     const [index, setIndex] = useState(0);
 
     const [showModalAdd, setShowModalAdd] = useState(false);
+
+    const [newDocument, setNewDocument] = useState({
+        id: null,
+        title: "",
+        stakeholders: "",
+        scale: "",
+        issuanceDate: "",
+        type: "",
+        connections: "",
+        language: "",
+        pages: 0,
+        description: "",
+        lat: null,
+        lng: null,
+    });
+
     const onBtnSelectAdd = () => setShowModalAdd(true);
-    const handleClose = () => setShowModalAdd(false);
+    const handleClose = () =>{
+        setNewDocument({
+            id: null,
+            title: "",
+            stakeholders: "",
+            scale: "",
+            issuanceDate: "",
+            type: "",
+            connections: "",
+            language: "",
+            pages: 0,
+            description: "",
+            lat: null,
+            lng: null,
+        });
+        setIndex(0)
+        setShowModalAdd(false);
+    } 
 
     const handleNext = () => {
         setIndex((prevIndex) => (prevIndex + 1) % 3);
     };
 
-    const handlePrev = () => {
+    const handlePrev = async() => {
         setIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
+        console.log("elimino: ",newDocument.id)
+        await DocumentAPI.deleteDocument(newDocument.id);
+        props.handleBackActionForm(newDocument.id); /////////controllare
+        //console.log(newDocument)
     };
 
     const handleSelect = (selectedIndex) => {
@@ -40,15 +78,15 @@ function UnifiedForms(props) {
             </Button>
             <Modal show={showModalAdd} onHide={handleClose} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>{index==0? "Insert new document":"insert link"}</Modal.Title>
+                    <Modal.Title>{index==0? "Insert new document":"Insert link"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Carousel activeIndex={index} onSelect={handleSelect} controls={false} indicators={false} interval={null}>
                         <Carousel.Item>
-                            <AddDocument handleAddDocument={props.handleAddDocument} handleNext={handleNext} />
+                            <AddDocument handleAddDocument={props.handleAddDocument} handleNext={handleNext} newDocument={newDocument} setNewDocument={setNewDocument} />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose}></Link>
+                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} docId={newDocument.id} title={newDocument.title}></Link>
                         </Carousel.Item>
                     </Carousel>
 

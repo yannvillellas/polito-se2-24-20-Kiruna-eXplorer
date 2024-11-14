@@ -16,25 +16,11 @@ import ChosenPosition from "../chosenPosition/ChosenPosition";
  * 
 */
 
-
-
 function AddDocument(props) {
-    const [newDocument, setNewDocument] = useState({
-        id: null,
-        title: "",
-        stakeholders: "",
-        scale: "",
-        issuanceDate: "",
-        type: "",
-        connections: "",
-        language: "",
-        pages: 0,
-        description: "",
-        lat: null,
-        lng: null,
-    });
+
+    
     const handleSetPostition = (lat, lng) => {
-        setNewDocument({ ...newDocument, lat: lat, lng: lng });
+        props.setNewDocument({ ...props.newDocument, lat: lat, lng: lng });
     };
 
 
@@ -75,16 +61,16 @@ function AddDocument(props) {
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
-        if (newDocument.lat === null || newDocument.lng === null) {
+        if (props.newDocument.lat === null || props.newDocument.lng === null) {
             alert("Please select a position on the map");
             return;
         }
 
 
-        console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", newDocument);
-        props.handleAddDocument(newDocument);
-
-        setNewDocument({
+        console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", props.newDocument);
+        props.handleAddDocument(props.newDocument);
+        /*
+        props.setNewDocument({
             id: null,
             title: "",
             stakeholders: "",
@@ -97,7 +83,7 @@ function AddDocument(props) {
             description: "",
             lat: null,
             lng: null,
-        });
+        });*/
         props.handleNext();
 
     };
@@ -115,9 +101,9 @@ function AddDocument(props) {
                                 type="text"
                                 placeholder="Enter document name"
                                 required={true}
-                                value={newDocument.title} // per avere infup controlalto
+                                value={props.newDocument.title} // per avere infup controlalto
 
-                                onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
+                                onChange={(e) => props.setNewDocument({ ...props.newDocument, title: e.target.value })}
                             />
                         </Form.Group>
 
@@ -128,9 +114,10 @@ function AddDocument(props) {
                                 isClearable // Aggiunge una "x" per cancellare la selezione
                                 placeholder="Select Stakeholders"
                                 required={true}
+                                value={stakeholdersOptions.find(opt => opt.value === props.newDocument.stakeholders)}
                                 onChange={(selectedOption) =>
-                                    setNewDocument({
-                                        ...newDocument,
+                                    props.setNewDocument({
+                                        ...props.newDocument,
                                         stakeholders: selectedOption ? selectedOption.value : ""
                                     })
                                 }
@@ -147,8 +134,8 @@ function AddDocument(props) {
                                 required={true}
                                 onChange={(selectedOption) => {
 
-                                    setNewDocument({
-                                        ...newDocument,
+                                    props.setNewDocument({
+                                        ...props.newDocument,
                                         scale: selectedOption ? selectedOption.value : ""
                                     })
 
@@ -165,6 +152,7 @@ function AddDocument(props) {
                                     }
                                 }
                                 }
+                                value={scaleOptions.find(opt => opt.value === props.newDocument.scale)}
                             />
 
                         </Form.Group>
@@ -180,12 +168,13 @@ function AddDocument(props) {
                                         const regex = /^\d+:\d+$/;
                                         if (regex.test(e.target.value)) {
                                             setIsArchitecturalScaleFormat(true);
-                                            setNewDocument({ ...newDocument, scale: e.target.value })
+                                            props.setNewDocument({ ...props.newDocument, scale: e.target.value })
                                         } else {
                                             setIsArchitecturalScaleFormat(false);
                                         }
                                     }}
                                     isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+                                    value={scaleOptions.find(opt => opt.value === props.newDocument.scale)} /////////////////////////////////////////////  DA VERIFICARE /////////////////////////////////////////////
                                 />
                                 <Form.Text className="text-muted">
                                     Please enter the scale in "x:y" format (e.g., 1:100).
@@ -198,7 +187,8 @@ function AddDocument(props) {
                             <Form.Control
                                 type="date"
                                 required={true}
-                                onChange={(e) => setNewDocument({ ...newDocument, issuanceDate: e.target.value })}
+                                onChange={(e) => props.setNewDocument({ ...props.newDocument, issuanceDate: e.target.value })}
+                                value={props.newDocument.issuanceDate}
                             />
                         </Form.Group>
 
@@ -210,8 +200,9 @@ function AddDocument(props) {
                                 placeholder="Select Type"
                                 required={true}
                                 onChange={(selectedOption) =>
-                                    setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
+                                    props.setNewDocument({ ...props.newDocument, type: selectedOption ? selectedOption.value : "" })
                                 }
+                                value={typeOptions.find(opt => opt.value === props.newDocument.type)}
                             />
                         </Form.Group>
 
@@ -222,8 +213,9 @@ function AddDocument(props) {
                                 isClearable
                                 placeholder="Select Language"
                                 onChange={(selectedOption) =>
-                                    setNewDocument({ ...newDocument, language: selectedOption ? selectedOption.value : "" })
+                                    props.setNewDocument({ ...props.newDocument, language: selectedOption ? selectedOption.value : "" })
                                 }
+                                value={languageOptions.find(opt => opt.value === props.newDocument.language)}
                             />
                         </Form.Group>
 
@@ -231,7 +223,8 @@ function AddDocument(props) {
                             <Form.Label>Pages</Form.Label>
                             <Form.Control
                                 type="text"
-                                onChange={(e) => setNewDocument({ ...newDocument, pages: e.target.value })}
+                                onChange={(e) => props.setNewDocument({ ...props.newDocument, pages: e.target.value })}
+                                value={props.newDocument.pages}
                             />
                         </Form.Group>
                     </Col>
@@ -243,7 +236,8 @@ function AddDocument(props) {
                                 as="textarea"
                                 rows={10}
                                 required={true}
-                                onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
+                                onChange={(e) => props.setNewDocument({ ...props.newDocument, description: e.target.value })}
+                                value={props.newDocument.description}
                             />
                         </Form.Group>
 
