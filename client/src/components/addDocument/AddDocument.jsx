@@ -232,6 +232,7 @@ function AddDocument(props){
                                 <Form.Label>Issuance Date*</Form.Label>
                                 <Form.Control
                                     type="text"
+                                    required={true}
                                     placeholder="Enter date in yyyy/mm/dd format"
                                     value={issuanceDate}
                                     onChange={handleDateChange}
