@@ -75,9 +75,7 @@ function Map(props) {
         <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
       }
 
-      <Row>
-        <Col>
-          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '850px', width: '100%' }}>
+          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -111,8 +109,6 @@ function Map(props) {
               );
             })}
           </MapContainer>
-        </Col>
-      </Row>
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>
@@ -121,7 +117,7 @@ function Map(props) {
         <Modal.Body>
           {selectedDoc ? (
             <>
-              {Object.entries(selectedDoc).filter(([key]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+              {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
                 <p key={key}>
                   <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                 </p>
