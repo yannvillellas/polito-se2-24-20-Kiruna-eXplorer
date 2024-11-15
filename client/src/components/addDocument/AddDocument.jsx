@@ -168,13 +168,13 @@ function AddDocument(props) {
                                         const regex = /^\d+:\d+$/;
                                         if (regex.test(e.target.value)) {
                                             setIsArchitecturalScaleFormat(true);
-                                            props.setNewDocument({ ...props.newDocument, scale: e.target.value })
+                                            props.setNewDocument({ ...props.newDocument, scale:"Architectural Scale,"+e.target.value })
                                         } else {
                                             setIsArchitecturalScaleFormat(false);
                                         }
                                     }}
                                     isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
-                                    value={scaleOptions.find(opt => opt.value === props.newDocument.scale)} /////////////////////////////////////////////  DA VERIFICARE /////////////////////////////////////////////
+                                    value={props.newDocument.scale !== "" ? String(scaleOptions.find(opt => opt.value === props.newDocument.scale.split(",")[0])).split(",")[1]/*.split(",")[1]*/:""}
                                 />
                                 <Form.Text className="text-muted">
                                     Please enter the scale in "x:y" format (e.g., 1:100).
@@ -250,7 +250,7 @@ function AddDocument(props) {
                 </Row>
                 <Row>
                     <Col>
-                        <Button variant="secondary" onClick={handleClose}> Close</Button>
+                        <Button variant="secondary" onClick={()=>props.handleClose()}> Close</Button>
                         <Button variant="primary" type='submit'> Save Changes, go to links </Button>
                     </Col>
                 </Row>

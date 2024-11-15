@@ -71,14 +71,28 @@ function HomePage(props) {
 
         try {
             console.log("Sono in HomePage.jsx, sto mandando il documento al db:", document);
-            let stateDocument=document;
+            //let stateDocument={...document};
             //document.id = documents.length + 3; // to be managed
             //stateDocument.docId= documents.length + 3; // to be managed
             
             
             const docId=await DocumentAPI.addDocument(document);
             document.id =docId
-            stateDocument.docId=docId
+            const stateDocument={
+                docId: docId,
+                title: document.title,
+                stakeholders: document.stakeholders,
+                scale: document.scale,
+                issuanceDate: document.issuanceDate,
+                type: document.type,
+                connections:document.connections,
+                language: document.language,
+                pages: document.pages,
+                description: document.description,
+                lat: document.lat,
+                lng: document.lng,
+            }
+            console.log("Sono in HomePage.jsx, sto mandando il documento allo stato:", stateDocument);
             console.log("Sono in HomePage.jsx, ho aggiunto un documento: ", document);
             setDocuments([...documents, stateDocument]);
             const position = {

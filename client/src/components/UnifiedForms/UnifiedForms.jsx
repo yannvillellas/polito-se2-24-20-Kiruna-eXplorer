@@ -30,8 +30,11 @@ function UnifiedForms(props) {
         lng: null,
     });
 
+    const [closeConfirmation, setCloseConfirmation] = useState(false)
+
     const onBtnSelectAdd = () => setShowModalAdd(true);
-    const handleClose = () =>{
+    const handleClose = () => {
+        console.log("bottone")
         setNewDocument({
             id: null,
             title: "",
@@ -48,23 +51,32 @@ function UnifiedForms(props) {
         });
         setIndex(0)
         setShowModalAdd(false);
-    } 
+        setCloseConfirmation(false);
+    }
 
     const handleNext = () => {
         setIndex((prevIndex) => (prevIndex + 1) % 3);
     };
 
-    const handlePrev = async() => {
+    const handlePrev = async () => {
         setIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
-        console.log("elimino: ",newDocument.id)
+        console.log("elimino: ", newDocument.id)
         await DocumentAPI.deleteDocument(newDocument.id);
-        props.handleBackActionForm(newDocument.id); /////////controllare
+        props.handleBackActionForm(newDocument.id);
         //console.log(newDocument)
     };
 
     const handleSelect = (selectedIndex) => {
         setIndex(selectedIndex);
-    };
+    }
+
+    const confirmClose = ()=>{
+        if(index==1){
+            setCloseConfirmation(true);
+        }else{
+            handleClose();
+        }
+    }
 
     return (
         <>
@@ -76,17 +88,17 @@ function UnifiedForms(props) {
             >
                 <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
             </Button>
-            <Modal show={showModalAdd} onHide={handleClose} size="xl">
+            <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>{index==0? "Insert new document":"Insert link"}</Modal.Title>
+                    <Modal.Title>{index == 0 ? "Insert new document" : "Insert link"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Carousel activeIndex={index} onSelect={handleSelect} controls={false} indicators={false} interval={null}>
                         <Carousel.Item>
-                            <AddDocument handleAddDocument={props.handleAddDocument} handleNext={handleNext} newDocument={newDocument} setNewDocument={setNewDocument} />
+                            <AddDocument handleAddDocument={props.handleAddDocument} handleNext={handleNext} newDocument={newDocument} setNewDocument={setNewDocument} handleClose={handleClose}/>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} docId={newDocument.id} title={newDocument.title}></Link>
+                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} docId={newDocument.id} title={newDocument.title} confirmClose={confirmClose}></Link>
                         </Carousel.Item>
                     </Carousel>
 
@@ -108,6 +120,22 @@ function UnifiedForms(props) {
                 </Modal.Body>
                 <Modal.Footer>
                     <p>All the fields contrassigned by * are mandatory. </p>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal di conferma */}
+            <Modal show={closeConfirmation} onHide={()=>setCloseConfirmation(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Conferma uscita</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Sei sicuro di voler uscire senza aggiungere link al documento?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={()=>setCloseConfirmation(false)}>
+                        Annulla
+                    </Button>
+                    <Button variant="primary" onClick={()=>handleClose()}>
+                        Sì, chiudi
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>

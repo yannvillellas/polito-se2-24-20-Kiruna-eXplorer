@@ -3,6 +3,7 @@ import associationAPI from "../../api/associationAPI";
 import { Modal, Row, Col, Form, Button } from "react-bootstrap";
 import "./Link.css";
 import associationApi from "../../api/associationAPI";
+import Select from "react-select";
 
 function Link(props) {
   const [doc1, setDoc1] = useState(""); // here there is the id so it is an integer!
@@ -10,21 +11,22 @@ function Link(props) {
   const [doc2, setDoc2] = useState("");
   // const [documents, setDocuments] = useState([]); // State for documents
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
-  const [selectedProperties, setSelectedProperties] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
 
   // Funzione per gestire il cambiamento della checkbox
-  const handleCheckboxChange = (property) => {
-    const isSelected = selectedProperties.some((item) => item.id === property.id);
+  const handleCheckboxChange = (linkType) => {
+    const isSelected = selectedTypes.some((type) => type === linkType);
 
     if (isSelected) {
       // Rimuovi la proprietà dallo stato se è deselezionata
-      setSelectedProperties((prevSelected) =>
-        prevSelected.filter((item) => item.id !== property.id)
+      setSelectedTypes((prevSelected) =>
+        prevSelected.filter((type) => type !== linkType)
       );
     } else {
       // Aggiungi la proprietà allo stato se è selezionata
-      setSelectedProperties((prevSelected) => [...prevSelected, property]);
+      setSelectedTypes((prevSelected) => [...prevSelected, linkType]);
     }
+    console.log(selectedTypes)
   };
 
   useEffect(() => {
@@ -44,16 +46,22 @@ function Link(props) {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const association = {
-      doc1: `${props.docId}`, ///*parseInt(*/doc1/*, 10)*/,
-      type: link,
-      doc2: /*parseInt(*/doc2/*, 10)*/
-    };
+
 
     try {
-      console.log("Sono in link.jsx: sto spedendo,", association);
-      const createdAssociation = await associationAPI.createAssociation(association); // Create association using API
-      console.log("Association created:", createdAssociation);
+      //console.log("Sono in link.jsx: sto spedendo,", association);
+      console.log("tipi selezionati: ", selectedTypes)
+      for (let link of selectedTypes) {
+        console.log("stop creando associazione: ", link)
+        let association = {
+          doc1: `${props.docId}`, //doc1
+          type: link,
+          doc2: doc2
+        };
+        const createdAssociation = await associationAPI.createAssociation(association);
+
+      }
+      //console.log("Association created:", createdAssociation);
       // Reset form fields after successful submission
       setDoc1("");
       setLink("");
@@ -101,7 +109,7 @@ function Link(props) {
             </Form.Label>
 
             <Col sm="7">
-              {<Form.Select
+              {/* dropdown menu <Form.Select
                 value={link} // link is a string
                 onChange={(e) => setLink(e.target.value)}
               >
@@ -113,17 +121,17 @@ function Link(props) {
                     {linkType}
                   </option>
                 ))}
-              </Form.Select>}
-              {/*properties.map((linkType) => (
+              </Form.Select>*/}
+              {linkTypes.map((linkType) => (
                 <Form.Check
                   key={linkType}
                   type="checkbox"
                   id={`checkbox-${linkType}`}
                   label={linkType}
-                  checked={selectedProperties.some((item) => item.id === property.id)}
-                  onChange={() => handleCheckboxChange(property)}
+                  checked={selectedTypes.some((type) => type === linkType)}
+                  onChange={() => handleCheckboxChange(linkType)}
                 />
-              ))*/}
+              ))}
             </Col>
           </Form.Group>
 
@@ -134,7 +142,7 @@ function Link(props) {
             </Form.Label>
 
             <Col sm="7">
-              <Form.Select
+              {/*<Form.Select
                 value={doc2} // doc2 is the ID, i don't do parseInt() so it will remain string
                 onChange={(e) => { setDoc2(e.target.value); console.log(props.documents) }} // ?*parseInt(e.target.value, 10)*?e.target.value
               >
@@ -143,22 +151,47 @@ function Link(props) {
                 </option>
                 {props.documents
                   //.filter((doc) => parseInt(doc.id, 10) !== parseInt(doc1, 10)) // Exclude doc1 from the list here you need to parse the id-string to integer
-                  .filter((doc) => doc.docId != doc1)
+                  //.filter((doc) => doc.docId != doc1)
                   .map((doc) => (
                     <option key={doc.docId} value={doc.docId}>
-                      {doc.title} {doc.docId}
+                      {doc.title}
                     </option>
                   ))}
-              </Form.Select>
+              </Form.Select>*/}
+              <Select
+                options={props.documents.map((d) => {
+                  console.log(d.docId)
+                  return { value: `${d.docId}`, label: d.title }
+                })}
+                /*value={props.documents.find((d) => d.docId = doc2)?.docId}*/
+                isClearable
+                placeholder="Select document"
+                required={true}
+                onChange={(selectedOption) => { console.log(selectedOption);setDoc2(selectedOption.value) }}
+                menuPlacement="auto" // Posiziona il menu in base allo spazio disponibile
+                menuPosition="fixed" // Evita overflow dal modal
+                styles={{
+                  menu: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+                  menuList: (base) => ({
+                    ...base,
+                    maxHeight: '200px', // Imposta l'altezza massima del menu
+                    overflowY: 'auto', // Abilita lo scroll verticale
+                  }),
+                }}
+              />
             </Col>
           </Form.Group>
           <Form.Group>
-            <Button onClick={() => props.handlePrev()}>Previous</Button>
-            {/*doc1 && */link && doc2 &&
+            <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
+            {/*doc1 && link &&*/selectedTypes.length > 0 && doc2 &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>
             }
+            <Button variant="danger" onClick={() => props.confirmClose()}>Continue without links</Button>
           </Form.Group>
         </Form>
       </Col>
