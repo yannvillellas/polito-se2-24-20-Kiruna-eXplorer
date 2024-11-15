@@ -75,40 +75,40 @@ function Map(props) {
         <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
       }
 
-          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {Object.keys(groupedDocuments).map((key, index) => {
-              const [lat, lng] = key.split(',').map(Number);
-              const docs = groupedDocuments[key];
-              return (
-                <Marker
-                  key={index}
-                  position={[lat, lng]}
-                  eventHandlers={{
-                    click: () => handleMarkerClick(docs)
-                  }}
-                >
-                  {docs.length > 1 && (
-                    <Popup>
-                      <strong>Documents at this location:</strong>
-                      <ul>
-                        {docs.map((doc) => (
-                          <li key={doc.id}>
-                            <Button variant="link" onClick={() => handleChoiceClick(doc)}>
-                              {doc.title}
-                            </Button>
-                          </li>
-                        ))}
-                      </ul>
-                    </Popup>
-                  )}
-                </Marker>
-              );
-            })}
-          </MapContainer>
+      <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {Object.keys(groupedDocuments).map((key, index) => {
+          const [lat, lng] = key.split(',').map(Number);
+          const docs = groupedDocuments[key];
+          return (
+            <Marker
+              key={index}
+              position={[lat, lng]}
+              eventHandlers={{
+                click: () => handleMarkerClick(docs)
+              }}
+            >
+              {docs.length > 1 && (
+                <Popup>
+                  <strong>Documents at this location:</strong>
+                  <ul>
+                    {docs.map((doc) => (
+                      <li key={doc.id}>
+                        <Button variant="link" onClick={() => handleChoiceClick(doc)}>
+                          {doc.title}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </Popup>
+              )}
+            </Marker>
+          );
+        })}
+      </MapContainer>
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>
