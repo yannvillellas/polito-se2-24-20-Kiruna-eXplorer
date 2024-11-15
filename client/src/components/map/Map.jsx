@@ -1,8 +1,8 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
+import { Container, Row, Col, Button, Modal} from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -21,7 +21,7 @@ import Link from "../link/Link";
 function Map(props) {
   const [showModalAdd, setShowModalAdd] = useState(false);
   const [showModalLink, setShowModalLink] = useState(false);
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
 
   const [isAllMunicipality, setIsAllMunicipality] = useState(false);
@@ -43,81 +43,98 @@ function Map(props) {
     setShowModalLink(false);
   };
 
-  const handleCloseOffcanvas = () => {
-    setShowOffcanvas(false);
+  const closeDocumentModal = () => {
+    setShowDocumentModal(false);
   };
 
-  const handleMarkerClick = (doc) => {
+  const handleMarkerClick = (docs) => {
+    if (docs.length == 1) {
+      setSelectedDoc(docs[0]);
+      setShowDocumentModal(true);
+    }
+
+  };
+
+  const handleChoiceClick = (doc) => {
     setSelectedDoc(doc);
-    setShowOffcanvas(true); // Apri OffCanvas
+    setShowDocumentModal(true);
+  }
 
-  };
-
-
+  const groupedDocuments = documents.reduce((acc, doc) => {
+    const key = `${doc.lat},${doc.lng}`;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(doc);
+    return acc;
+  }, {});
 
   return (
     <Container fluid>
-      
       {documents.length > 1 &&
         <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
       }
 
       <Row>
         <Col>
-          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
+          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '850px', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
             />
-
-            {documents && documents.length > 0 && (
-              documents.map((doc) => (
+            {Object.keys(groupedDocuments).map((key, index) => {
+              const [lat, lng] = key.split(',').map(Number);
+              const docs = groupedDocuments[key];
+              return (
                 <Marker
-                  key={doc.id}
-                  position={[doc.lat, doc.lng]}
+                  key={index}
+                  position={[lat, lng]}
                   eventHandlers={{
-                    click: () => handleMarkerClick(doc)
+                    click: () => handleMarkerClick(docs)
                   }}
-                />
-              ))
-            )}
-
+                >
+                  {docs.length > 1 && (
+                    <Popup>
+                      <strong>Documents at this location:</strong>
+                      <ul>
+                        {docs.map((doc) => (
+                          <li key={doc.id}>
+                            <Button variant="link" onClick={() => handleChoiceClick(doc)}>
+                              {doc.title}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </Popup>
+                  )}
+                </Marker>
+              );
+            })}
           </MapContainer>
         </Col>
       </Row>
 
-      <Row>
-        <Col>
-
-          <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
-
-            <Offcanvas.Header closeButton>
-              <Offcanvas.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Offcanvas.Title>
-            </Offcanvas.Header>
-
-            <Offcanvas.Body>
-              {selectedDoc ? (
-                <>
-                  {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                    <p key={key}>
-                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                    </p>
-                  ))}
-                  <p key="position">
-                    <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
-                  </p>
-                </>
-              ) : (
-                <p>Seleziona un marker per visualizzare i dettagli.</p>
-              )}
-            </Offcanvas.Body>
-
-          </Offcanvas>
-        </Col>
-      </Row>
-
-
-
+      <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDoc ? (
+            <>
+              {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+                <p key={key}>
+                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                </p>
+              ))}
+              <p key="position">
+                <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
+              </p>
+            </>
+          ) : (
+            <p>Seleziona un marker per visualizzare i dettagli.</p>
+          )}
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 }
