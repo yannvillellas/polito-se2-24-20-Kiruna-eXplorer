@@ -108,7 +108,7 @@ function Map(props) {
                     defaultValue={{ value: docs[0].id, label: docs[0].title }}
                     required={true}
                     onChange={(selected) => {
-                      setSelectedOption(selected);
+                      setSelectedOption(docs.find((doc) => doc.id === selected.value));
                     }}
                   />
                   <Button variant="primary" onClick={() => handleChoiceClick(selectedOption)}>Submit</Button>
@@ -126,7 +126,7 @@ function Map(props) {
         <Modal.Body>
           {selectedDoc ? (
             <>
-              {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+              {Object.entries(selectedDoc).filter(([key]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
                 <p key={key}>
                   <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                 </p>
