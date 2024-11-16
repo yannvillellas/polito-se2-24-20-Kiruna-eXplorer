@@ -28,6 +28,7 @@ function Map(props) {
   const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
   const navigate = useNavigate();
 
+
   const [documents, setDocuments] = useState([]);
 
   // So that sync with the parent component
@@ -58,9 +59,9 @@ function Map(props) {
   return (
     <Container fluid>
       
-      {documents.length > 1 &&
+      {/*documents.length > 1 &&
         <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
-      }
+      */}
 
       <Row>
         <Col>
@@ -70,8 +71,8 @@ function Map(props) {
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
             />
 
-            {documents && documents.length > 0 && (
-              documents.map((doc) => (
+            {props.documents && props.documents.length > 0 && (
+              props.documents.map((doc) => (
                 <Marker
                   key={doc.id}
                   position={[doc.lat, doc.lng]}

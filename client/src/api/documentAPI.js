@@ -2,22 +2,21 @@ import Document from '../models/document.mjs'
 const SERVER_URL = 'http://localhost:3001/api/documents/'
 
 const listDocuments = async () => {
-    try{
-        const documents = await fetch(SERVER_URL,{
+    try {
+        const documents = await fetch(SERVER_URL, {
             method: 'GET',
             credentials: 'include'
         })
+
         .then(response => response.json())
         console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
         //console.log("le api tornano: ", documents)
 
         return documents;
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }
-
-
 
 
 
@@ -25,6 +24,7 @@ const listDocuments = async () => {
 const addDocument = async (document) => {
     console.log("sono in documentAPI.js: sto aggiungendo:", document);
     const response = await fetch(`${SERVER_URL}`, {
+
       method: 'POST',
       headers: {'Content-Type': 'application/json'}, 
 
@@ -48,14 +48,34 @@ const addDocument = async (document) => {
 
     return null;
 }
-  
+
+const deleteDocument = async (docId) => {
+    try {
+        console.log("in API elimino: ", docId)
+        const response = await fetch(SERVER_URL, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ docId: docId }),
+        });
+        if (!response.ok) throw new Error('Failed to fetch link types');
+        return
+        //return await response.json();
+    }catch(e){
+        console.error("Error removing a document:", e);
+        throw e;
+    }
+
+}
+
 
 
 
 
 const DocumentAPI = {
     listDocuments,
-    addDocument
+    addDocument,
+    deleteDocument
 }
 
 export default DocumentAPI;

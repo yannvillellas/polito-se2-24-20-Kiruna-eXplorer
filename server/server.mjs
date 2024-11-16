@@ -6,7 +6,7 @@ import session from 'express-session';
 import passport from 'passport';
 import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
-import { listDocuments, addDocument } from './src/dao/documentDAO.mjs';
+import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
 import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
@@ -122,6 +122,18 @@ app.post('/api/documents', isUrbanPlanner, [
     console.log("sono in server.mjs: ho aggiunto il documento, mi è tornato id:", documentId);
 
     res.status(201).json(documentId);
+});
+
+//delete Document
+app.delete('/api/documents',isUrbanPlanner,[],async (req, res)=>{
+    try{
+        console.log("in server elimino: ", req.body.docId)
+        await deleteDocument(req.body.docId);
+        res.status(200).end();
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+
 });
 
 
