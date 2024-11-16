@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Modal} from "react-bootstrap";
+import Select from "react-select";
 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -23,6 +24,7 @@ function Map(props) {
   const [showModalLink, setShowModalLink] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const [isAllMunicipality, setIsAllMunicipality] = useState(false);
   const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
@@ -93,16 +95,23 @@ function Map(props) {
             >
               {docs.length > 1 && (
                 <Popup>
-                  <strong>Documents at this location:</strong>
-                  <ul>
-                    {docs.map((doc) => (
-                      <li key={doc.id}>
-                        <Button variant="link" onClick={() => handleChoiceClick(doc)}>
-                          {doc.title}
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
+                  <strong>Choose document to open at this location:</strong>
+                  <Select
+                    options={
+                      docs.map((doc) => ({
+                        value: doc.id,
+                        label: doc.title,
+                      }))
+                    }
+                    isClearable
+                    defaultMenuIsOpen
+                    defaultValue={{ value: docs[0].id, label: docs[0].title }}
+                    required={true}
+                    onChange={(selected) => {
+                      setSelectedOption(selected);
+                    }}
+                  />
+                  <Button variant="primary" onClick={() => handleChoiceClick(selectedOption)}>Submit</Button>
                 </Popup>
               )}
             </Marker>
