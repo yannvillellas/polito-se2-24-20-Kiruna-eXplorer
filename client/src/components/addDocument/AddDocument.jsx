@@ -18,7 +18,6 @@ import ChosenPosition from "../chosenPosition/ChosenPosition";
 
 function AddDocument(props) {
 
-    
     const handleSetPostition = (lat, lng) => {
         props.setNewDocument({ ...props.newDocument, lat: lat, lng: lng });
     };
@@ -54,6 +53,21 @@ function AddDocument(props) {
     const [isArchitecturalScale, setIsArchitecturalScale] = useState(false);
     const [isArchitecturalScaleFormat, setIsArchitecturalScaleFormat] = useState(false);
 
+    const [issuanceDate, setIssuanceDate] = useState("");
+    const [isIssuanceDateValid, setIsIssuanceDateValid] = useState(true);
+
+    const handleDateChange = (e) => {
+        const value = e.target.value;
+        const regex = /^[1-9][0-9]{3}(\/(0[1-9]|1[0-2])(\/(0[1-9]|[1-2][0-9]|3[0-1]))?)?$/;
+        if (regex.test(value)) {
+            setIsIssuanceDateValid(true);
+            setNewDocument({ ...newDocument, issuanceDate: value });
+        } else {
+            setIsIssuanceDateValid(false);
+        }
+        setIssuanceDate(value);
+    };
+
     const [showModalAdd, setShowModalAdd] = useState(false);
 
 
@@ -66,6 +80,15 @@ function AddDocument(props) {
             return;
         }
 
+        if (!isIssuanceDateValid) {
+            alert("Please enter a valid issuance date.");
+            return;
+        }
+
+        if (isArchitecturalScale && !isArchitecturalScaleFormat) {
+            alert("Please enter a valid architectural scale format.");
+            return;
+        }
 
         console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", props.newDocument);
         props.handleAddDocument(props.newDocument);
@@ -77,7 +100,7 @@ function AddDocument(props) {
             scale: "",
             issuanceDate: "",
             type: "",
-            connections: "",
+            connections: 0,
             language: "",
             pages: 0,
             description: "",
@@ -150,13 +173,54 @@ function AddDocument(props) {
                                         // In this way i have always guaranteed that Architectural Scale Format form disappear (case of Selected Option null)
                                         setIsArchitecturalScale(false);
                                     }
+
                                 }
                                 }
                                 value={scaleOptions.find(opt => opt.value === props.newDocument.scale)}
                             />
 
-                        </Form.Group>
-                        {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}
+                            </Form.Group>
+                                                {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}       
+                            {isArchitecturalScale && 
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Architectural Scale Format (x:y)*</Form.Label> 
+                                    <Form.Control
+                                        type="text"
+                                        required={true}
+                                        placeholder="Enter scale in x:y format"
+                                        onChange={(e) => {
+                                            const regex = /^\d+:\d+$/;
+                                            if(regex.test(e.target.value)){
+                                                setIsArchitecturalScaleFormat(true);
+                                                setNewDocument({...newDocument, scale: e.target.value})
+                                            } else{
+                                                setIsArchitecturalScaleFormat(false);
+                                            }
+                                        }}
+                                        isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                            Please enter the scale in "x:y" format (e.g., 1:100).
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                            }
+                            <Form.Group className="mb-3">
+                                <Form.Label>Issuance Date*</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    required={true}
+                                    placeholder="Enter date in yyyy/mm/dd format"
+                                    value={issuanceDate}
+                                    onChange={handleDateChange}
+                                    isInvalid={!isIssuanceDateValid}
+                                />
+                                <Form.Control.Feedback type="invalid">
+                                        Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                                </Form.Control.Feedback>
+                            </Form.Group>
+
+                        {/*</Form.Group>
+                        
                         {isArchitecturalScale &&
                             <Form.Group className="mb-3">
                                 <Form.Label>Architectural Scale Format (x:y)*</Form.Label>
@@ -174,7 +238,7 @@ function AddDocument(props) {
                                         }
                                     }}
                                     isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
-                                    value={props.newDocument.scale !== "" ? String(scaleOptions.find(opt => opt.value === props.newDocument.scale.split(",")[0])).split(",")[1]/*.split(",")[1]*/:""}
+                                    value={props.newDocument.scale !== "" ? String(scaleOptions.find(opt => opt.value === props.newDocument.scale.split(",")[0])).split(",")[1]:""}
                                 />
                                 <Form.Text className="text-muted">
                                     Please enter the scale in "x:y" format (e.g., 1:100).
@@ -190,7 +254,7 @@ function AddDocument(props) {
                                 onChange={(e) => props.setNewDocument({ ...props.newDocument, issuanceDate: e.target.value })}
                                 value={props.newDocument.issuanceDate}
                             />
-                        </Form.Group>
+                        </Form.Group>*/}
 
                         <Form.Group className="mb-3">
                             <Form.Label>Type*</Form.Label> {/* sono fixed*/}

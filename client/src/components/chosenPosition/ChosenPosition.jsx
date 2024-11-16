@@ -13,10 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 
-/** BUGS:
- *  Line 68: Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them) 
- * 
- */
 
 
 function ChosenPosition(props) {
@@ -68,8 +64,8 @@ function ChosenPosition(props) {
     const handleResetLatLong = async () => {
         setManualLat(null);
         setManualLong(null);
-        console.log("Sono in ChosenPosition.jsx, ho cliccato su change lat long i valori attuali sono:", manualLat, manualLong);
         setShowLatLongForm(true)
+        console.log("Sono in ChosenPosition.jsx, ho cliccato su change lat long i valori attuali sono (se vedi valori in realtà sono null, null): ", manualLat, manualLong);
     };
 
 
@@ -89,7 +85,7 @@ function ChosenPosition(props) {
         <>
         <Container fluid>
                     {/**here i put the checkbox/radio */}
-                    <Form>
+                    <Form.Group>
                         <Form.Check
                             type="radio"
                             label="All municipalities"
@@ -117,7 +113,7 @@ function ChosenPosition(props) {
                             onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
                         />
 
-                    </Form>
+                    </Form.Group>
 
                     {/**here i put the map */}
                     {selectedOption === 'pointToPoint' && !positionAlreadyChosen &&
@@ -141,10 +137,7 @@ function ChosenPosition(props) {
                     {/**here i put the form */}
                     {selectedOption === 'manualInsertion' && showLatLongForm &&
                         <>
-                            <Form onSubmit={(e) => { 
-                                e.preventDefault(); // has to be used here otherwise the fact thet this is a form component inside a from component refresh the page 
-                                handleLatLongFormSubmit();
-                            }}>
+                            <Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Latitude</Form.Label>
                                     <Form.Control 
@@ -170,7 +163,7 @@ function ChosenPosition(props) {
                                 <Button variant="primary" onClick={handleLatLongFormSubmit}>
                                     Submit
                                 </Button>
-                            </Form>
+                            </Form.Group>
                         </>
                     }
 

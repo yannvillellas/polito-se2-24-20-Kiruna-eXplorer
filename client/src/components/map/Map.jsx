@@ -28,33 +28,15 @@ function Map(props) {
   const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
   const navigate = useNavigate();
 
-  const [documents, setDocuments] = useState(props.documents ? props.documents : []);
 
-    
-    /*useEffect(()=>{
-      const fetchDocuments = async () => {
-        try {
-          const docs = await DocumentAPI.listDocuments();
-          const positions = await PositionAPI.listPositions();
-          console.log(docs);
-          console.log(positions)
-          const joined = docs.map((doc) => {
-            const docPositions = positions.filter((pos) => pos.docId === doc.docId);
-            return {
-              ...doc,
-              lat: docPositions[0].latitude,
-              lng: docPositions[0].longitude
-            };
-          });
-          setDocuments(joined);
-        } catch (error) {
-          console.error("Failed to fetch documents:", error);
-        }
-      };
-      fetchDocuments();
-      console.log("documenti join: ",documents);
-    }, [])*/
+  const [documents, setDocuments] = useState([]);
 
+  // So that sync with the parent component
+  useEffect(() => {
+    if (props.documents) {
+      setDocuments(props.documents);
+    }
+  }, [props.documents]);
 
 
   const handleClose = () => {

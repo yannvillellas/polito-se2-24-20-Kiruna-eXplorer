@@ -7,8 +7,9 @@ const listDocuments = async () => {
             method: 'GET',
             credentials: 'include'
         })
-            .then(response => response.json())
-            .then(mapDocuments);
+
+        .then(response => response.json())
+        console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
         //console.log("le api tornano: ", documents)
 
         return documents;
@@ -17,44 +18,29 @@ const listDocuments = async () => {
     }
 }
 
-function mapDocuments(documents) {
-    //console.log("mapDocuments riceve: ",documents)
-    return documents.map(document => {
-        return new Document(   ////// modifica messo return
-            document.docId, ///////////////modifica da document.id
-            document.title,
-            document.description,
-            document.stackeholders,
-            document.scale,
-            document.issuanceDate,
-            document.type,
-            document.connections,
-            document.language,
-            document.pages
-        )
-    })
-}
+
 
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
     console.log("sono in documentAPI.js: sto aggiungendo:", document);
     const response = await fetch(`${SERVER_URL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
 
-        body: JSON.stringify({
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'}, 
 
-            id: document.id, title: document.title, stakeholders: document.stakeholders,
-            scale: document.scale, issuanceDate: document.issuanceDate, type: document.type,
-            connections: document.connections, language: document.language, pages: document.pages,
-            description: document.description,
-        }),
+      body: JSON.stringify({
+        
+        title: document.title, stakeholders: document.stakeholders, 
+        scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
+        connections: document.connections, language: document.language, pages: document.pages, 
+        description: document.description,
+      }),
 
-        credentials: 'include'
+      credentials: 'include'
     });
-    if (!response.ok) {
-        const errMessage = await response.json();
-        throw errMessage;
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
     } else {
         const documentId = await response.json();
         return documentId;

@@ -91,6 +91,7 @@ app.delete('/api/sessions/current', (req, res) => {
 app.get('/api/documents',[], async(req, res) => {
     try{
         const documents = await listDocuments();
+        console.log("il server.mjs, GET ALL Documents riceve dal DAO come documenti: ",documents)
         //console.log("il server riceve come documenti: ",documents)
         res.status(200).json(documents);
     }catch(err){
@@ -105,9 +106,9 @@ app.post('/api/documents', isUrbanPlanner, [
     check('scale').isString(),
     check('issuanceDate').isString(),
     check('type').isString(),
-    check('connections').isString(),
-    check('language').isString(),
-    check('pages').isInt(),
+    check('connections').isInt(),
+    check('language').optional().isString(),
+    check('pages').optional().isInt(),
     check('description').isString(),
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -132,6 +133,7 @@ app.delete('/api/documents',isUrbanPlanner,[],async (req, res)=>{
     }catch(err){
         res.status(500).json({error: err.message});
     }
+
 });
 
 
