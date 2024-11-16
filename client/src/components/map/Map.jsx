@@ -14,35 +14,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 
-import DocumentAPI from "../../api/documentAPI";
-import PositionAPI from "../../api/positionAPI";
-import Link from "../link/Link";
 
 function Map(props) {
-  const [showModalAdd, setShowModalAdd] = useState(false);
-  const [showModalLink, setShowModalLink] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
-
-  const [isAllMunicipality, setIsAllMunicipality] = useState(false);
-  const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
-  const navigate = useNavigate();
+ 
 
 
   const [documents, setDocuments] = useState([]);
 
+
   // So that sync with the parent component
   useEffect(() => {
     if (props.documents) {
+      console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
       setDocuments(props.documents);
     }
   }, [props.documents]);
 
-
-  const handleClose = () => {
-    setShowModalAdd(false);
-    setShowModalLink(false);
-  };
 
   const handleCloseOffcanvas = () => {
     setShowOffcanvas(false);
@@ -57,12 +46,8 @@ function Map(props) {
 
 
   return (
+    
     <Container fluid>
-      
-      {/*documents.length > 1 &&
-        <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
-      */}
-
       <Row>
         <Col>
           <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
@@ -70,18 +55,23 @@ function Map(props) {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
             />
-
-            {props.documents && props.documents.length > 0 && (
-              props.documents.map((doc) => (
-                <Marker
-                  key={doc.id}
-                  position={[doc.lat, doc.lng]}
-                  eventHandlers={{
-                    click: () => handleMarkerClick(doc)
-                  }}
-                />
-              ))
-            )}
+              {props.documents && props.documents.length > 0 && (
+                props.documents.map((doc) => {
+                  // Controlla se le coordinate sono valide
+                  if (doc.lat && doc.lng) {
+                    return (
+                      <Marker
+                        key={doc.docId}
+                        position={[doc.lat, doc.lng]}
+                        eventHandlers={{
+                          click: () => handleMarkerClick(doc),
+                        }}
+                      />
+                    );
+                  }
+                  return null; // Non renderizzare il marker se lat o lng sono invalidi
+                })
+              )}
 
           </MapContainer>
         </Col>
@@ -116,6 +106,7 @@ function Map(props) {
           </Offcanvas>
         </Col>
       </Row>
+
 
 
 

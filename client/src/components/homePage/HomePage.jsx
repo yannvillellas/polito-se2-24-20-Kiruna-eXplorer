@@ -16,9 +16,6 @@ L.Icon.Default.mergeOptions({
 
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
-import Link from "../link/Link";
-import AddDocument from "../addDocument/AddDocument";
-import FakeLink from "../fakeLink/FakeLink";
 import UnifiedForms from "../UnifiedForms/UnifiedForms";
 
 
@@ -44,19 +41,22 @@ function HomePage(props) {
             try {
                 const documents = await DocumentAPI.listDocuments();
                 console.log("Sono in HomePage.jsx, ho ricevuto dal db i documenti: ",documents);
+
+                
                 const positions = await PositionAPI.listPositions();
                 console.log("Sono in HomePage.jsx, ho ricevuto dal db le posizioni: ",positions);
                 
                 documents.forEach(document => {
-                    const position = positions.find(position => position.docId === document.id);
+                    const position = positions.find(position => position.docId === document.docId);
                     if (position) {
                         document.lat = position.latitude;
                         document.lng = position.longitude;
                     }
                 });
 
-                console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents);
+                console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents[0].lat, documents[0].lng);
                 setDocuments(documents);
+                
                 
             } catch (error) {
                 console.error("Error fetching documents:", error);
@@ -67,47 +67,22 @@ function HomePage(props) {
     
 
 
-    const [isJustBeenAddedADocument, setIsJustBeenAddedADocument] = useState(false); // to be able to manage add link after a document has been added
-
-    useEffect(() => {
-        const fetchDocuments = async () => {
-            try {
-                const docs = await DocumentAPI.listDocuments();
-                const positions = await PositionAPI.listPositions();
-                console.log(docs);
-                console.log(positions)
-                const joined = docs.map((doc) => {
-                    const docPositions = positions.filter((pos) => pos.docId === doc.docId);
-                    return {
-                        ...doc,
-                        lat: docPositions[0].latitude,
-                        lng: docPositions[0].longitude
-                    };
-                });
-                setDocuments(joined);
-            } catch (error) {
-                console.error("Failed to fetch documents:", error);
-            }
-        };
-        fetchDocuments();
-        console.log("documenti join: ", documents);
-    }, [])
-
-
     const handleAddDocument = async (document) => {
-        /*setDocuments([...documents, document]);
-        console.log("Sono in HomePage.jsx, ho aggiunto un documento: ", document);*/
-        setIsJustBeenAddedADocument(true);
 
         try {
             console.log("Sono in HomePage.jsx, sto mandando il documento al db:", document);
-            //let stateDocument={...document};
-            //document.id = documents.length + 3; // to be managed
-            //stateDocument.docId= documents.length + 3; // to be managed
+            const docId = await DocumentAPI.addDocument(document);
+            console.log("Sono in HomePage.jsx, ho aggiunto il documento al db, mi è tornato id:", docId);
+            
+            const position = {
+                docId: docId,
+                lat: document.lat,
+                lng: document.lng,
+            };
+            console.log("Sono in HomePage.jsx, sto mandando la posizione del documento al db:", position);
+            await PositionAPI.addPosition(position);
             
             
-            const docId=await DocumentAPI.addDocument(document);
-            document.id =docId
             const stateDocument={
                 docId: docId,
                 title: document.title,
@@ -123,34 +98,18 @@ function HomePage(props) {
                 lng: document.lng,
             }
             console.log("Sono in HomePage.jsx, sto mandando il documento allo stato:", stateDocument);
-            console.log("Sono in HomePage.jsx, ho aggiunto un documento: ", document);
             setDocuments([...documents, stateDocument]);
+            
+            console.log("Sono in HomePage.jsx, restituisco a Link.jsx, il docId: ", docId);
+            return docId;
 
-            const position = {
-                docId: document.id,
-                lat: document.lat,
-                lng: document.lng,
-            };
-            await PositionAPI.addPosition(position);
-            console.log("Sono in HomePage.jsx, ho aggiunto la posizione al db:", position);
           } catch (error) {
 
             console.error("Error adding document:", error);
         }
 
-
-
     }
 
-    const handleAddLink = () => {
-        console.log("Sono in HomePage.jsx, ho cliccato su add link");
-        setIsJustBeenAddedADocument(false);
-    }
-
-    const handleBackActionForm = (docId)=>{
-        const docs= documents.filter((d)=>d.docId!=docId)
-        setDocuments(docs)
-    }
 
 
 
@@ -161,9 +120,7 @@ function HomePage(props) {
 
                     <h1 className="text-dark">Welcome to Kiruna</h1>
                     <div className="d-flex">
-                        {/*{isUrbanPlanner &&  !isJustBeenAddedADocument && <AddDocument handleAddDocument={handleAddDocument}/>}
-                        {isUrbanPlanner && isJustBeenAddedADocument && <FakeLink isJustBeenAddedADocument={isJustBeenAddedADocument} handleAddLink={handleAddLink}/>}*/}
-                        {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} handleBackActionForm={handleBackActionForm}/>}
+                        {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />}
                         {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
                         {isLoggedIn && <Button variant="primary" onClick={props.handleLogout}>Logout</Button>}
                     </div>

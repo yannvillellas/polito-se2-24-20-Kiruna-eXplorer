@@ -8,7 +8,6 @@ const listPositions = async () => {
             credentials: 'include'
         })
         .then(response => response.json())
-        .then(mapPositions);
         //console.log("le api ritornano: ",positions)
         return positions;
     }catch(err){
@@ -35,17 +34,7 @@ const addPosition = async (position) => {
     else return null;
 }
 
-function mapPositions(positions){
-    //console.log("map position riceve: ",positions)
-    return positions.map(position => {
-        return new Position (       //modifica messo return
-            position.posId,
-            position.docId,
-            position.latitude,
-            position.longitude
-        )        
-    })
-}
+
 
 
 const PositionAPI = {

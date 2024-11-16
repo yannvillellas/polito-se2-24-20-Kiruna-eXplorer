@@ -197,8 +197,8 @@ app.get('/api/associations/:docId',[], async(req, res) => {
 });
 
 app.post('/api/associations', isUrbanPlanner, isValidType,[
-    check('doc1').notEmpty().isString(),
-    check('doc2').notEmpty().isString(),
+    check('doc1').notEmpty().isNumeric(),
+    check('doc2').notEmpty().isNumeric(),
     check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare
   ], async (req, res) => {
     console.log("sono in server.mjs: mi è arrivato",req.body)

@@ -2,10 +2,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
-import AddDocument from "../addDocument/AddDocument";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "../link/Link"
 import DocumentAPI from "../../api/documentAPI";
+import AddDocument from "../AddDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
 
 
 
@@ -16,13 +16,13 @@ function UnifiedForms(props) {
     const [showModalAdd, setShowModalAdd] = useState(false);
 
     const [newDocument, setNewDocument] = useState({
-        id: null,
+        docId: null,
         title: "",
         stakeholders: "",
         scale: "",
         issuanceDate: "",
         type: "",
-        connections: "",
+        connections: 0,
         language: "",
         pages: 0,
         description: "",
@@ -33,16 +33,18 @@ function UnifiedForms(props) {
     const [closeConfirmation, setCloseConfirmation] = useState(false)
 
     const onBtnSelectAdd = () => setShowModalAdd(true);
+
+    // Controllato: è corretto
     const handleClose = () => {
-        console.log("bottone")
+        console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
         setNewDocument({
-            id: null,
+            docId: null,
             title: "",
             stakeholders: "",
             scale: "",
             issuanceDate: "",
             type: "",
-            connections: "",
+            connections: 0,
             language: "",
             pages: 0,
             description: "",
@@ -52,6 +54,13 @@ function UnifiedForms(props) {
         setIndex(0)
         setShowModalAdd(false);
         setCloseConfirmation(false);
+
+    }
+
+    const handleAddDocumentToModal = (document) => {
+        setNewDocument(document);
+        // L'aggiutna del documento al database la si può fare alla fine, quando si preme il pulsante "salva"
+        console.log("Sono in UnifiedForms, ho aggiunto il documento al modal:", document);
     }
 
     const handleNext = () => {
@@ -60,19 +69,17 @@ function UnifiedForms(props) {
 
     const handlePrev = async () => {
         setIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
-        console.log("elimino: ", newDocument.id)
-        await DocumentAPI.deleteDocument(newDocument.id);
-        props.handleBackActionForm(newDocument.id);
-        //console.log(newDocument)
+        
     };
 
     const handleSelect = (selectedIndex) => {
         setIndex(selectedIndex);
     }
 
-    const confirmClose = ()=>{
+    const confirmClose =  ()=>{
         if(index==1){
             setCloseConfirmation(true);
+    
         }else{
             handleClose();
         }
@@ -94,11 +101,11 @@ function UnifiedForms(props) {
                 </Modal.Header>
                 <Modal.Body>
                     <Carousel activeIndex={index} onSelect={handleSelect} controls={false} indicators={false} interval={null}>
-                        <Carousel.Item>
-                            <AddDocument handleAddDocument={props.handleAddDocument} handleNext={handleNext} newDocument={newDocument} setNewDocument={setNewDocument} handleClose={handleClose}/>
+                        <Carousel.Item> {/* passing newDocument is essential for abilitating the button previous (permits to save the state)*/}
+                            <AddDocument handleAddDocumentToModal={handleAddDocumentToModal} handleNext={handleNext} newDocument={newDocument} handleClose={handleClose}/>
                         </Carousel.Item>
                         <Carousel.Item>
-                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} docId={newDocument.id} title={newDocument.title} confirmClose={confirmClose}></Link>
+                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose}  newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} confirmClose={confirmClose} handleAddDocument={props.handleAddDocument}></Link>
                         </Carousel.Item>
                     </Carousel>
 
@@ -133,7 +140,10 @@ function UnifiedForms(props) {
                     <Button variant="secondary" onClick={()=>setCloseConfirmation(false)}>
                         Annulla
                     </Button>
-                    <Button variant="primary" onClick={()=>handleClose()}>
+                    <Button variant="primary" onClick={()=>{
+                        handleClose()
+                        props.handleAddDocument(newDocument)
+                        }}>
                         Sì, chiudi
                     </Button>
                 </Modal.Footer>
