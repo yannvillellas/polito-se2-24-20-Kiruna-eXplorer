@@ -16,15 +16,10 @@ L.Icon.Default.mergeOptions({
 
 
 function Map(props) {
-  const [showModalAdd, setShowModalAdd] = useState(false);
-  const [showModalLink, setShowModalLink] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
  
-
-
   const [documents, setDocuments] = useState([]);
-
 
   // So that sync with the parent component
   useEffect(() => {
@@ -34,11 +29,6 @@ function Map(props) {
     }
   }, [props.documents]);
 
-
-  const handleClose = () => {
-    setShowModalAdd(false);
-    setShowModalLink(false);
-  };
 
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
@@ -68,6 +58,10 @@ function Map(props) {
         />
         {Object.keys(groupedDocuments).map((key, index) => {
           const [lat, lng] = key.split(',').map(Number);
+          if (isNaN(lat) || isNaN(lng)) {
+            console.error(`Invalid coordinates for key ${key}: (${lat}, ${lng})`);
+            return null;
+          }
           const docs = groupedDocuments[key];
           return (
             <Marker
@@ -89,7 +83,7 @@ function Map(props) {
               groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.length > 1 ? (
                 <Select
                   options={groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.map((doc) => ({
-                    value: doc.id,
+                    value: doc.docId,
                     label: doc.title,
                   }))}
                   styles={{ menu: (provided) => ({ ...provided, width: "max-content" }) }}
@@ -101,7 +95,7 @@ function Map(props) {
                   required={true}
                   onChange={(selected) => {
                     const relatedDocs = groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`];
-                    setSelectedDoc(relatedDocs.find((doc) => doc.id === selected.value));
+                    setSelectedDoc(relatedDocs.find((doc) => doc.docId === selected.value));
                   }}
                 />
               ) : (
