@@ -10,7 +10,9 @@ import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDA
 import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
-import { isUrbanPlanner,isValidType} from './middleware.mjs';
+import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
+import fileUpload from 'express-fileupload' 
+import path from 'path'
 
 
 const app = express();
@@ -18,6 +20,8 @@ const PORT = 3001;
 
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use(fileUpload());
 
 const corsOptions = {
     origin: 'http://localhost:5173',
@@ -253,6 +257,64 @@ app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
         res.status(500).json({ error: 'Error updating the association' });
     }
 });
+
+
+app.post("/api/upload/:docId", (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send("No file uploaded.");
+    }
+
+    const files = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
+
+    files.forEach((file) => {
+        // choose the subfolder based on the document associated with the file
+        let subfolder = `${req.params.docId}`;
+
+        const uploadPath = path.join(__dirname, "uploads", subfolder);
+        createFolder(uploadPath);
+
+        //save the file in the choosen subfolder
+        const filePath = path.join(uploadPath, file.name);
+        file.mv(filePath, (err) => {
+            if (err) {
+                console.error("Error during file saving:", err);
+                return res.status(500).send("Error during file upload.");
+            }
+        });
+    });
+
+    res.send("Files uploaded succesfully!");
+});
+
+app.get("/files/:docId", (req, res) => {
+    const { subfolder } = req.params;
+    const uploadDir = path.join(__dirname, "uploads");
+
+    // Ottiene la lista delle sottocartelle presenti nella cartella uploads
+    const availableFolders = fs.readdirSync(uploadDir).filter((item) => {
+        const itemPath = path.join(uploadDir, item);
+        return fs.statSync(itemPath).isDirectory();
+    });
+
+    // Verifica che la sottocartella richiesta esista
+    if (!availableFolders.includes(subfolder)) {
+        return res.status(400).send("Sottocartella non valida o non trovata.");
+    }
+
+    const folderPath = path.join(uploadDir, subfolder);
+
+    // Legge i file nella sottocartella specificata
+    const files = fs.readdirSync(folderPath).map((file) => ({
+        name: file,
+        path: `/uploads/${subfolder}/${file}`,
+    }));
+
+    res.json(files);
+});
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
 //if (require.main === module) {

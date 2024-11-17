@@ -86,8 +86,24 @@ function AddDocument(props) {
 
     const [showModalAdd, setShowModalAdd] = useState(false);
 
+    const [selectedFiles, setSelectedFiles] = useState([]);
+
 
     const handleClose = () => setShowModalAdd(false);
+
+    const handleUpload = async () => {
+        const formData = new FormData();
+        Array.from(selectedFiles).forEach((file) => {
+          formData.append("files", file);
+        });
+    
+        try {
+          await DocumentAPI.addFiles(formData)
+        } catch (error) {
+          console.error("Errore:", error);
+          alert("Errore durante il caricamento dei file.");
+        }
+      };
 
     const handleSaveDocument = (e) => {
         e.preventDefault();

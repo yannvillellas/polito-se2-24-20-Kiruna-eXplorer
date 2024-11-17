@@ -21,3 +21,10 @@ export const isValidType = async (req, res, next) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Middleware to create subfolfder that doesn't exist
+export const createFolder = (folderPath) => {
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
+};
