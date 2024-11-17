@@ -1,7 +1,7 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
-import { Container, Link, Modal} from "react-bootstrap";
+import { Container, Modal} from "react-bootstrap";
 import Select from "react-select";
 
 import 'leaflet/dist/leaflet.css';
@@ -61,10 +61,6 @@ function Map(props) {
   return (
     
     <Container fluid>
-      {documents.length > 1 &&
-        <Link documents={documents} showModalLink={showModalLink} handleClose={handleClose} />
-      }
-
       <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
