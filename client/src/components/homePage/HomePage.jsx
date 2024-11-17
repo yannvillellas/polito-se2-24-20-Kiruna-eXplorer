@@ -115,23 +115,21 @@ function HomePage(props) {
 
     return (
         <Container fluid>
-            <Row>
+            <Row className="my-2">
                 <Col className="d-flex justify-content-between align-items-center">
 
                     <h1 className="text-dark">Welcome to Kiruna</h1>
                     <div className="d-flex">
                         {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />}
-                        {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
-                        {isLoggedIn && <Button variant="primary" onClick={props.handleLogout}>Logout</Button>}
+                        {!isLoggedIn && <Button className="ms-2" variant="primary" onClick={() => navigate('/login')}>Login</Button>}
+                        {isLoggedIn && <Button className="ms-2" variant="primary" onClick={props.handleLogout}>Logout</Button>}
                     </div>
 
                 </Col>
             </Row>
 
             <Row>
-                <Col>
-                    <Map documents={documents} />
-                </Col>
+                <Map documents={documents}/>
             </Row>
 
             <Row>
