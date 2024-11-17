@@ -52,7 +52,7 @@ function Map(props) {
   }, {});
 
 
-  const handleModifyPosition = () => {
+  const handleModifyPosition = async () => {
     if(manualLat === null || manualLong === null){
       alert("Latitude and longitude must be filled and should be numbers");
       return;
@@ -61,7 +61,7 @@ function Map(props) {
         return;
     }
     console.log("Modify position to ", manualLat, manualLong);
-    props.handleModifyPosition(selectedDoc.docId, manualLat, manualLong);
+    await props.handleModifyPosition(selectedDoc.docId, manualLat, manualLong);
     setIsPositionToModify(false);
   };
 
