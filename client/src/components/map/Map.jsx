@@ -99,6 +99,7 @@ function Map(props) {
                     value: doc.id,
                     label: doc.title,
                   }))}
+                  styles={{ menu: (provided) => ({ ...provided, width: "max-content" }) }}
                   isClearable
                   defaultValue={{
                     value: selectedDoc.id,
