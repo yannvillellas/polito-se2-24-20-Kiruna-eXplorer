@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from "react-router-dom";
-import HomePage from "./components/HomePage/HomePage";
+import HomePage from "./components/homePage/HomePage";
 import PageNotFound from "./components/pageNotFound/PageNotFound";
 import Map from "./components/map/Map";
 import Login from "./components/login/Login";
 import Link from "./components/link/Link";
 import AuthAPI from "./api/authAPI";
+
+import SearchDocuments from "./components/searchDocuments/SearchDocuments";
+
 
 import "./App.css";
 import DocList from "./components/DocumentList/DocList";
@@ -105,6 +108,8 @@ function App() {
         }
       />
       <Route path="/DocumentList" element={<DocList />} />
+      <Route path="/search" element={<SearchDocuments />} />
+
 
       {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
     </Routes>
