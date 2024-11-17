@@ -1,7 +1,7 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
-import { Container, Modal} from "react-bootstrap";
+import { Container, Modal, Button, Form} from "react-bootstrap";
 import Select from "react-select";
 
 import 'leaflet/dist/leaflet.css';
@@ -18,8 +18,11 @@ L.Icon.Default.mergeOptions({
 function Map(props) {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
- 
   const [documents, setDocuments] = useState([]);
+
+  const [isPositionToModify, setIsPositionToModify] = useState(false);
+  const [manualLat, setManualLat] = useState(null);
+  const [manualLong, setManualLong] = useState(null);
 
   // So that sync with the parent component
   useEffect(() => {
@@ -48,6 +51,21 @@ function Map(props) {
     return acc;
   }, {});
 
+
+  const handleModifyPosition = () => {
+    if(manualLat === null || manualLong === null){
+      alert("Latitude and longitude must be filled and should be numbers");
+      return;
+    } else if(manualLat < -90 || manualLat > 90 || manualLong < -180 || manualLong > 180){
+        alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
+        return;
+    }
+    console.log("Modify position to ", manualLat, manualLong);
+    props.handleModifyPosition(selectedDoc.docId, manualLat, manualLong);
+    setIsPositionToModify(false);
+  };
+
+
   return (
     
     <Container fluid>
@@ -59,7 +77,7 @@ function Map(props) {
         {Object.keys(groupedDocuments).map((key, index) => {
           const [lat, lng] = key.split(',').map(Number);
           if (isNaN(lat) || isNaN(lng)) {
-            console.error(`Invalid coordinates for key ${key}: (${lat}, ${lng})`);
+            // console.error(`Invalid coordinates for key ${key}: (${lat}, ${lng})`);
             return null;
           }
           const docs = groupedDocuments[key];
@@ -87,7 +105,6 @@ function Map(props) {
                     label: doc.title,
                   }))}
                   styles={{ menu: (provided) => ({ ...provided, width: "max-content" }) }}
-                  isClearable
                   defaultValue={{
                     value: selectedDoc.id,
                     label: selectedDoc.title,
@@ -109,14 +126,53 @@ function Map(props) {
         <Modal.Body>
           {selectedDoc ? (
             <>
-              {Object.entries(selectedDoc).filter(([key]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+              {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
                 <p key={key}>
                   <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                 </p>
               ))}
-              <p key="position">
-                <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
-              </p>
+              <div key={"position"}>
+                <p>
+                  <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
+                </p>
+                  <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
+                    Modify position
+                  </Button>
+
+                  {isPositionToModify && 
+                    <Form.Group>
+                      <Form.Group className="mb-3">
+                          <Form.Label>Latitude</Form.Label>
+                          <Form.Control 
+                              type="number" 
+                              placeholder="Enter latitude" 
+                              step="0.000001" 
+                              required={true}
+                              onChange={(e) => setManualLat(parseFloat(e.target.value))}
+                          />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                          <Form.Label>Longitude</Form.Label>
+                          <Form.Control 
+                              type="number" 
+                              placeholder="Enter longitude" 
+                              step="0.000001" 
+                              required={true}
+                              onChange={(e) => setManualLong(parseFloat(e.target.value))}
+                          />
+                      </Form.Group>
+
+                      <Button variant="primary" onClick={handleModifyPosition} >
+                          Submit
+                      </Button>
+                      <Button variant="primary" onClick={() => setIsPositionToModify(false)}> 
+                        Cancel
+                      </Button>
+                    </Form.Group>
+                  
+                  }
+              </div>
             </>
           ) : (
             <p>Seleziona un marker per visualizzare i dettagli.</p>

@@ -110,6 +110,27 @@ function HomePage(props) {
 
     }
 
+    const handleModifyPosition = async (docId, lat, lng) => {
+        try {
+            console.log("Sono in HomePage.jsx, sto modificando la posizione del documento con id: ", docId, " in lat: ", lat, " e lng: ", lng);
+            await PositionAPI.modifyPosition(docId, lat, lng);
+
+            const updatedDocuments = documents.map(document => {
+                if (document.docId === docId) {
+                    return {
+                        ...document,
+                        lat: lat,
+                        lng: lng,
+                    };
+                }
+                return document;
+            });
+            setDocuments(updatedDocuments);
+
+        } catch (error) {
+            console.error("Error modifying position:", error);
+        }
+    }
 
 
 
@@ -129,7 +150,7 @@ function HomePage(props) {
             </Row>
 
             <Row>
-                <Map documents={documents}/>
+                <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
             </Row>
 
             <Row>
