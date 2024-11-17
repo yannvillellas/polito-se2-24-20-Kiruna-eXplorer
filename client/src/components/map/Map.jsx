@@ -24,7 +24,6 @@ function Map(props) {
   const [showModalLink, setShowModalLink] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const [selectedOption, setSelectedOption] = useState(null);
 
   const [isAllMunicipality, setIsAllMunicipality] = useState(false);
   const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === "urbanPlanner" ? true : false);
@@ -50,17 +49,9 @@ function Map(props) {
   };
 
   const handleMarkerClick = (docs) => {
-    if (docs.length == 1) {
-      setSelectedDoc(docs[0]);
-      setShowDocumentModal(true);
-    }
-
-  };
-
-  const handleChoiceClick = (doc) => {
-    setSelectedDoc(doc);
+    setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
-  }
+  };
 
   const groupedDocuments = documents.reduce((acc, doc) => {
     const key = `${doc.lat},${doc.lng}`;
@@ -93,27 +84,6 @@ function Map(props) {
                 click: () => handleMarkerClick(docs)
               }}
             >
-              {docs.length > 1 && (
-                <Popup>
-                  <strong>Choose document to open at this location:</strong>
-                  <Select
-                    options={
-                      docs.map((doc) => ({
-                        value: doc.id,
-                        label: doc.title,
-                      }))
-                    }
-                    isClearable
-                    defaultMenuIsOpen
-                    defaultValue={{ value: docs[0].id, label: docs[0].title }}
-                    required={true}
-                    onChange={(selected) => {
-                      setSelectedOption(docs.find((doc) => doc.id === selected.value));
-                    }}
-                  />
-                  <Button variant="primary" onClick={() => handleChoiceClick(selectedOption)}>Submit</Button>
-                </Popup>
-              )}
             </Marker>
           );
         })}
@@ -121,7 +91,32 @@ function Map(props) {
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>
-          <Modal.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Modal.Title>
+          <Modal.Title>
+            {selectedDoc ? (
+              groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.length > 1 ? (
+                <Select
+                  options={groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.map((doc) => ({
+                    value: doc.id,
+                    label: doc.title,
+                  }))}
+                  isClearable
+                  defaultValue={{
+                    value: selectedDoc.id,
+                    label: selectedDoc.title,
+                  }}
+                  required={true}
+                  onChange={(selected) => {
+                    const relatedDocs = groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`];
+                    setSelectedDoc(relatedDocs.find((doc) => doc.id === selected.value));
+                  }}
+                />
+              ) : (
+                <span>{selectedDoc.title}</span>
+              )
+            ) : (
+              <p>Seleziona un marker per visualizzare i dettagli.</p>
+            )}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedDoc ? (
