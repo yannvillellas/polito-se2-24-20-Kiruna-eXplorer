@@ -5,6 +5,7 @@ import PageNotFound from './components/pageNotFound/PageNotFound';
 import Map from './components/map/Map';
 import Login from './components/login/Login';
 import Link from './components/link/Link';
+import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 
 import './App.css';

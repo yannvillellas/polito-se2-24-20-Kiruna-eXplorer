@@ -1,0 +1,165 @@
+.container {
+    background-color: #5F78A1;
+    height: 80px;
+    width: 100%;
+}
+
+nav {
+    backdrop-filter: blur(30px);
+    box-shadow: 0px 0px 30px rgba(227, 228, 237, 0.37);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    color: white;
+    font-size: 35px;
+    line-height: 80px;
+    padding: 0 20px;
+    font-weight: bold;
+}
+
+nav ul {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+nav ul li {
+    line-height: 80px;
+    margin: 0 5px;
+}
+
+nav ul li a {
+    color: white;
+    font-size: 17px;
+    padding: 7px 13px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.active, a:hover {
+    background: #1B9BFF;
+    transition: 0.5s;
+}
+
+.checkbtn {
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    display: none;
+}
+
+#check {
+    display: none;
+}
+
+.main {
+    background-image: url("background.jpg");
+    width: 100%;
+    height: 89vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Media query per schermi medi */
+@media (max-width: 950px) {
+    .logo {
+        font-size: 30px;
+    }
+
+    nav ul li a {
+        font-size: 16px;
+    }
+}
+
+/* Media query per schermi piccoli - Layout a colonna */
+@media (max-width: 650px) {
+    .container {
+        height: auto;
+        padding: 10px 0;
+    }
+
+    nav {
+        flex-direction: column;
+        padding: 10px 0;
+    }
+
+    .logo {
+        font-size: 30px;
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    .checkbtn {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+    }
+
+    ul {
+        position: static;
+        width: 100%;
+        height: auto;
+        background: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 0;
+        transition: none;
+    }
+
+    nav ul li {
+        display: block;
+        line-height: normal;
+        margin: 5px 0;
+    }
+
+    nav ul li a {
+        font-size: 18px;
+        padding: 10px;
+    }
+
+    button {
+        width: 100%;
+        margin: 15px 0;
+    }
+
+    #check:checked ~ ul {
+        display: flex;
+    }
+}
+
+/* Pulsante */
+button {
+    width: 150px;
+    height: 60px;
+    border: 3px solid #315cfd;
+    border-radius: 45px;
+    transition: all 0.3s;
+    cursor: pointer;
+    background: white;
+    font-size: 1.2em;
+    font-weight: 550;
+    font-family: 'Montserrat', sans-serif;
+}
+
+button:hover {
+    background: #315cfd;
+    color: white;
+    font-size: 1.5em;
+}
+
+/* Pulsante responsivo per schermi molto piccoli */
+@media (max-width: 450px) {
+    button {
+        width: 120px;
+        height: 50px;
+        font-size: 1em;
+    }
+}
