@@ -1,8 +1,7 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { Container, Modal} from "react-bootstrap";
+import { Container, Link, Modal} from "react-bootstrap";
 import Select from "react-select";
 
 import 'leaflet/dist/leaflet.css';
