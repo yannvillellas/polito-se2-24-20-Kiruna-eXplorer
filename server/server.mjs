@@ -68,6 +68,8 @@ app.use(session({
 
 app.use(passport.authenticate('session'));
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 //authAPI

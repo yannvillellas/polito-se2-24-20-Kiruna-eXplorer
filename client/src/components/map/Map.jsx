@@ -62,10 +62,18 @@ function Map(props) {
     }
     
   }
-/*
-  const handleDownload = async (docId, file) => {
-    console.log("visualizzato")
-  }*/
+
+  const handleDownload = (file) => {
+    const URL=`http://localhost:3001/${file.path.slice(1)}`
+    console.log(URL)
+    
+    const aTag = document.createElement("a");
+    aTag.href=URL
+    aTag.setAttribute("download",file.name)
+    document.body.appendChild(aTag)
+    aTag.click();
+    aTag.remove();
+  }
 
 
 
@@ -124,7 +132,7 @@ function Map(props) {
                   {/*console.log("questo è losato files:",files)*/}
                   {files ? files.map(f => {
                     return (<>
-                      <Button><i className="bi bi-file-earmark-text-fill"></i></Button>
+                      <Button onClick={()=>handleDownload(f)}><i className="bi bi-file-earmark-text-fill"></i></Button>
                       <p>{f.name}</p>
                     </>)
                   }) : ""}
