@@ -6,6 +6,7 @@ import Select from "react-select";
 import AddOriginalSource from "../addOriginalSource/AddOriginalSource"
 
 import ChosenPosition from "../chosenPosition/ChosenPosition";
+import AddOriginalSource from "../addOriginalSource/AddOriginalSource";
 /**BUGS: 
  *  
  *  Line 137: The date there are no restriction on only year (has to be fixed by Yann)
@@ -31,12 +32,18 @@ function AddDocument(props) {
         description: "",
         lat: null,
         lng: null,
+        files: [],
     });
 
 
 
     const handleSetPostition = (lat, lng) => {
         setNewDocument({ ...newDocument, lat: lat, lng: lng });
+    };
+
+    const handleAddedFiles = (files) => {
+        setNewDocument({ ...newDocument, files: files });
+        console.log("Files in AddDocument.jsx:", files);
     };
 
 
@@ -91,11 +98,6 @@ function AddDocument(props) {
 
 
     const handleClose = () => setShowModalAdd(false);
-
-    const handleAddedFiles = (files) => {
-        setNewDocument({ ...newDocument, files: files });
-        console.log("Files in AddDocument.jsx:", files);
-    };
 
 
     const handleSaveDocument = (e) => {
@@ -287,7 +289,7 @@ function AddDocument(props) {
                         <ChosenPosition
                             handleSetPostition={handleSetPostition}
                         />
-
+                        
                         <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
                     </Col>
