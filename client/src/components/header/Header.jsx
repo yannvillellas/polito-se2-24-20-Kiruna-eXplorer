@@ -16,7 +16,7 @@ function Header(props) {
 
         <ul>
             <li><Link to="/map" >Map</Link></li>
-            {props.isUrbanPlanner && <li><Link to="/documents">Documents</Link></li>}
+            {/* {props.isUrbanPlanner && <li><Link to="/documents">Documents</Link></li>} */}
             {props.loggedIn ?   <Button onClick={props.handleLogout}>Logout</Button>:
                                 <Button onClick={()=>{navigate('/login')}}>Login</Button>}
         </ul>

@@ -1,22 +1,25 @@
+//import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect } from 'react';
-import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import HomePage from './components/HomePage/HomePage';
+import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
 import Map from './components/map/Map';
 import Login from './components/login/Login';
+import Link from './components/link/Link';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 
 import './App.css';
 
 function App() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`
     const [authChecked, setAuthChecked] = useState(false);
-    const [loggedIn, setLoggedIn] = useState(false);
-    const [isUrbanPlanner, setIsUrbanPlanner] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);    const [isUrbanPlanner, setIsUrbanPlanner] = useState(false);
+
     const navigate = useNavigate();
 
-    // Check authentication
+
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -56,11 +59,16 @@ function App() {
 
     const handleLogout = async () => {
         try {
-            const response = await AuthAPI.logOut();
-            if (response) {
-                setLoggedIn(false);
-                setUser(null);
-                setIsUrbanPlanner(false);
+            if (loggedIn) {
+                const response = await AuthAPI.logOut();
+                if (response) {
+                    setLoggedIn(false);
+                    setUser(null);  
+                    setIsUrbanPlanner(false);
+
+                    navigate('/login');
+                }
+            } else {
                 navigate('/login');
             }
         } catch (err) {
@@ -88,7 +96,7 @@ function App() {
                 }
             >
                 {/* Routes */}
-                <Route path="/" element={<Navigate replace to={loggedIn ? '/map' : '/login'} />} />
+                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/login'} />} />
                 <Route
                     path="/homePage"
                     element={
@@ -109,6 +117,8 @@ function App() {
                 />
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
+                <Route path='/homePage' element={loggedIn ? <HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/> : <PageNotFound/> }/>
+                {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
             </Route>
         </Routes>
     );

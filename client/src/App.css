@@ -1,12 +1,15 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
-  }
-  
-  :root {
-    --primary-color: #ffffff;
-    --second-color: #d0d0d0;
-    --black-color: #000000;
-  }
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+:root {
+  --primary-color: #ffffff;
+  --second-color: #d0d0d0;
+  --black-color: #000000;
+}
