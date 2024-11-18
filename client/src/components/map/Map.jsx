@@ -55,7 +55,12 @@ function Map(props) {
     console.log("prendo i file di: ", docId)
     const files = await DocumentAPI.getFiles(docId);
     console.log("ricevo: ", files)
-    setFiles(Array.from(files))
+    if(files){
+      setFiles(Array.from(files))
+    }else{
+      setFiles()
+    }
+    
   }
 /*
   const handleDownload = async (docId, file) => {
