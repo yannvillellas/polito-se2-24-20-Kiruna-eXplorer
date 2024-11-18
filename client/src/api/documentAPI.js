@@ -9,7 +9,7 @@ const listDocuments = async () => {
         })
 
         .then(response => response.json())
-        console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
+        //console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
         //console.log("le api tornano: ", documents)
 
         return documents;
@@ -93,6 +93,7 @@ const getFiles = async(docId) =>{
         })
         if(response.ok){
             const filesJson = await response.json();
+            console.log("le api sono ok")
             return filesJson;
         }else{
             throw new Error('Error loading files');
@@ -101,7 +102,7 @@ const getFiles = async(docId) =>{
         console.log(err);
     }
 }
-
+/*
 const downloadFile = async(docId, fileName)=>{
     try {
         const response = await fetch(`http://localhost:3001/api/download/${docId}/${file.name}`, {
@@ -117,7 +118,7 @@ const downloadFile = async(docId, fileName)=>{
     } catch (err) {
         console.log(err);
     }
-}
+}*/
 
 
 

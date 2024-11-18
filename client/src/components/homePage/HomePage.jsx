@@ -40,11 +40,11 @@ function HomePage(props) {
         const fetchDocuments = async () => {
             try {
                 const documents = await DocumentAPI.listDocuments();
-                console.log("Sono in HomePage.jsx, ho ricevuto dal db i documenti: ",documents);
+                //console.log("Sono in HomePage.jsx, ho ricevuto dal db i documenti: ",documents);
 
                 
                 const positions = await PositionAPI.listPositions();
-                console.log("Sono in HomePage.jsx, ho ricevuto dal db le posizioni: ",positions);
+                //console.log("Sono in HomePage.jsx, ho ricevuto dal db le posizioni: ",positions);
                 
                 documents.forEach(document => {
                     const position = positions.find(position => position.docId === document.docId);
@@ -57,7 +57,7 @@ function HomePage(props) {
                 });
 
 
-                console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents[0].lat, documents[0].lng);
+                //console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents[0].lat, documents[0].lng);
                 setDocuments(documents);
                 
                 
@@ -97,14 +97,14 @@ function HomePage(props) {
                 lat: document.lat,
                 lng: document.lng,
             };
-            console.log("Sono in HomePage.jsx, sto mandando la posizione del documento al db:", position);
+            //console.log("Sono in HomePage.jsx, sto mandando la posizione del documento al db:", position);
             await PositionAPI.addPosition(position);
 
             // Here i check if there are files to upload (and so i not create folders if there are no files)
-            if(document.files && document.files.length > 0){
+            /*if(document.files && document.files.length > 0){
                 // await handleUpload(docId, document.files);
                 console.log("HomePage.jsx, i uploaded the document.files: (now handleUpload is comemnted)", document.files);
-            }
+            }*/
             
             const stateDocument={
                 docId: docId,
@@ -119,19 +119,20 @@ function HomePage(props) {
                 description: document.description,
                 lat: document.lat,
                 lng: document.lng,
-                files:document.files
+                //files:document.files
 
             }
             console.log("Sono in HomePage.jsx, sto mandando il documento allo stato:", stateDocument);
             setDocuments([...documents, stateDocument]);
 
             // adding files to the document
-            if(stateDocument.files){
-                console.log("chiamo l'upload di:",stateDocument)
-                handleUpload(stateDocument);
+            if(document.files){
+                console.log(docId)
+                console.log("chiamo l'upload di:",{...document,docId:docId })
+                handleUpload({...document, docId:docId});
             }
             
-            console.log("Sono in HomePage.jsx, restituisco a Link.jsx, il docId: ", docId);
+            //console.log("Sono in HomePage.jsx, restituisco a Link.jsx, il docId: ", docId);
             return docId;
 
           } catch (error) {

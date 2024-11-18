@@ -32,7 +32,7 @@ function Map(props) {
   // So that sync with the parent component
   useEffect(() => {
     if (props.documents) {
-      console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
+      //console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
       setDocuments(props.documents);
     }
   }, [props.documents]);
@@ -42,11 +42,12 @@ function Map(props) {
     setShowOffcanvas(false);
   };
 
-  const handleMarkerClick = (doc) => {
+  const handleMarkerClick = async (doc) => {
+    console.log(doc)
     setSelectedDoc(doc);
     setShowOffcanvas(true); // Apri OffCanvas
 
-    handleGetFiles(doc.docId)
+    await handleGetFiles(doc.docId)
 
   };
 
@@ -54,35 +55,12 @@ function Map(props) {
     console.log("prendo i file di: ", docId)
     const files = await DocumentAPI.getFiles(docId);
     console.log("ricevo: ", files)
-    setFiles(files)
+    setFiles(Array.from(files))
   }
-
+/*
   const handleDownload = async (docId, file) => {
-    try {
-      const response = await fetch(file.path, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/octet-stream",
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Errore durante il download del file");
-      }
-  
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", file.name || "download");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Errore:", error);
-    }
-  }
+    console.log("visualizzato")
+  }*/
 
 
 
@@ -105,7 +83,7 @@ function Map(props) {
                       key={doc.docId}
                       position={[doc.lat, doc.lng]}
                       eventHandlers={{
-                        click: () => handleMarkerClick(doc),
+                        click: async() => {await handleMarkerClick(doc)},
                       }}
                     />
                   );
@@ -138,10 +116,10 @@ function Map(props) {
                   <p key="position">
                     <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
                   </p>
-                  {console.log(files)}
+                  {/*console.log("questo è losato files:",files)*/}
                   {files ? files.map(f => {
                     return (<>
-                      <Button onClick={() => handleDownload(selectedDoc.docId, f)}><i class="bi bi-file-earmark-text-fill"></i></Button>
+                      <Button><i className="bi bi-file-earmark-text-fill"></i></Button>
                       <p>{f.name}</p>
                     </>)
                   }) : ""}

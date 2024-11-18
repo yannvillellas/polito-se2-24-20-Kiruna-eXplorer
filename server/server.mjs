@@ -326,7 +326,7 @@ app.get("/api/files/:docId", (req, res) => {
 });
 
 //get files to download it
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+/*app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("api/download/:docId/:filename", (req, res) => {
     const filename = req.params.filename;
     const docId=req.params.docId
@@ -338,7 +338,7 @@ app.get("api/download/:docId/:filename", (req, res) => {
         res.status(500).send("Errore durante il download del file");
       }
     });
-  });
+  });*/
 
 
 
