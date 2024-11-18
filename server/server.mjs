@@ -327,21 +327,6 @@ app.get("/api/files/:docId", (req, res) => {
     res.json(files);
 });
 
-//get files to download it
-/*app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.get("api/download/:docId/:filename", (req, res) => {
-    const filename = req.params.filename;
-    const docId=req.params.docId
-    const filePath = path.join(__dirname, "uploads",docId, filename);
-    
-    res.download(filePath, filename, (err) => {
-      if (err) {
-        console.error("Errore durante il download:", err);
-        res.status(500).send("Errore durante il download del file");
-      }
-    });
-  });*/
-
 
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
