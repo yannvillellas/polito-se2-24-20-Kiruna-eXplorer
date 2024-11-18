@@ -66,6 +66,21 @@ function HomePage(props) {
     }, []);
     
 
+    const handleUpload = async (document) => {
+        const formData = new FormData();
+        Array.from(document.files).forEach((file) => {
+          formData.append("files", file);
+        });
+    
+        try {
+            console.log("in homepage passo all'api: "+document.docId);
+            console.log(formData)
+          await DocumentAPI.addFiles(document.docId,formData)
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error uploading file.");
+        }
+    };
 
     const handleAddDocument = async (document) => {
 
@@ -96,9 +111,16 @@ function HomePage(props) {
                 description: document.description,
                 lat: document.lat,
                 lng: document.lng,
+                files:document.files
             }
             console.log("Sono in HomePage.jsx, sto mandando il documento allo stato:", stateDocument);
             setDocuments([...documents, stateDocument]);
+
+            // adding files to the document
+            if(stateDocument.files){
+                console.log("chiamo l'upload di:",stateDocument)
+                handleUpload(stateDocument);
+            }
             
             console.log("Sono in HomePage.jsx, restituisco a Link.jsx, il docId: ", docId);
             return docId;
@@ -109,7 +131,6 @@ function HomePage(props) {
         }
 
     }
-
 
 
 

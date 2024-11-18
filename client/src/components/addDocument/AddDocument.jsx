@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 import Select from "react-select";
+import AddOriginalSource from "../addOriginalSource/AddOriginalSource"
 
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 /**BUGS: 
@@ -86,24 +87,16 @@ function AddDocument(props) {
 
     const [showModalAdd, setShowModalAdd] = useState(false);
 
-    const [selectedFiles, setSelectedFiles] = useState([]);
+    //const [selectedFiles, setSelectedFiles] = useState([]);
 
 
     const handleClose = () => setShowModalAdd(false);
 
-    const handleUpload = async () => {
-        const formData = new FormData();
-        Array.from(selectedFiles).forEach((file) => {
-          formData.append("files", file);
-        });
-    
-        try {
-          await DocumentAPI.addFiles(formData)
-        } catch (error) {
-          console.error("Errore:", error);
-          alert("Errore durante il caricamento dei file.");
-        }
-      };
+    const handleAddedFiles = (files) => {
+        setNewDocument({ ...newDocument, files: files });
+        console.log("Files in AddDocument.jsx:", files);
+    };
+
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
@@ -294,6 +287,8 @@ function AddDocument(props) {
                         <ChosenPosition
                             handleSetPostition={handleSetPostition}
                         />
+
+                        <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
                     </Col>
 

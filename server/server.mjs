@@ -11,8 +11,14 @@ import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
 import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
+
 import fileUpload from 'express-fileupload' 
-import path from 'path'
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 const app = express();
@@ -29,6 +35,7 @@ const corsOptions = {
     credentials: true
 };
 app.use(cors(corsOptions));
+
 
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
@@ -271,6 +278,7 @@ app.post("/api/upload/:docId", (req, res) => {
         let subfolder = `${req.params.docId}`;
 
         const uploadPath = path.join(__dirname, "uploads", subfolder);
+        console.log("uploadPath nel server: ",uploadPath)
         createFolder(uploadPath);
 
         //save the file in the choosen subfolder
@@ -286,33 +294,51 @@ app.post("/api/upload/:docId", (req, res) => {
     res.send("Files uploaded succesfully!");
 });
 
-app.get("/files/:docId", (req, res) => {
-    const { subfolder } = req.params;
+app.get("/api/files/:docId", (req, res) => {
+    const subfolder = req.params.docId;
     const uploadDir = path.join(__dirname, "uploads");
+    console.log(uploadDir)
 
     // Ottiene la lista delle sottocartelle presenti nella cartella uploads
     const availableFolders = fs.readdirSync(uploadDir).filter((item) => {
         const itemPath = path.join(uploadDir, item);
+        console.log(itemPath)
         return fs.statSync(itemPath).isDirectory();
     });
-
+    console.log("subfolder: ", subfolder)
+    console.log("cartella da cui prendere file: ",availableFolders)
     // Verifica che la sottocartella richiesta esista
     if (!availableFolders.includes(subfolder)) {
         return res.status(400).send("Sottocartella non valida o non trovata.");
     }
 
     const folderPath = path.join(uploadDir, subfolder);
+    console.log("cartella da dove prendo i file: ", folderPath)
 
     // Legge i file nella sottocartella specificata
     const files = fs.readdirSync(folderPath).map((file) => ({
         name: file,
         path: `/uploads/${subfolder}/${file}`,
     }));
+    console.log(files)
 
     res.json(files);
 });
 
+//get files to download it
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.get("api/download/:docId/:filename", (req, res) => {
+    const filename = req.params.filename;
+    const docId=req.params.docId
+    const filePath = path.join(__dirname, "uploads",docId, filename);
+    
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        console.error("Errore durante il download:", err);
+        res.status(500).send("Errore durante il download del file");
+      }
+    });
+  });
 
 
 

@@ -70,10 +70,11 @@ const deleteDocument = async (docId) => {
 
 const addFiles = async(docId, files) =>{
     try{
+       /* console.log(docId)
+        console.log(files);*/
         const response= await fetch(`http://localhost:3001/api/upload/${docId}`,{
             method:'POST',
             credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
             body: files,
         })
         if (!response.ok) throw new Error('Failed to upload files');
@@ -87,6 +88,23 @@ const addFiles = async(docId, files) =>{
 const getFiles = async(docId) =>{
     try {
         const response = await fetch(`http://localhost:3001/api/files/${docId}`, {
+            method: 'GET',
+            //credentials: 'include'
+        })
+        if(response.ok){
+            const filesJson = await response.json();
+            return filesJson;
+        }else{
+            throw new Error('Error loading files');
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+const downloadFile = async(docId, fileName)=>{
+    try {
+        const response = await fetch(`http://localhost:3001/api/download/${docId}/${file.name}`, {
             method: 'GET',
             //credentials: 'include'
         })

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 
+import DocumentAPI from "../../api/documentAPI";
+
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -18,10 +20,13 @@ L.Icon.Default.mergeOptions({
 function Map(props) {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
- 
+
 
 
   const [documents, setDocuments] = useState([]);
+
+  const [files, setFiles] = useState();
+  const navigate = useNavigate();
 
 
   // So that sync with the parent component
@@ -41,12 +46,46 @@ function Map(props) {
     setSelectedDoc(doc);
     setShowOffcanvas(true); // Apri OffCanvas
 
+    handleGetFiles(doc.docId)
+
   };
+
+  const handleGetFiles = async (docId) => {
+    console.log("prendo i file di: ", docId)
+    const files = await DocumentAPI.getFiles(docId);
+    console.log("ricevo: ", files)
+    setFiles(files)
+  }
+
+  const handleDownload = async (docId, file) => {
+    /*try {
+      const response = await fetch(file.path);
+      if (!response.ok) {
+        throw new Error("Errore durante il download del file");
+      }
+  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", file.name);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Errore:", error);
+    }*/
+    //window.location.href = `/download/${docId}/${file.name}`;
+    await fetch(`http://localhost:3001/api/download/${docId}/${file.name}`, {
+      method: 'GET',
+    })
+  }
 
 
 
   return (
-    
+
     <Container fluid>
       <Row>
         <Col>
@@ -55,23 +94,23 @@ function Map(props) {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
             />
-              {props.documents && props.documents.length > 0 && (
-                props.documents.map((doc) => {
-                  // Controlla se le coordinate sono valide
-                  if (doc.lat && doc.lng) {
-                    return (
-                      <Marker
-                        key={doc.docId}
-                        position={[doc.lat, doc.lng]}
-                        eventHandlers={{
-                          click: () => handleMarkerClick(doc),
-                        }}
-                      />
-                    );
-                  }
-                  return null; // Non renderizzare il marker se lat o lng sono invalidi
-                })
-              )}
+            {props.documents && props.documents.length > 0 && (
+              props.documents.map((doc) => {
+                // Controlla se le coordinate sono valide
+                if (doc.lat && doc.lng) {
+                  return (
+                    <Marker
+                      key={doc.docId}
+                      position={[doc.lat, doc.lng]}
+                      eventHandlers={{
+                        click: () => handleMarkerClick(doc),
+                      }}
+                    />
+                  );
+                }
+                return null; // Non renderizzare il marker se lat o lng sono invalidi
+              })
+            )}
 
           </MapContainer>
         </Col>
@@ -97,6 +136,13 @@ function Map(props) {
                   <p key="position">
                     <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
                   </p>
+                  {console.log(files)}
+                  {files ? files.map(f => {
+                    return (<>
+                      <Button onClick={() => handleDownload(selectedDoc.docId, f)}><i class="bi bi-file-earmark-text-fill"></i></Button>
+                      <p>{f.name}</p>
+                    </>)
+                  }) : ""}
                 </>
               ) : (
                 <p>Seleziona un marker per visualizzare i dettagli.</p>
