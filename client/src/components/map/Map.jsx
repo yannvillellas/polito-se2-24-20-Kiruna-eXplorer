@@ -58,8 +58,14 @@ function Map(props) {
   }
 
   const handleDownload = async (docId, file) => {
-    /*try {
-      const response = await fetch(file.path);
+    try {
+      const response = await fetch(file.path, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/octet-stream",
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Errore durante il download del file");
       }
@@ -68,18 +74,14 @@ function Map(props) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", file.name);
+      link.setAttribute("download", file.name || "download");
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Errore:", error);
-    }*/
-    //window.location.href = `/download/${docId}/${file.name}`;
-    await fetch(`http://localhost:3001/api/download/${docId}/${file.name}`, {
-      method: 'GET',
-    })
+    }
   }
 
 
@@ -128,7 +130,7 @@ function Map(props) {
             <Offcanvas.Body>
               {selectedDoc ? (
                 <>
-                  {Object.entries(selectedDoc).filter(([key, value]) => key != "id" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+                  {Object.entries(selectedDoc).filter(([key, value]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
                     <p key={key}>
                       <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                     </p>

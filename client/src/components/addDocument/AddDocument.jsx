@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 import Select from "react-select";
-import AddOriginalSource from "../addOriginalSource/AddOriginalSource"
 
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import AddOriginalSource from "../addOriginalSource/AddOriginalSource";
