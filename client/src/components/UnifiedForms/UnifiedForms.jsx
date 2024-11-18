@@ -28,6 +28,7 @@ function UnifiedForms(props) {
         description: "",
         lat: null,
         lng: null,
+        files: [],
     });
 
     const [closeConfirmation, setCloseConfirmation] = useState(false)
@@ -50,6 +51,7 @@ function UnifiedForms(props) {
             description: "",
             lat: null,
             lng: null,
+            files: [],
         });
         setIndex(0)
         setShowModalAdd(false);

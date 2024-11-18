@@ -52,7 +52,10 @@ function HomePage(props) {
                         document.lat = position.latitude;
                         document.lng = position.longitude;
                     }
+                    // for each get the files from the db---------------------------------------------------------------------------------------------------- <-----HERE
+                    // document.files = await DocumentAPI.getFiles(document.docId)
                 });
+
 
                 console.log("Sono in HomePage.jsx, i documenti con le posizioni sono: ",documents[0].lat, documents[0].lng);
                 setDocuments(documents);
@@ -65,6 +68,20 @@ function HomePage(props) {
         fetchDocuments();
     }, []);
     
+    /* Here is the function: */
+    const handleUpload = async (docId, selectedFiles) => {
+        const formData = new FormData();
+        Array.from(selectedFiles).forEach((file) => {
+          formData.append("files", file);
+        });
+    
+        try {
+          await DocumentAPI.addFiles(docId, formData)
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error during the file upload.");
+        }
+      };
 
 
     const handleAddDocument = async (document) => {
@@ -81,7 +98,12 @@ function HomePage(props) {
             };
             console.log("Sono in HomePage.jsx, sto mandando la posizione del documento al db:", position);
             await PositionAPI.addPosition(position);
-            
+
+            // Here i check if there are files to upload (and so i not create folders if there are no files)
+            if(document.files && document.files.length > 0){
+                // await handleUpload(docId, document.files);
+                console.log("HomePage.jsx, i uploaded the document.files: (now handleUpload is comemnted)", document.files);
+            }
             
             const stateDocument={
                 docId: docId,
@@ -96,6 +118,7 @@ function HomePage(props) {
                 description: document.description,
                 lat: document.lat,
                 lng: document.lng,
+                files: document.files,
             }
             console.log("Sono in HomePage.jsx, sto mandando il documento allo stato:", stateDocument);
             setDocuments([...documents, stateDocument]);
