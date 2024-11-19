@@ -32,6 +32,7 @@ function UnifiedForms(props) {
     });
 
     const [closeConfirmation, setCloseConfirmation] = useState(false)
+    const [onlyLinkForm, setOnlyLinkForm] = useState(false)
 
     const onBtnSelectAdd = () => setShowModalAdd(true);
 
@@ -87,6 +88,12 @@ function UnifiedForms(props) {
         }
     }
 
+    const showOnlyLinks = ()=>{
+        return (
+            <Link documents={props.documents}></Link>
+        )
+    }
+
     return (
         <>
             <Button
@@ -96,6 +103,11 @@ function UnifiedForms(props) {
                 style={{ width: "50px", height: "50px" }}
             >
                 <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+            </Button>
+            <Button
+                onClick={setOnlyLinkForm(true)}    
+            >
+                <i class="bi bi-link-45deg"></i>
             </Button>
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
