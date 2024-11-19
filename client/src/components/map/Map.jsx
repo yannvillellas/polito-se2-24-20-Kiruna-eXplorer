@@ -47,7 +47,7 @@ function Map(props) {
 
   return (
     
-    <Container fluid>
+    <Container fluid className="map-container">
       <Row>
         <Col>
           <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
