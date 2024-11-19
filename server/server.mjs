@@ -7,7 +7,7 @@ import passport from 'passport';
 import { check, validationResult } from 'express-validator';
 import { getUser } from './src/dao/userDAO.mjs';
 import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
-import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
+import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
 import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
@@ -183,6 +183,27 @@ app.post('/api/positions', isUrbanPlanner, [
     await addPosition(docId, lat, lng);
 
     res.status(201).end();
+});
+
+//updatePosition
+app.put('/api/positions/:docId', isUrbanPlanner, [
+    check('lat').isFloat(),
+    check('lng').isFloat(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    console.log("sono in server.mjs: sto aggiornando la posizione:", req.body);
+
+    // Here i manage the (lat, long), float values
+    const docId = req.params.docId;
+    const lat = req.body.lat;
+    const lng = req.body.lng;
+    await updatePosition(docId, lat, lng);
+
+    res.status(200).end();
 });
 
 

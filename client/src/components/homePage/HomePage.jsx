@@ -142,27 +142,46 @@ function HomePage(props) {
 
     }
 
+    const handleModifyPosition = async (docId, lat, lng) => {
+        try {
+            console.log("Sono in HomePage.jsx, sto modificando la posizione del documento con id: ", docId, " in lat: ", lat, " e lng: ", lng);
+            await PositionAPI.modifyPosition(docId, lat, lng);
+
+            const updatedDocuments = documents.map(document => {
+                if (document.docId === docId) {
+                    return {
+                        ...document,
+                        lat: lat,
+                        lng: lng,
+                    };
+                }
+                return document;
+            });
+            setDocuments(updatedDocuments);
+
+        } catch (error) {
+            console.error("Error modifying position:", error);
+        }
+    }
 
 
     return (
         <Container fluid>
-            <Row>
+            <Row className="my-2">
                 <Col className="d-flex justify-content-between align-items-center">
 
                     <h1 className="text-dark">Welcome to Kiruna</h1>
                     <div className="d-flex">
                         {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />}
-                        {!isLoggedIn && <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>}
-                        {isLoggedIn && <Button variant="primary" onClick={props.handleLogout}>Logout</Button>}
+                        {!isLoggedIn && <Button className="ms-2" variant="primary" onClick={() => navigate('/login')}>Login</Button>}
+                        {isLoggedIn && <Button className="ms-2" variant="primary" onClick={props.handleLogout}>Logout</Button>}
                     </div>
 
                 </Col>
             </Row>
 
             <Row>
-                <Col>
-                    <Map documents={documents} />
-                </Col>
+                <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
             </Row>
 
             <Row>
