@@ -105,8 +105,3 @@
   .add-link-form {
     background-color: white !important; /* Assicura uno sfondo bianco */
 }
-
-.add-link-form input:focus {
-    background-color: white !important;
-    border-color: #ccc;
-}
