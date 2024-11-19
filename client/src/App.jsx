@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate } from "react-router-dom";
-import HomePage from "./components/homePage/HomePage";
-import PageNotFound from "./components/pageNotFound/PageNotFound";
-import Map from "./components/map/Map";
-import Login from "./components/login/Login";
-import Link from "./components/link/Link";
-import AuthAPI from "./api/authAPI";
+
+import { useState, useEffect } from 'react';
+import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import HomePage from './components/homePage/HomePage';
+import PageNotFound from './components/pageNotFound/PageNotFound';
+import Map from './components/map/Map';
+import Login from './components/login/Login';
+import Link from './components/link/Link';
+import AuthAPI from './api/authAPI';
+
 
 import SearchDocuments from "./components/searchDocuments/SearchDocuments";
 

@@ -55,6 +55,6 @@ const getLinkTypes = async () => {
   }
 };
 
-const associationApi={ createAssociation/*, getAllAssociations*/, getLinkTypes };
+const associationAPI={ createAssociation/*, getAllAssociations*/, getLinkTypes };
 
-export default associationApi;
+export default associationAPI;

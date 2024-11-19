@@ -8,7 +8,6 @@ const listPositions = async () => {
             credentials: 'include'
         })
         .then(response => response.json())
-        .then(mapPositions);
         //console.log("le api ritornano: ",positions)
         return positions;
     }catch(err){
@@ -35,22 +34,30 @@ const addPosition = async (position) => {
     else return null;
 }
 
-function mapPositions(positions){
-    //console.log("map position riceve: ",positions)
-    return positions.map(position => {
-        return new Position (       //modifica messo return
-            position.posId,
-            position.docId,
-            position.latitude,
-            position.longitude
-        )        
-    })
+const modifyPosition = async (docId, lat, lng) => {
+    //console.log("sono in positionAPI.js: sto modificando la posizione", docId, lat, lng);
+    const response = await fetch(`${SERVER_URL}/${docId}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'}, 
+
+      body: JSON.stringify({
+        lat: lat, lng: lng
+      }),
+
+      credentials: 'include'
+    });
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
 }
 
 
 const PositionAPI = {
     listPositions,
-    addPosition
+    addPosition,
+    modifyPosition
 }
 
 export default PositionAPI;
