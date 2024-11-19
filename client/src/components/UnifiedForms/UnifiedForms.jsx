@@ -72,26 +72,20 @@ function UnifiedForms(props) {
 
     const handlePrev = async () => {
         setIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
-        
+
     };
 
     const handleSelect = (selectedIndex) => {
         setIndex(selectedIndex);
     }
 
-    const confirmClose =  ()=>{
-        if(index==1){
+    const confirmClose = () => {
+        if (index == 1) {
             setCloseConfirmation(true);
-    
-        }else{
+
+        } else {
             handleClose();
         }
-    }
-
-    const showOnlyLinks = ()=>{
-        return (
-            <Link documents={props.documents}></Link>
-        )
     }
 
     return (
@@ -105,10 +99,25 @@ function UnifiedForms(props) {
                 <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
             </Button>
             <Button
-                onClick={() => setOnlyLinkForm(true)}    
+                className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                variant="primary"
+                style={{ width: "50px", height: "50px" }}
+                onClick={() => setOnlyLinkForm(true)}
             >
                 <i className="bi bi-link-45deg"></i>
             </Button>
+
+            {/*Modal only for link documents*/}
+            <Modal show={onlyLinkForm} onHide={()=>setOnlyLinkForm(false)} size="xl">
+                <Modal.Header closeButton>
+                    <Modal.Title>Insert link</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Link documents={props.documents} alone={true} setOnlyLinkForm={setOnlyLinkForm}></Link>
+                </Modal.Body>
+            </Modal>
+            {/************************************/}
+
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
                     <Modal.Title>{index == 0 ? "Insert new document" : "Insert link"}</Modal.Title>
@@ -116,10 +125,10 @@ function UnifiedForms(props) {
                 <Modal.Body>
                     <Carousel activeIndex={index} onSelect={handleSelect} controls={false} indicators={false} interval={null}>
                         <Carousel.Item> {/* passing newDocument is essential for abilitating the button previous (permits to save the state)*/}
-                            <AddDocument handleAddDocumentToModal={handleAddDocumentToModal} handleNext={handleNext} newDocument={newDocument} handleClose={handleClose}/>
+                            <AddDocument handleAddDocumentToModal={handleAddDocumentToModal} handleNext={handleNext} newDocument={newDocument} handleClose={handleClose} />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose}  newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} confirmClose={confirmClose} handleAddDocument={props.handleAddDocument}></Link>
+                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false}></Link>
                         </Carousel.Item>
                     </Carousel>
 
@@ -145,19 +154,19 @@ function UnifiedForms(props) {
             </Modal>
 
             {/* Modal di conferma */}
-            <Modal show={closeConfirmation} onHide={()=>setCloseConfirmation(false)}>
+            <Modal show={closeConfirmation} onHide={() => setCloseConfirmation(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirm exit</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Are you sure to exit without adding a link?</Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={()=>setCloseConfirmation(false)}>
+                    <Button variant="secondary" onClick={() => setCloseConfirmation(false)}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={()=>{
+                    <Button variant="primary" onClick={() => {
                         handleClose()
                         props.handleAddDocument(newDocument)
-                        }}>
+                    }}>
                         Yes, close
                     </Button>
                 </Modal.Footer>

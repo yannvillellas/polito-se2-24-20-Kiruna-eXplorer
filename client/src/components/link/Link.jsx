@@ -5,10 +5,11 @@ import "./Link.css";
 import Select from "react-select";
 
 function Link(props) {
-  
+
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [doc2, setDoc2] = useState("");
+  const [doc1, setDoc1] = useState("");
 
   // It works
   // Funzione per gestire il cambiamento della checkbox
@@ -50,31 +51,39 @@ function Link(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    
     try {
-      const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document----------------------------------------------------------------------------------------
-      ///console.log("Sono in Link.jsx, ho mandato il documento a HomePage.jsx, mi è tornato l'id: ", props.newDocument, docId);
-      //console.log("Sono in link.jsx: sto spedendo,", association);
-      //console.log("tipi selezionati: ", selectedTypes)
-      for (let link of selectedTypes) {
-        //console.log("stop creando associazione: ", link)
-        let association = {
-          doc1: docId, //doc1
-          type: link,
-          doc2: doc2
-        };
-        //console.log("sto creando associazione: ", association)
-        await associationAPI.createAssociation(association);
+      if (!props.alone) {
+        const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document
+        for (let link of selectedTypes) {
+          let association = {
+            doc1: docId, //doc1
+            type: link,
+            doc2: doc2
+          };
+          await associationAPI.createAssociation(association);
 
+        }
+        props.handleClose(); // Close modal after submission
+
+      }else{  //the link form is detached from addDocument form
+        for (let link of selectedTypes) {
+          let association = {
+            doc1: doc1, //doc1
+            type: link,
+            doc2: doc2
+          };
+          await associationAPI.createAssociation(association);
+        }
+        setDoc1("")
+        props.setOnlyLinkForm(false)
       }
       // Reset form fields after successful submission
       setLinkTypes([]);
       setDoc2("");
-      props.handleClose(); // Close modal after submission
     } catch (error) {
       console.error("Failed to create association:", error);
     }
-    
+
   };
 
   return (
@@ -88,9 +97,38 @@ function Link(props) {
             </Form.Label>
 
             <Col sm="7">
-              <Form.Label>
-                {props.title}
-              </Form.Label>
+              {props.alone ?
+                <Select
+                  options={props.documents
+                    .filter((d) => d.docId !== doc2)
+                    .map((d) => {
+                    return { value: d.docId, label: d.title }
+                  })}
+                  isClearable
+                  placeholder="Select document"
+                  required={true}
+                  onChange={(selectedOption) => {
+                    setDoc1(selectedOption ? selectedOption.value : "");
+                  }}
+                  menuPlacement="auto"
+                  menuPosition="fixed"
+                  styles={{
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                    }),
+                  }}
+                />
+                :
+                <Form.Label>
+                  {props.title}
+                </Form.Label>
+              }
             </Col>
 
           </Form.Group>
@@ -120,10 +158,12 @@ function Link(props) {
               Document 2
             </Form.Label>
 
-            
+
             <Col sm="7">
               <Select
-                options={props.documents.map((d) => {
+                options={props.documents
+                  .filter((d) => d.docId !== doc1)
+                  .map((d) => {
                   return { value: d.docId, label: d.title }
                 })}
                 isClearable
@@ -147,16 +187,26 @@ function Link(props) {
                 }}
               />
             </Col>
-            
+
           </Form.Group>
           <Form.Group>
-            <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
-            {/*doc1 && link &&*/selectedTypes.length > 0 && doc2>=0 &&
+            {props.alone ?
+              <Button onClick={() => props.setOnlyLinkForm(false)} variant="secondary">Close</Button>
+              :
+              <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
+            }
+
+            {(doc1!=="" || !props.alone) && selectedTypes.length > 0 && doc2!=="" &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>
             }
-            <Button variant="danger" onClick={() => props.confirmClose()}>Continue without links</Button>
+
+            {props.alone == false ?
+              <Button variant="danger" onClick={() => props.confirmClose()}>Continue without links</Button>
+              :
+              ""
+            }
           </Form.Group>
         </Form>
       </Col>
