@@ -178,7 +178,6 @@ function HomePage(props) {
         <Container fluid>
             <Row>
                 <Col style={{ position: "relative" }}>
-                    <h1 className="title-overlay">Welcome to Kiruna</h1>
                     <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
                     {isUrbanPlanner && (
                         <div className="add-document-container">

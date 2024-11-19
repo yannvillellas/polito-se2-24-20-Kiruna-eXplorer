@@ -125,8 +125,8 @@ function DocumentTable(props) {
         </tr>
       </thead>
       <tbody>
-        {documents.map((doc) => (
-          <DocumentRow key={doc.docId} document={doc} />
+        {documents.map((doc, index) => (
+          <DocumentRow key={index} document={doc} />
         ))}
       </tbody>
     </Table>);
@@ -135,9 +135,9 @@ function DocumentTable(props) {
 function DocumentRow(props) {
   // console.log("Sono in DocList.jsx, DocumentRow, ricevo dal db il documento: ", props.document);
   return (
-    <tr key={props.document.docId}>
-      <DocumentData key={props.document.docId} document={props.document} />
-      <DocumentFile key={props.document.docId} document={props.document} />
+    <tr >
+      <DocumentData document={props.document} />
+      <DocumentFile document={props.document} />
     </tr>
   );
 }

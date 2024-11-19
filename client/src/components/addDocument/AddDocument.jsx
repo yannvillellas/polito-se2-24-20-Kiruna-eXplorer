@@ -57,6 +57,7 @@ function AddDocument(props) {
     const scaleOptions = [
         { value: "Architectural Scale", label: "Architectural Scale" },
         { value: "Blueprints/Effects", label: "Blueprints/Effects" },
+        { value: "Text", label: "Text" }
     ];
 
     const typeOptions = [

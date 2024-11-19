@@ -177,7 +177,7 @@ app.post('/api/documents', isUrbanPlanner, [
     check('type').isString(),
     check('connections').isInt(),
     check('language').optional().isString(),
-    check('pages').optional().isInt(),
+    check('pages').optional().isString(),
     check('description').isString(),
 ], async (req, res) => {
     const errors = validationResult(req);

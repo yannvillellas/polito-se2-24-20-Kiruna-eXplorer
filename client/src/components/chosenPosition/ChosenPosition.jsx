@@ -129,7 +129,7 @@ function ChosenPosition(props) {
                                 props.handleSetPostition(position.lat, position.lng)
                                 setPositionAlreadyChosen(true)
                                 }}>
-                                Save position
+                                Set 
                             </Button>
                         </>
                     }
@@ -161,7 +161,7 @@ function ChosenPosition(props) {
                                 </Form.Group>
 
                                 <Button variant="primary" onClick={handleLatLongFormSubmit}>
-                                    Submit
+                                    Save
                                 </Button>
                             </Form.Group>
                         </>

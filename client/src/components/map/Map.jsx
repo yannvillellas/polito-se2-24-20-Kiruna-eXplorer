@@ -43,6 +43,7 @@ function Map(props) {
 
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
+    setIsPositionToModify(false);
   };
 
 
@@ -106,7 +107,6 @@ function Map(props) {
     }
     console.log("Modify position to ", newLan, newLng);
     await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
-    setIsPositionToModify(false);
     closeDocumentModal();
   };
 
@@ -224,7 +224,7 @@ function Map(props) {
                 <span>{selectedDoc.title}</span>
               )
             ) : (
-              <p>Seleziona un marker per visualizzare i dettagli.</p>
+              <p>Select a marker for visualize the details.</p>
             )}
           </Modal.Title>
         </Modal.Header>
@@ -241,7 +241,7 @@ function Map(props) {
                   <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
                 </p>
                 <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
-                  Modify position
+                  Reposition
                 </Button>
                 {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
               </div>
@@ -257,7 +257,7 @@ function Map(props) {
               </div>
             </>
           ) : (
-            <p>Seleziona un marker per visualizzare i dettagli.</p>
+            <p>Select a marker for visualize the details.</p>
           )}
         </Modal.Body>
       </Modal>
