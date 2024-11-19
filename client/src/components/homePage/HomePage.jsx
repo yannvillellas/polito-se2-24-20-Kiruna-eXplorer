@@ -175,7 +175,7 @@ function HomePage(props) {
 
 
     return (
-        <Container fluid>
+        <Container fluid className="mt-5">
             <Row>
                 <Col style={{ position: "relative" }}>
                     <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
