@@ -178,7 +178,7 @@ function HomePage(props) {
             <Row>
                 <Col style={{ position: "relative" }}>
                     <h1 className="title-overlay">Welcome to Kiruna</h1>
-                    <Map documents={documents} />
+                    <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
                     {isUrbanPlanner && (
                         <div className="add-document-container">
                             <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />

@@ -1,6 +1,6 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useNavigate } from "react";
 import { Container, Modal, Button, Form} from "react-bootstrap";
 import Select from "react-select";
 
@@ -27,8 +27,6 @@ function Map(props) {
   const [documents, setDocuments] = useState([]);
 
   const [files, setFiles] = useState();
-  const navigate = useNavigate();
-
   const [isPositionToModify, setIsPositionToModify] = useState(false);
   const [manualLat, setManualLat] = useState(null);
   const [manualLong, setManualLong] = useState(null);
