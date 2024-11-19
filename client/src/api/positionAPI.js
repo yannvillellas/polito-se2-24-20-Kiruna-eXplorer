@@ -34,12 +34,30 @@ const addPosition = async (position) => {
     else return null;
 }
 
+const modifyPosition = async (docId, lat, lng) => {
+    //console.log("sono in positionAPI.js: sto modificando la posizione", docId, lat, lng);
+    const response = await fetch(`${SERVER_URL}/${docId}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'}, 
 
+      body: JSON.stringify({
+        lat: lat, lng: lng
+      }),
+
+      credentials: 'include'
+    });
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
+}
 
 
 const PositionAPI = {
     listPositions,
-    addPosition
+    addPosition,
+    modifyPosition
 }
 
 export default PositionAPI;

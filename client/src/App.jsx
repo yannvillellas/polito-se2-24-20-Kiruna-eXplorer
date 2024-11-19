@@ -1,4 +1,5 @@
 
+import './App.css';
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
 import HomePage from './components/homePage/HomePage';
@@ -10,8 +11,8 @@ import Link from './components/link/Link';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
-
-import './App.css';
+import DocList from "./components/DocumentList/DocList";
+import SearchDocuments from "./components/searchDocuments/SearchDocuments";
 
 function App() {
     const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`
@@ -20,8 +21,7 @@ function App() {
     const [isUrbanPlanner, setIsUrbanPlanner] = useState(false);
     
     const navigate = useNavigate();
-
-
+  
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -98,7 +98,7 @@ function App() {
         return <div>Loading...</div>;
     }
 
-    return (
+  return (
         <Routes>
             {/* Layout with Header */}
             <Route
@@ -127,6 +127,8 @@ function App() {
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
                 <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}/>
+                <Route path="/DocumentList" element={<DocList />} />
+                <Route path="/search" element={<SearchDocuments />} />
                 {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
             </Route>
         </Routes>

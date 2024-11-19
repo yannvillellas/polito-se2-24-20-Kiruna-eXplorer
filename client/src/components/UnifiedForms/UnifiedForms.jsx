@@ -5,7 +5,7 @@ import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-boots
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "../link/Link"
 import DocumentAPI from "../../api/documentAPI";
-import AddDocument from "../AddDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
+import AddDocument from "../addDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
 
 
 
@@ -28,6 +28,7 @@ function UnifiedForms(props) {
         description: "",
         lat: null,
         lng: null,
+        files: [],
     });
 
     const [closeConfirmation, setCloseConfirmation] = useState(false)
@@ -36,7 +37,7 @@ function UnifiedForms(props) {
 
     // Controllato: è corretto
     const handleClose = () => {
-        console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
+        //console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
         setNewDocument({
             docId: null,
             title: "",
@@ -50,6 +51,7 @@ function UnifiedForms(props) {
             description: "",
             lat: null,
             lng: null,
+            files: [],
         });
         setIndex(0)
         setShowModalAdd(false);
