@@ -128,7 +128,7 @@ function App() {
                 <Route path="*" element={<PageNotFound />} />
                 <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}/>
                 <Route path="/documentPage" element={<DocList />} />
-                <Route path="/search" element={<SearchDocuments />} />
+                {/*<Route path="/search" element={<SearchDocuments />} />*/}
                 {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
             </Route>
         </Routes>

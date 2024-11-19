@@ -49,26 +49,35 @@ function DocList() {
   // Polling: and then update the document after 5 sec
   useEffect(() => {
     const intervalId = setInterval(async () => {
-      if (selectedDocument === null) {
-        fetchDocuments();
-      } else {
-        console.log("Not polling for documents because a document is selected");
-      }
+      try {
+        const res = await DocumentAPI.listDocuments();
 
-    }, 5000); // dopo 5sec
+        if (!selectedDocument) {
+          // Aggiorna sia la lista completa sia i documenti mostrati
+          setAllDocuments(res || []);
+          setDocuments(res || []);
+        } else {
+          // Aggiorna solo la lista completa per evitare sovrascritture
+          setAllDocuments(res || []);
+          console.log("Polling: Document list updated in background.");
+        }
+      } catch (error) {
+        console.error("Error during polling:", error);
+      }
+    }, 5000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [selectedDocument]);
 
 
   // Gestione del cambio selezione nel Select
   const handleSelectChange = (selectedOption) => {
     if (selectedOption) {
-      setSelectedDocument(selectedOption); // Aggiorna selectedDocument con l'intero oggetto selezionato
-      setDocuments(documents.filter((doc) => doc.docId === selectedOption.value));
+      setSelectedDocument(selectedOption);
+      setDocuments(allDocuments.filter((doc) => doc.docId === selectedOption.value));
     } else {
-      setSelectedDocument(null); // Rimuovi la selezione
-      setDocuments(allDocuments); // Ripristina la lista di documenti
+      setSelectedDocument(null);
+      setDocuments(allDocuments); // Ripristina solo quando non c'è selezione
     }
   };
 
