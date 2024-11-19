@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Container, Modal, Button, Form} from "react-bootstrap";
 import Select from "react-select";
 
+import DocumentAPI from "../../api/documentAPI";
+
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -19,16 +21,23 @@ L.Icon.Default.mergeOptions({
 function Map(props) {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
+
+
+
   const [documents, setDocuments] = useState([]);
+
+  const [files, setFiles] = useState();
+  const navigate = useNavigate();
 
   const [isPositionToModify, setIsPositionToModify] = useState(false);
   const [manualLat, setManualLat] = useState(null);
   const [manualLong, setManualLong] = useState(null);
 
+
   // So that sync with the parent component
   useEffect(() => {
     if (props.documents) {
-      console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
+      //console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
       setDocuments(props.documents);
     }
   }, [props.documents]);
@@ -38,9 +47,44 @@ function Map(props) {
     setShowDocumentModal(false);
   };
 
+
+  /*const handleMarkerClick = async (doc) => {
+    setSelectedDoc(doc);
+    setShowOffcanvas(true); // Apri OffCanvas
+
+    await handleGetFiles(doc.docId)
+
+  };*/
+
+  const handleGetFiles = async (docId) => {
+    console.log("prendo i file di: ", docId)
+    const files = await DocumentAPI.getFiles(docId);
+    console.log("ricevo: ", files)
+    if(files){
+      setFiles(Array.from(files))
+    }else{
+      setFiles()
+    }
+    
+  }
+
+  const handleDownload = (file) => {
+    const URL=`http://localhost:3001/${file.path.slice(1)}`
+    console.log(URL)
+    
+    const aTag = document.createElement("a");
+    aTag.href=URL
+    aTag.setAttribute("download",file.name)
+    document.body.appendChild(aTag)
+    aTag.click();
+    aTag.remove();
+  }
+
   const handleMarkerClick = (docs) => {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
+    
+    await handleGetFiles(doc.docId)
   };
 
   const groupedDocuments = documents.reduce((acc, doc) => {
@@ -68,9 +112,68 @@ function Map(props) {
   };
 
 
+
   return (
-    
+
     <Container fluid>
+
+      /*<Row>
+        <Col>
+          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {props.documents && props.documents.length > 0 && (
+              props.documents.map((doc) => {
+                // Controlla se le coordinate sono valide
+                if (doc.lat && doc.lng) {
+                  return (
+                    <Marker
+                      key={doc.docId}
+                      position={[doc.lat, doc.lng]}
+                      eventHandlers={{
+                        click: async() => {await handleMarkerClick(doc)},
+                      }}
+                    />
+                  );
+                }
+                return null; // Non renderizzare il marker se lat o lng sono invalidi
+              })
+            )}
+
+          </MapContainer>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col>
+
+          <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
+
+            <Offcanvas.Header closeButton>
+              <Offcanvas.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Offcanvas.Title>
+            </Offcanvas.Header>
+
+            <Offcanvas.Body>
+              {selectedDoc ? (
+                <>
+                  {Object.entries(selectedDoc).filter(([key, value]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+                    <p key={key}>
+                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                    </p>
+                  ))}
+                  <p key="position">
+                    <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
+                  </p>
+                  {files ? files.map(f => {
+                    return (<>
+                      <Button onClick={()=>handleDownload(f)}><i className="bi bi-file-earmark-text-fill"></i></Button>
+                      <p>{f.name}</p>
+                    </>)
+                  }) : ""}
+                </>*/
+
       <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -175,6 +278,12 @@ function Map(props) {
                   
                   */}
               </div>
+              {files ? files.map(f => {
+                    return (<>
+                      <Button onClick={()=>handleDownload(f)}><i className="bi bi-file-earmark-text-fill"></i></Button>
+                      <p>{f.name}</p>
+                    </>)
+               }) : ""}
             </>
           ) : (
             <p>Seleziona un marker per visualizzare i dettagli.</p>

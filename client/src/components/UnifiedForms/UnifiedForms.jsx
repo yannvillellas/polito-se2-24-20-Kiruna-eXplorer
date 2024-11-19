@@ -28,6 +28,7 @@ function UnifiedForms(props) {
         description: "",
         lat: null,
         lng: null,
+        files: [],
     });
 
     const [closeConfirmation, setCloseConfirmation] = useState(false)
@@ -36,7 +37,7 @@ function UnifiedForms(props) {
 
     // Controllato: è corretto
     const handleClose = () => {
-        console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
+        //console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
         setNewDocument({
             docId: null,
             title: "",
@@ -50,6 +51,7 @@ function UnifiedForms(props) {
             description: "",
             lat: null,
             lng: null,
+            files: [],
         });
         setIndex(0)
         setShowModalAdd(false);

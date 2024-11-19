@@ -25,18 +25,18 @@ function Link(props) {
   };
 
   // for checking the selected types
-  useEffect(() => {
+  /*useEffect(() => {
     console.log("Sono in Link.jsx, ho selezionato i tipi di link: ", selectedTypes);
-  }, [selectedTypes]);
+  }, [selectedTypes]);*/
 
 
   // it works
   useEffect(() => {
-    console.log("Sono in Link.jsx, ho ricevuto da HomePages.jsx questi documenti: ", props.documents)
+    //console.log("Sono in Link.jsx, ho ricevuto da HomePages.jsx questi documenti: ", props.documents)
     const fetchLinkTypes = async () => {
       try {
         const types = await associationAPI.getLinkTypes();
-        console.log("Sono in Link.jsx, ho ricevuto dal db i tipi di link, in forma di vettore: ", types);
+        //console.log("Sono in Link.jsx, ho ricevuto dal db i tipi di link, in forma di vettore: ", types);
         setLinkTypes(types);
       } catch (error) {
         console.error("Failed to fetch documents:", error);
@@ -53,17 +53,17 @@ function Link(props) {
     
     try {
       const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document----------------------------------------------------------------------------------------
-      console.log("Sono in Link.jsx, ho mandato il documento a HomePage.jsx, mi è tornato l'id: ", props.newDocument, docId);
+      ///console.log("Sono in Link.jsx, ho mandato il documento a HomePage.jsx, mi è tornato l'id: ", props.newDocument, docId);
       //console.log("Sono in link.jsx: sto spedendo,", association);
-      console.log("tipi selezionati: ", selectedTypes)
+      //console.log("tipi selezionati: ", selectedTypes)
       for (let link of selectedTypes) {
-        console.log("stop creando associazione: ", link)
+        //console.log("stop creando associazione: ", link)
         let association = {
           doc1: docId, //doc1
           type: link,
           doc2: doc2
         };
-        console.log("sto creando associazione: ", association)
+        //console.log("sto creando associazione: ", association)
         await associationAPI.createAssociation(association);
 
       }

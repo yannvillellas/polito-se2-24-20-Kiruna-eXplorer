@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
-import HomePage from './components/HomePage/HomePage';
+import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
 import Map from './components/map/Map';
 import Login from './components/login/Login';
