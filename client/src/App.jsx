@@ -30,7 +30,7 @@ function App() {
                 if (user) {
                     setLoggedIn(true);
                     setUser(user);
-                    setIsUrbanPlanner(user.role === 'urban_planner');
+                    setIsUrbanPlanner(user.role === 'urbanPlanner');
                 } else {
                     console.log('User is not logged in');
                 }
@@ -51,7 +51,7 @@ function App() {
             if (user) {
                 setLoggedIn(true);
                 setUser(user);
-                setIsUrbanPlanner(user.role === 'urban_planner');
+                setIsUrbanPlanner(user.role === 'urbanPlanner');
                 return user;
             }
         } catch (err) {
@@ -117,17 +117,7 @@ function App() {
                 <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/login'} />} />
                 <Route
                     path="/homePage"
-                    element={
-                        loggedIn ? (
-                            <HomePage
-                                loggedIn={loggedIn}
-                                role={user?.role}
-                                handleLogout={handleLogout}
-                            />
-                        ) : (
-                            <PageNotFound />
-                        )
-                    }
+                    element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}
                 />
                 <Route
                     path="/login"

@@ -1,6 +1,5 @@
 import './header.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
 
 function Header(props) {
     const navigate = useNavigate();
@@ -17,8 +16,9 @@ function Header(props) {
 
           <ul>
               <li><Link to="/homePage" >Map</Link></li>
-              {props.loggedIn ?   <Button onClick={props.handleLogout}>Logout</Button>:
-                                  <Button onClick={()=>{navigate('/login')}}>Login</Button>}
+              {props.isUrbanPlanner && <li><Link to="/documentPage" >Documents</Link></li>}
+              {props.loggedIn ?   <button onClick={props.handleLogout}>Logout</button>:
+                                  <button onClick={()=>{navigate('/login')}}>Login</button>}
           </ul>
           </nav>
       </div>
