@@ -33,3 +33,22 @@ export const getUser = (username, password) => {
       });
     });
 };
+
+export const createUser = (username, password, role) => {
+    return new Promise((resolve, reject) => {
+        const salt = crypto.randomBytes(16).toString('hex');
+        crypto.scrypt(password, salt, 32, (err, hashedPassword) => {
+            if (err) reject(err);
+
+            const insertUserQuery = `INSERT INTO user (username, password, salt, role) VALUES (?, ?, ?, ?)`;
+            db.run(insertUserQuery, [username, hashedPassword.toString('hex'), salt, role], function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                  const user = new User(this.lastID, username, hashedPassword.toString('hex'), salt, role);
+                  resolve(user);
+                }
+            });
+        });
+    });
+}

@@ -5,7 +5,7 @@ import LocalStrategy from 'passport-local';
 import session from 'express-session';
 import passport from 'passport';
 import { check, validationResult } from 'express-validator';
-import { getUser } from './src/dao/userDAO.mjs';
+import { getUser, createUser } from './src/dao/userDAO.mjs';
 import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
 import { listPositions, addPosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
@@ -86,6 +86,61 @@ app.delete('/api/sessions/current', (req, res) => {
         res.end();
     });
 });
+
+
+//userAPi
+app.post('/api/users', [
+    // Validazione del campo username
+    check('username')
+        .isString()
+        .withMessage('Username must be a string.')
+        .isLength({ min: 3, max: 20 })
+        .withMessage('Username must be between 3 and 20 characters.')
+        .matches(/^[a-zA-Z0-9_]+$/)
+        .withMessage('Username can only contain letters, numbers, and underscores.'),
+
+    // Validazione del campo password
+    check('password')
+        .isString()
+        .withMessage('Password must be a string.')
+        .isLength({ min: 8 })
+        .withMessage('Password must be at least 8 characters long.')
+        .matches(/[A-Z]/)
+        .withMessage('Password must contain at least one uppercase letter.')
+        .matches(/[a-z]/)
+        .withMessage('Password must contain at least one lowercase letter.')
+        .matches(/\d/)
+        .withMessage('Password must contain at least one number.')
+        .matches(/[!@#$%^&*(),_.?":{}|<>]/)
+        .withMessage('Password must contain at least one special character.')
+        .not()
+        .matches(/\s/)
+        .withMessage('Password must not contain spaces.'),
+], async (req, res) => {
+    // Gestione degli errori di validazione
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { username, password } = req.body;
+
+    try {
+        // Creazione utente con ruolo predefinito "urbanPlanner"
+        const user = await createUser(username, password, 'urbanPlanner');
+        res.status(200).json(user);
+    } catch (err) {
+        console.error('Error creating user:', err);
+        
+        // Gestione di errori specifici per conflitti di username
+        if (err.code === 'SQLITE_CONSTRAINT') {
+            res.status(409).json({ error: 'Username already exists.' });
+        } else {
+            res.status(500).json({ error: 'Internal server error.' });
+        }
+    }
+});
+
 
 //documentAPI
 app.get('/api/documents',[], async(req, res) => {
