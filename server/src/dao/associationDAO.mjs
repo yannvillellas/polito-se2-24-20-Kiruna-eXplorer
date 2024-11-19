@@ -1,12 +1,12 @@
 import { db } from "../database/db.mjs"
 import Association from "../models/association.mjs"
-import {getTypeIdByType} from "./LinkTypeDAO.mjs" 
+import { getTypeIdByType } from "./LinkTypeDAO.mjs"
 
 //get association for a specific docId
 export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM Association WHERE doc1=? OR doc2=?'
-        db.all(sql, [parseInt(docId,10),parseInt(docId,10)], (err, rows) => {
+        db.all(sql, [parseInt(docId, 10), parseInt(docId, 10)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -23,16 +23,27 @@ export const insertAssociation = (association) => {
     return new Promise(async (resolve, reject) => {
         try {
             const typeId = await getTypeIdByType(association.type);
-            console.log("sono in associationDAO: ho ritornato typeId",typeId);
-            const insertSql = 'INSERT INTO Association (doc1, doc2, typeId) VALUES (?, ?, ?)';
-            db.run(insertSql, [parseInt(association.doc1,10), parseInt(association.doc2,10), parseInt(typeId,10)], function (err) {
+            console.log("sono in associationDAO: ho ritornato typeId", typeId);
+            // It should add +1 to the field connections where docId = docId1 or docId = docId2
+            db.run('UPDATE Document SET connections = connections + 1 WHERE docId = ? OR docId = ?', [parseInt(association.doc1, 10), parseInt(association.doc2, 10)], function (err) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(this.lastID);
+                    try { // Inizio del blocco try interno
+                        const insertSql = 'INSERT INTO Association (doc1, doc2, typeId) VALUES (?, ?, ?)';
+                        db.run(insertSql, [parseInt(association.doc1, 10), parseInt(association.doc2, 10), parseInt(typeId, 10)], function (err) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(this.lastID);
+                            }
+                        });
+                    } catch (err) { // Chiusura del blocco try-catch interno
+                        reject(err);
+                    }
                 }
             });
-        } catch (err) {
+        } catch (err) { // Chiusura del blocco try-catch esterno
             reject(err);
         }
     });
@@ -43,7 +54,7 @@ export const insertAssociation = (association) => {
 export const deleteAssociation = (aId) => {
     return new Promise((resolve, reject) => {
         const sql = 'DELETE FROM Association where aId= ?'
-        db.run(sql, [parseInt(aId,10)], (err, rows) => {
+        db.run(sql, [parseInt(aId, 10)], (err, rows) => {
             if (err) {
                 reject(err);
             } else {
@@ -58,7 +69,7 @@ export const UpdateAssociation = (association) => {
         try {
             const typeId = await getTypeIdByType(association.type);
             const updateSql = 'UPDATE Association SET doc1=?, doc2=?, typeId=? WHERE aId=?';
-            db.run(updateSql, [parseInt(association.doc1,10), parseInt(association.doc2,10), parseInt(typeId,10), parseInt(association.aId,10)], (err) => {
+            db.run(updateSql, [parseInt(association.doc1, 10), parseInt(association.doc2, 10), parseInt(typeId, 10), parseInt(association.aId, 10)], (err) => {
                 if (err) {
                     reject(err);
                 } else {
