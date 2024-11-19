@@ -245,14 +245,16 @@ function Map(props) {
                 </Button>
                 {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
               </div>
-              {files ? files.map((f, index) => (
-                <div key={f.name || index}>
-                  <Button onClick={() => handleDownload(f)}>
-                    <i className="bi bi-file-earmark-text-fill"></i>
-                  </Button>
-                  <p>{f.name}</p>
-                </div>
-              )) : ""}
+              <div className="download-buttons-container">
+                {files ? files.map((f, index) => (
+                  <div key={f.name || index} className="download-btns">
+                    <Button onClick={() => handleDownload(f)} className="files">
+                      <i className="bi bi-file-earmark-text-fill"></i>
+                    </Button>
+                    <p className="file-name">{f.name}</p>
+                  </div>
+                )) : ""}
+              </div>
             </>
           ) : (
             <p>Seleziona un marker per visualizzare i dettagli.</p>
