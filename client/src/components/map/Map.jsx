@@ -107,6 +107,7 @@ function Map(props) {
     console.log("Modify position to ", newLan, newLng);
     await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
     setIsPositionToModify(false);
+    closeDocumentModal();
   };
 
 

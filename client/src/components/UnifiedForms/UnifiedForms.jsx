@@ -147,18 +147,18 @@ function UnifiedForms(props) {
             {/* Modal di conferma */}
             <Modal show={closeConfirmation} onHide={()=>setCloseConfirmation(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Conferma uscita</Modal.Title>
+                    <Modal.Title>Confirm exit</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Sei sicuro di voler uscire senza aggiungere link al documento?</Modal.Body>
+                <Modal.Body>Are you sure to exit without adding a link?</Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={()=>setCloseConfirmation(false)}>
-                        Annulla
+                        Cancel
                     </Button>
                     <Button variant="primary" onClick={()=>{
                         handleClose()
                         props.handleAddDocument(newDocument)
                         }}>
-                        Sì, chiudi
+                        Yes, close
                     </Button>
                 </Modal.Footer>
             </Modal>
