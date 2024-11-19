@@ -117,7 +117,7 @@ function Map(props) {
 
     <Container fluid className="map-container">
 
-      /*<Row>
+      {/*<Row>
         <Col>
           <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
             <TileLayer
@@ -172,7 +172,7 @@ function Map(props) {
                       <p>{f.name}</p>
                     </>)
                   }) : ""}
-                </>*/
+                </>*/ }
 
       <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
         <TileLayer
