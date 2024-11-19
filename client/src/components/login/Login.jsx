@@ -73,7 +73,7 @@ function Login({ login }) {  // Destruttura `login` direttamente dai props
                 </form>
 
                 <div className="guest">
-                    <span>Don't have an account? <a href="http://localhost:5173/map">Continue as guest</a></span>
+                    <span>Don't have an account? <a href="http://localhost:5173/registration">Sign-up</a></span>
                 </div>
             </div>
         </div>

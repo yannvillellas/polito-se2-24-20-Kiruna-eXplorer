@@ -98,7 +98,7 @@ function Map(props) {
 
 
   const handleModifyPosition = async (newLan, newLng) => {
-    
+  
     if(newLan === null || newLng === null){
       alert("Latitude and longitude must be filled and should be numbers");
       return;
@@ -115,7 +115,7 @@ function Map(props) {
 
   return (
 
-    <Container fluid>
+    <Container fluid className="map-container">
 
       /*<Row>
         <Col>

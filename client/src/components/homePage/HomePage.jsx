@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./homePage.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from "react-router-dom";
 import {
@@ -174,22 +175,21 @@ function HomePage(props) {
 
     return (
         <Container fluid>
-            <Row className="my-2">
-                <Col className="d-flex justify-content-between align-items-center">
-
-                    <h1 className="text-dark">Welcome to Kiruna</h1>
-                    <div className="d-flex">
-                        {isUrbanPlanner && <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />}
-                        {!isLoggedIn && <Button className="ms-2" variant="primary" onClick={() => navigate('/login')}>Login</Button>}
-                        {isLoggedIn && <Button className="ms-2" variant="primary" onClick={props.handleLogout}>Logout</Button>}
-                    </div>
-
-                </Col>
-            </Row>
-
             <Row>
-                <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
+                <Col style={{ position: "relative" }}>
+                    <h1 className="title-overlay">Welcome to Kiruna</h1>
+                    <Map documents={documents} />
+                    {isUrbanPlanner && (
+                        <div className="add-document-container">
+                            <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />
+                        </div>
+                    )}
+                </Col>
+
             </Row>
+
+
+
 
             <Row>
                 <Col>
