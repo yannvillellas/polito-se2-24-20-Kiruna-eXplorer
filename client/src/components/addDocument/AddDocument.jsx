@@ -5,6 +5,7 @@ import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-boots
 import Select from "react-select";
 
 import ChosenPosition from "../chosenPosition/ChosenPosition";
+import AddOriginalSource from "../addOriginalSource/AddOriginalSource";
 /**BUGS: 
  *  
  *  Line 137: The date there are no restriction on only year (has to be fixed by Yann)
@@ -16,11 +17,9 @@ import ChosenPosition from "../chosenPosition/ChosenPosition";
  * 
 */
 
-
-
-function AddDocument(props){
-    const [newDocument, setNewDocument] = useState({
-        id: null,
+function AddDocument(props) {
+    const [newDocument, setNewDocument] = useState(props.newDocument ? props.newDocument : {
+        docId: null,
         title: "",
         stakeholders: "",
         scale: "",
@@ -32,9 +31,18 @@ function AddDocument(props){
         description: "",
         lat: null,
         lng: null,
+        files: [],
     });
+
+
+
     const handleSetPostition = (lat, lng) => {
-        setNewDocument({...newDocument, lat: lat, lng: lng});
+        setNewDocument({ ...newDocument, lat: lat, lng: lng });
+    };
+
+    const handleAddedFiles = (files) => {
+        setNewDocument({ ...newDocument, files: files });
+        console.log("Files in AddDocument.jsx:", files);
     };
 
 
@@ -85,12 +93,15 @@ function AddDocument(props){
 
     const [showModalAdd, setShowModalAdd] = useState(false);
 
-    const onBtnSelectAdd = () => setShowModalAdd(true);
+    //const [selectedFiles, setSelectedFiles] = useState([]);
+
+
     const handleClose = () => setShowModalAdd(false);
+
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
-        if(newDocument.lat === null || newDocument.lng === null){
+        if (newDocument.lat === null || newDocument.lng === null) {
             alert("Please select a position on the map");
             return;
         }
@@ -106,102 +117,80 @@ function AddDocument(props){
         }
 
         console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", newDocument);
-        props.handleAddDocument(newDocument);
-
-        setNewDocument({
-            id: null,
-            title: "",
-            stakeholders: "",
-            scale: "",
-            issuanceDate: "",
-            type: "",
-            connections: 0,
-            language: "",
-            pages: 0,
-            description: "",
-            lat: null,
-            lng: null,
-        });
+        props.handleAddDocumentToModal(newDocument);
+        props.handleNext();
 
     };
 
 
-    return(
+    return (
         <>
-        <Button
-            onClick={onBtnSelectAdd}
-            className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-            variant="primary"
-            style={{ width: "50px", height: "50px" }}
-            >
-            <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
-        </Button>
+            <Form onSubmit={handleSaveDocument}>
+                <Row>
+                    <Col md={5}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Title*</Form.Label>
 
-        <Modal show={showModalAdd} onHide={handleClose} size="xl">
-            <Modal.Header closeButton>
-                <Modal.Title>Insert New Document</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form onSubmit={handleSaveDocument}>
-                    <Row>
-                        <Col md={5}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Title*</Form.Label>
-                                
-                                <Form.Control 
-                                    type="text" 
-                                    placeholder="Enter document name" 
-                                    required={true}
-                                    value={newDocument.title} // per avere infup controlalto
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter document name"
+                                required={true}
+                                value={newDocument.title} // per avere infup controlalto
+
+                                onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Stakeholders*</Form.Label>
+                            <Select
+                                options={stakeholdersOptions} // Opzioni definite
+                                isClearable // Aggiunge una "x" per cancellare la selezione
+                                placeholder="Select Stakeholders"
+                                required={true}
+                                value={stakeholdersOptions.find(opt => opt.value === newDocument.stakeholders)}
+                                onChange={(selectedOption) =>
+                                    setNewDocument({
+                                        ...newDocument,
+                                        stakeholders: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Scale*</Form.Label>
+
+                            <Select
+                                options={scaleOptions} // Opzioni definite
+                                isClearable // Aggiunge una "x" per cancellare la selezione
+                                placeholder="Select Scale"
+                                required={true}
+                                onChange={(selectedOption) => {
+                                    const scaleValue = selectedOption ? selectedOption.value : "";
+
+                                    setIsArchitecturalScale(scaleValue === "Architectural Scale");
+
+                                    isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({...newDocument, scale: scaleValue})
                                     
-                                    onChange={(e) => setNewDocument({...newDocument, title: e.target.value})}
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3">
-                                <Form.Label>Stakeholders*</Form.Label>
-                                <Select
-                                    options={stakeholdersOptions} // Opzioni definite
-                                    isClearable // Aggiunge una "x" per cancellare la selezione
-                                    placeholder="Select Stakeholders"
-                                    required={true}
-                                    onChange={(selectedOption) => 
-                                        setNewDocument({
-                                            ...newDocument, 
-                                            stakeholders: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3">
-                                <Form.Label>Scale*</Form.Label>
-
-                                <Select
-                                    options={scaleOptions} // Opzioni definite
-                                    isClearable // Aggiunge una "x" per cancellare la selezione
-                                    placeholder="Select Scale"
-                                    required={true}
-                                    onChange={(selectedOption) => {
-                                
-                                            setNewDocument({...newDocument, 
-                                                scale: selectedOption ? selectedOption.value : ""
-                                            })
-                            
-                                            if(selectedOption){
-                                                if(selectedOption.value === "Architectural Scale"){
-                                                    setIsArchitecturalScale(true);
-                                                } else{
-                                                    // In this way i have always guaranteed that Architectural Scale Format form disappear
-                                                    setIsArchitecturalScale(false);
-                                                }
-                                            } else{
-                                                // In this way i have always guaranteed that Architectural Scale Format form disappear (case of Selected Option null)
-                                                setIsArchitecturalScale(false);
-                                            }
+                                    /*
+                                    if (selectedOption) {
+                                        if (selectedOption.value === "Architectural Scale") {
+                                            setIsArchitecturalScale(true);
+                                        } else {
+                                            // In this way i have always guaranteed that Architectural Scale Format form disappear
+                                            setIsArchitecturalScale(false);
                                         }
+                                    } else {
+                                        // In this way i have always guaranteed that Architectural Scale Format form disappear (case of Selected Option null)
+                                        setIsArchitecturalScale(false);
                                     }
-                                />
+                                        */
+
+                                }
+                                }
+                                value={isArchitecturalScale ?  scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
+                            />
 
                             </Form.Group>
                                                 {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}       
@@ -222,7 +211,10 @@ function AddDocument(props){
                                             }
                                         }}
                                         isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+                                        
                                     />
+                                    {/* I'm not setting the value, thevalue will be still tehre untill the comontent is not unmounted (refreshed the page). 
+                                    isArchitecturalScale  is still true untill you unmount the component */}
                                     <Form.Control.Feedback type="invalid">
                                             Please enter the scale in "x:y" format (e.g., 1:100).
                                     </Form.Control.Feedback>
@@ -243,73 +235,72 @@ function AddDocument(props){
                                 </Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Type*</Form.Label> {/* sono fixed*/}
-                                <Select
-                                    options={typeOptions}
-                                    isClearable
-                                    placeholder="Select Type"
-                                    required={true}
-                                    onChange={(selectedOption) => 
-                                        setNewDocument({...newDocument, type: selectedOption ? selectedOption.value : ""})
-                                    }
-                                />
-                            </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Language</Form.Label>
-                                <Select
-                                    options={languageOptions}
-                                    isClearable
-                                    placeholder="Select Language"
-                                    onChange={(selectedOption) => 
-                                        setNewDocument({...newDocument, language: selectedOption ? selectedOption.value : ""})
-                                    }
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3">
-                                <Form.Label>Pages</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    onChange={(e) => setNewDocument({...newDocument, pages: e.target.value})}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Description*</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={10}
-                                    required={true}
-                                    onChange={(e) => setNewDocument({...newDocument, description: e.target.value})}
-                                />
-                            </Form.Group>
-                            
-                            <ChosenPosition
-                                handleSetPostition={handleSetPostition}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Type*</Form.Label> {/* sono fixed*/}
+                            <Select
+                                options={typeOptions}
+                                isClearable
+                                placeholder="Select Type"
+                                required={true}
+                                onChange={(selectedOption) =>
+                                    setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
+                                }
+                                value={typeOptions.find(opt => opt.value === newDocument.type)}
                             />
+                        </Form.Group>
 
-                        </Col>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Language</Form.Label>
+                            <Select
+                                options={languageOptions}
+                                isClearable
+                                placeholder="Select Language"
+                                onChange={(selectedOption) =>
+                                    setNewDocument({ ...newDocument, language: selectedOption ? selectedOption.value : "" })
+                                }
+                                value={languageOptions.find(opt => opt.value === newDocument.language)}
+                            />
+                        </Form.Group>
 
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Button variant="secondary" onClick={handleClose}> Close</Button>
-                            <Button variant="primary" type='submit'> Save Changes, go to links </Button>
-                        </Col>
-                    </Row>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <p>All the fields contrassigned by * are mandatory. </p>
-            </Modal.Footer>
-        </Modal>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pages</Form.Label>
+                            <Form.Control
+                                type="text"
+                                onChange={(e) => setNewDocument({ ...newDocument, pages: e.target.value })}
+                                value={newDocument.pages}
+                            />
+                        </Form.Group>
+                    </Col>
 
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description*</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={10}
+                                required={true}
+                                onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
+                                value={newDocument.description}
+                            />
+                        </Form.Group>
 
+                        <ChosenPosition
+                            handleSetPostition={handleSetPostition}
+                        />
+                        
+                        <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
+                    </Col>
+
+                </Row>
+                <Row>
+                    <Col>
+                        <Button variant="secondary" onClick={()=>props.handleClose()}> Close</Button>
+                        <Button variant="primary" type='submit'> Save Changes, go to links </Button>
+                    </Col>
+                </Row>
+            </Form>
         </>
     )
 }

@@ -1,6 +1,6 @@
 class Document{
     constructor(docId, title, description, stackeholders, scale, issuanceDate, type, connections, language, pages){
-        this.id = docId;
+        this.docId = docId;
         this.title = title;
         this.description = description;
         this.stackeholders = stackeholders;

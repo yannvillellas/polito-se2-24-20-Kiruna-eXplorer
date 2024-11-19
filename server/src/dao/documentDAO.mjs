@@ -44,3 +44,17 @@ export const addDocument = (document) => {
         );
     });
 };
+
+export const deleteDocument = (docId) =>{
+    return new Promise((resolve, reject) => {
+        const sql = 'DELETE FROM Document WHERE docId=?'
+        db.run(sql,[docId],(err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        })
+    })
+}
+
