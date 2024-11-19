@@ -151,7 +151,7 @@ function Link(props) {
           </Form.Group>
           <Form.Group>
             <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
-            {/*doc1 && link &&*/selectedTypes.length > 0 && doc2 &&
+            {/*doc1 && link &&*/selectedTypes.length > 0 && doc2>=0 &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>

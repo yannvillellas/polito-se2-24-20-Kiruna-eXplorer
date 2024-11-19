@@ -82,7 +82,7 @@ function Map(props) {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
     
-    await handleGetFiles(doc.docId)
+    await handleGetFiles(docs[0].docId)
   };
 
   const groupedDocuments = documents.reduce((acc, doc) => {
@@ -216,6 +216,7 @@ function Map(props) {
                   onChange={(selected) => {
                     const relatedDocs = groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`];
                     setSelectedDoc(relatedDocs.find((doc) => doc.docId === selected.value));
+                    handleGetFiles(selected.value)
                   }}
                 />
               ) : (

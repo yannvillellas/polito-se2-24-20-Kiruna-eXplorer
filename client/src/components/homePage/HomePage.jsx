@@ -134,7 +134,8 @@ function HomePage(props) {
             setDocuments([...documents, stateDocument]);
 
             // adding files to the document
-            if(document.files){
+            if(document.files.length>0){
+                console.log(document.files)
                 console.log(docId)
                 console.log("chiamo l'upload di:",{...document,docId:docId })
                 handleUpload({...document, docId:docId});
