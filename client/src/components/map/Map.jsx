@@ -80,7 +80,7 @@ function Map(props) {
     aTag.remove();
   }
 
-  const handleMarkerClick = (docs) => {
+  const handleMarkerClick = async (docs) => {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
     
