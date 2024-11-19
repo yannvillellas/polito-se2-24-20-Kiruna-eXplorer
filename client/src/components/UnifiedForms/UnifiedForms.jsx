@@ -107,7 +107,7 @@ function UnifiedForms(props) {
             <Button
                 onClick={() => setOnlyLinkForm(true)}    
             >
-                <i class="bi bi-link-45deg"></i>
+                <i className="bi bi-link-45deg"></i>
             </Button>
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
