@@ -7,6 +7,7 @@ import Select from "react-select";
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import ChosenPosition from "../chosenPosition/ChosenPosition";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
@@ -52,16 +53,17 @@ function Map(props) {
   }, {});
 
 
-  const handleModifyPosition = async () => {
-    if(manualLat === null || manualLong === null){
+  const handleModifyPosition = async (newLan, newLng) => {
+    
+    if(newLan === null || newLng === null){
       alert("Latitude and longitude must be filled and should be numbers");
       return;
-    } else if(manualLat < -90 || manualLat > 90 || manualLong < -180 || manualLong > 180){
+    } else if(newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180){
         alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
         return;
     }
-    console.log("Modify position to ", manualLat, manualLong);
-    await props.handleModifyPosition(selectedDoc.docId, manualLat, manualLong);
+    console.log("Modify position to ", newLan, newLng);
+    await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
     setIsPositionToModify(false);
   };
 
@@ -138,8 +140,8 @@ function Map(props) {
                   <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
                     Modify position
                   </Button>
-
-                  {isPositionToModify && 
+                  {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
+                  {/* isPositionToModify && 
                     <Form.Group>
                       <Form.Group className="mb-3">
                           <Form.Label>Latitude</Form.Label>
@@ -171,7 +173,7 @@ function Map(props) {
                       </Button>
                     </Form.Group>
                   
-                  }
+                  */}
               </div>
             </>
           ) : (

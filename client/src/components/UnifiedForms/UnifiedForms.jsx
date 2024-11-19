@@ -5,7 +5,7 @@ import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-boots
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "../link/Link"
 import DocumentAPI from "../../api/documentAPI";
-import AddDocument from "../AddDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
+import AddDocument from "../addDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
 
 
 
