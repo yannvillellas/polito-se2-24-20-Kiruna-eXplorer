@@ -407,7 +407,7 @@ app.get("/api/files/:docId", (req, res) => {
 
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
-if (require.main === module) {
+//if (require.main === module) {
     app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
-}
+//}
 export default app;
