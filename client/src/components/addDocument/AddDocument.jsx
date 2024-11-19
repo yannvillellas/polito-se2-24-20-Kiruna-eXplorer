@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./addDocument.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
@@ -125,7 +126,7 @@ function AddDocument(props) {
 
     return (
         <>
-            <Form onSubmit={handleSaveDocument}>
+            <Form className="add-document-form" onSubmit={handleSaveDocument}>
                 <Row>
                     <Col md={5}>
                         <Form.Group className="mb-3">
@@ -297,7 +298,7 @@ function AddDocument(props) {
                 <Row>
                     <Col>
                         <Button variant="secondary" onClick={()=>props.handleClose()}> Close</Button>
-                        <Button variant="primary" type='submit'> Save Changes, go to links </Button>
+                        <Button variant="primary" type='submit'> Save </Button>
                     </Col>
                 </Row>
             </Form>

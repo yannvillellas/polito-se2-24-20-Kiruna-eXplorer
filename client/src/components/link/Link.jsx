@@ -87,9 +87,9 @@ function Link(props) {
   };
 
   return (
-    <Row>
+    <Row className="add-link-form">
       <Col md={6}>
-        <Form onSubmit={handleSubmit}>
+        <Form  onSubmit={handleSubmit}>
           <Form.Group as={Row} className="mb-3">
 
             <Form.Label column sm="5">
@@ -203,13 +203,14 @@ function Link(props) {
             }
 
             {props.alone == false ?
-              <Button variant="danger" onClick={() => props.confirmClose()}>Continue without links</Button>
+              <Button variant="danger" onClick={() => props.confirmClose()}>Skip links</Button>
               :
               ""
             }
           </Form.Group>
         </Form>
       </Col>
+      
     </Row>
   );
 }
