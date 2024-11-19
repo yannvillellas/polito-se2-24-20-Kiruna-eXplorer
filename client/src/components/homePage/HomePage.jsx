@@ -190,14 +190,6 @@ function HomePage(props) {
             </Row>
 
 
-
-
-            <Row>
-                <Col>
-                    <h1 className="text-light">Shenzen diagram</h1>
-                </Col>
-            </Row>
-
         </Container>
     );
 }
