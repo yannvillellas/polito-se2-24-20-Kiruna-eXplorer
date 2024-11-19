@@ -1,14 +1,23 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
+import { Routes, Route, Outlet, Navigate, useNavigate } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Modal,
+  Offcanvas,
+} from "react-bootstrap";
 
-import Map from '../map/Map';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import Map from "../map/Map";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
+
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
     shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
@@ -18,13 +27,11 @@ import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import UnifiedForms from "../UnifiedForms/UnifiedForms";
 
-
 /** BUGS:
- *  isLogin is not working properly always is undefined (i fixed it with a default value = true)
- *  Line 49: To be managed: docId: document.id, because the doc id will be given by the db after the insertion (Matteo suggestion)
- * 
+ *  
+ *
+ *
  */
-
 
 
 function HomePage(props) {
@@ -193,6 +200,5 @@ function HomePage(props) {
         </Container>
     );
 }
-
 
 export default HomePage;
