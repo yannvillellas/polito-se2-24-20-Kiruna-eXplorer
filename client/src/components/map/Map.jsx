@@ -1,7 +1,7 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState, useNavigate } from "react";
-import { Container, Modal, Button, Form} from "react-bootstrap";
+import { Container, Modal, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
 import DocumentAPI from "../../api/documentAPI";
@@ -58,21 +58,21 @@ function Map(props) {
     console.log("prendo i file di: ", docId)
     const files = await DocumentAPI.getFiles(docId);
     console.log("ricevo: ", files)
-    if(files){
+    if (files) {
       setFiles(Array.from(files))
-    }else{
+    } else {
       setFiles()
     }
-    
+
   }
 
   const handleDownload = (file) => {
-    const URL=`http://localhost:3001/${file.path.slice(1)}`
+    const URL = `http://localhost:3001/${file.path.slice(1)}`
     console.log(URL)
-    
+
     const aTag = document.createElement("a");
-    aTag.href=URL
-    aTag.setAttribute("download",file.name)
+    aTag.href = URL
+    aTag.setAttribute("download", file.name)
     document.body.appendChild(aTag)
     aTag.click();
     aTag.remove();
@@ -81,7 +81,7 @@ function Map(props) {
   const handleMarkerClick = async (docs) => {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
-    
+
     await handleGetFiles(docs[0].docId)
   };
 
@@ -96,13 +96,13 @@ function Map(props) {
 
 
   const handleModifyPosition = async (newLan, newLng) => {
-  
-    if(newLan === null || newLng === null){
+
+    if (newLan === null || newLng === null) {
       alert("Latitude and longitude must be filled and should be numbers");
       return;
-    } else if(newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180){
-        alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
-        return;
+    } else if (newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180) {
+      alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
+      return;
     }
     console.log("Modify position to ", newLan, newLng);
     await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
@@ -240,50 +240,19 @@ function Map(props) {
                 <p>
                   <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
                 </p>
-                  <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
-                    Modify position
-                  </Button>
-                  {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
-                  {/* isPositionToModify && 
-                    <Form.Group>
-                      <Form.Group className="mb-3">
-                          <Form.Label>Latitude</Form.Label>
-                          <Form.Control 
-                              type="number" 
-                              placeholder="Enter latitude" 
-                              step="0.000001" 
-                              required={true}
-                              onChange={(e) => setManualLat(parseFloat(e.target.value))}
-                          />
-                      </Form.Group>
-
-                      <Form.Group className="mb-3">
-                          <Form.Label>Longitude</Form.Label>
-                          <Form.Control 
-                              type="number" 
-                              placeholder="Enter longitude" 
-                              step="0.000001" 
-                              required={true}
-                              onChange={(e) => setManualLong(parseFloat(e.target.value))}
-                          />
-                      </Form.Group>
-
-                      <Button variant="primary" onClick={handleModifyPosition} >
-                          Submit
-                      </Button>
-                      <Button variant="primary" onClick={() => setIsPositionToModify(false)}> 
-                        Cancel
-                      </Button>
-                    </Form.Group>
-                  
-                  */}
+                <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
+                  Modify position
+                </Button>
+                {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
               </div>
-              {files ? files.map(f => {
-                    return (<>
-                      <Button onClick={()=>handleDownload(f)}><i className="bi bi-file-earmark-text-fill"></i></Button>
-                      <p>{f.name}</p>
-                    </>)
-               }) : ""}
+              {files ? files.map((f, index) => (
+                <div key={f.name || index}>
+                  <Button onClick={() => handleDownload(f)}>
+                    <i className="bi bi-file-earmark-text-fill"></i>
+                  </Button>
+                  <p>{f.name}</p>
+                </div>
+              )) : ""}
             </>
           ) : (
             <p>Seleziona un marker per visualizzare i dettagli.</p>
