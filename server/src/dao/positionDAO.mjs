@@ -30,3 +30,16 @@ export const addPosition = (docId, lat, lng) => {
         });
     });
 }
+
+
+export const updatePosition = (docId, lat, lng) => {
+    return new Promise((resolve, reject) => {
+        db.run("UPDATE Position SET latitude = ?, longitude = ? WHERE docId = ?", [lat, lng, docId], (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+}

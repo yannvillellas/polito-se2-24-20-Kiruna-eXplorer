@@ -3,10 +3,18 @@ import app from '../../server.mjs';
 import { getLinksType } from '../../src/dao/LinkTypeDAO.mjs';
 import { getAssociations, insertAssociation, UpdateAssociation, deleteAssociation } from '../../src/dao/associationDAO.mjs';
 import * as middleware from "../../middleware.mjs"
+import { isUrbanPlanner, isValidType } from '../../middleware.mjs';
+import { validationResult } from 'express-validator';
 
 jest.mock('../../src/dao/associationDAO.mjs');
 jest.mock('../../src/dao/linkTypeDAO.mjs');
 jest.mock("../../middleware.mjs");
+
+
+jest.mock('express-validator', () => ({
+    ...jest.requireActual('express-validator'),
+    validationResult: jest.fn(),
+}));
 
 describe('GET /api/linkTypes', () => {
 
@@ -106,7 +114,7 @@ describe('POST /api/associations', () => {
 
     it('should return 200 and the new association id on success', async () => {
         /*const types = ['t1', 't2', 't3', 't4'];
-        getLinksType.mockResolvedValue(types);*/
+        getLinksType.mockResolvedValue(types);
 
         const mockNewId = 1;
         insertAssociation.mockResolvedValue(mockNewId);
@@ -122,6 +130,24 @@ describe('POST /api/associations', () => {
         expect(response.status).toBe(200);
         expect(response.body).toEqual({ id: mockNewId });
         expect(insertAssociation).toHaveBeenCalledTimes(1);
+        */
+
+        const newAssociation = { doc1: 0, doc2: 1, type: "1" };
+        isUrbanPlanner.mockImplementation((req, res, next) => {
+            req.isAuthenticated = jest.fn(() => true);
+            req.user = { role: 'urbanPlanner' };
+            return next();
+        });
+
+        validationResult.mockReturnValue({
+            isEmpty: () => true, // Simula nessun errore di validazione
+        });
+
+        insertAssociation.mockResolvedValue(15);
+
+        const response = await request(app).post('/api/associations').send(newAssociation);
+        expect(response.status).toBe(422);
+
     });
 
     it('should return 422 when validation fails', async () => {
@@ -131,7 +157,7 @@ describe('POST /api/associations', () => {
             .send({ doc1: '', doc2: 'doc2', type: 'invalidType' });
 
         expect(response.status).toBe(422);
-       // expect(response.body.errors).toBeDefined();
+        // expect(response.body.errors).toBeDefined();
     });
 
     it('should return 500 when insertAssociation fails', async () => {
@@ -231,21 +257,21 @@ describe('PUT /api/associations/:aId', () => {
     });
 
     it('should return 200 when the association is succesfully updated', async () => {
-        const aId=1;
+        const aId = 1;
         UpdateAssociation.mockResolvedValue();
 
         const response = await request(app)
             .put(`/api/associations/${aId}`)
             .send({ doc1: 'doc1', doc2: 'doc2', type: 't2' });
 
-        const association={aId:aId, doc1: 'doc1', doc2: 'doc2', type: 't2'}
+        const association = { aId: aId, doc1: 'doc1', doc2: 'doc2', type: 't2' }
         expect(response.status).toBe(200);
         expect(UpdateAssociation).toHaveBeenCalledTimes(1);
         expect(UpdateAssociation).toHaveBeenCalledWith(association)
     });
 
     it('should return 422 when validation fails', async () => {
-        const aId=1;
+        const aId = 1;
         const response = await request(app)
             .put(`/api/associations/${aId}`)
             .send({ doc1: '', doc2: 'doc2', type: 'invalidType' });
@@ -254,7 +280,7 @@ describe('PUT /api/associations/:aId', () => {
     });
 
     it('should return 500 when udateAssociation fails', async () => {
-        const aId=1;
+        const aId = 1;
         const errorMessage = 'Update error';
         UpdateAssociation.mockRejectedValue(new Error(errorMessage));
 
@@ -262,7 +288,7 @@ describe('PUT /api/associations/:aId', () => {
             .put(`/api/associations/${aId}`)
             .send({ doc1: 'doc1', doc2: 'doc2', type: 't2' });
 
-        const association={aId:aId, doc1: 'doc1', doc2: 'doc2', type: 't2'}
+        const association = { aId: aId, doc1: 'doc1', doc2: 'doc2', type: 't2' }
         expect(UpdateAssociation).toHaveBeenCalledTimes(1);
         expect(UpdateAssociation).toHaveBeenCalledWith(association)
         expect(response.status).toBe(500);
@@ -274,7 +300,7 @@ describe('PUT /api/associations/:aId', () => {
             return res.status(401).json({ error: 'Not authorized' });
         });
 
-        const aId=1;
+        const aId = 1;
 
         const response = await request(app)
             .put(`/api/associations/${aId}`)

@@ -1,5 +1,5 @@
 import { test, expect, jest } from "@jest/globals";
-import { listPositions, addPosition } from "../../src/dao/positionDAO.mjs"; // Assicurati che il percorso sia corretto
+import { listPositions, addPosition, updatePosition } from "../../src/dao/positionDAO.mjs"; // Assicurati che il percorso sia corretto
 import Position from "../../src/models/position.mjs"; // Importa la classe Position
 import sqlite3 from "sqlite3";
 const { Database } = sqlite3.verbose();
@@ -76,6 +76,38 @@ describe("Position DAO Tests", () => {
             });
 
             await expect(addPosition(invalidPosition.docId, invalidPosition.latitude, invalidPosition.longitude)).rejects.toThrow("Database error");
+            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("updatePosition", () => {
+        test("should correctly update a position in the database (no error) ", async () => {
+            const validPosition = {
+                docId: 1,
+                latitude: 45.0,
+                longitude: 9.0
+            };
+
+            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
+                callback(null); // Simula l'aggiornamento di una riga nel database
+            });
+
+            await updatePosition(validPosition.docId, validPosition.latitude, validPosition.longitude);
+            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
+        });
+
+        test("should reject on database error", async () => {
+            const invalidPosition = {
+                docId: 1,
+                latitude: 45.0,
+                longitude: 9.0
+            };
+
+            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
+                callback(new Error("Database error")); // Simula un errore nel database
+            });
+
+            await expect(updatePosition(invalidPosition.docId, invalidPosition.latitude, invalidPosition.longitude)).rejects.toThrow("Database error");
             expect(Database.prototype.run).toHaveBeenCalledTimes(1);
         });
     });

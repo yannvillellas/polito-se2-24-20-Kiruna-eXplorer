@@ -1,0 +1,29 @@
+
+header h1 {
+    color: #333;
+    margin-top: 20px;
+    font-size: 2rem;
+    text-align: center;
+  }
+  
+
+  .custom-table thead th {
+    background-color: #87CEEB !important; 
+    color: #333 !important;
+    text-align: left; 
+    white-space: nowrap; 
+    padding: 10px;
+  }
+  
+  .custom-table tbody tr:hover {/* why doesnt work??? */
+    background-color: #93d8f8 !important; 
+    cursor: pointer;
+  }
+  
+
+  .custom-table th,
+  .custom-table td {
+    padding: 8px;
+    border-color: #ddd;
+  }
+  
