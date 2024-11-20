@@ -1,6 +1,6 @@
 /* src/components/link/Link.css */
 
-.container {
+/*.container {
     display: grid;
     grid-template-areas: 
       "header header"
@@ -98,5 +98,10 @@
   .cancelButton {
     background-color: #6c757d;
     color: white;
-  }
+  }*/
   
+
+
+  .add-link-form {
+    background-color: white !important; /* Assicura uno sfondo bianco */
+}

@@ -147,3 +147,80 @@ describe ('POST /api/positions', () => {
         expect(response.body).toEqual({ error: errorMessage });
     });
 });
+
+
+
+describe('PUT /api/positions/:posId', () => {
+    it('should return 200 and update a position in the database', async () => {
+        const mockPosition = {
+            posId: 1,
+            docId: 1,
+            latitude: 45.0,
+            longitude: 9.0
+        };
+
+        isUrbanPlanner.mockImplementation((req, res, next) => {
+            req.isAuthenticated = jest.fn(() => true);
+            req.user = { role: 'urbanPlanner' };
+            return next();
+          });
+
+        validationResult.mockReturnValue({
+            isEmpty: () => true, // Simula nessun errore di validazione
+        });
+
+        const response = await request(app)
+            .put(`/api/positions/${mockPosition.posId}`)
+            .send(mockPosition);
+
+        expect(response.status).toBe(200);
+    });
+
+    it('should return 400 when the request body is invalid', async () => {
+        const mockPosition = {
+            posId: 1,
+            docId: 1,
+            latitude: 45.0,
+            longitude: '9.0' // Invalid value, should be a number
+        };
+
+        isUrbanPlanner.mockImplementation((req, res, next) => {
+            req.isAuthenticated = jest.fn(() => true);
+            req.user = { role: 'urbanPlanner' };
+            return next();
+        });
+
+        validationResult.mockReturnValue({
+            isEmpty: () => false, // Simula un errore di validazione
+            array: () => [{ msg: 'Invalid longitude', param: 'longitude' }]
+        });
+
+        const response = await request(app)
+            .put(`/api/positions/${mockPosition.posId}`)
+            .send({});
+
+        expect(response.status).toBe(400);
+    });
+
+    it('should return 401 when the user is not authorized', async () => {
+        const mockPosition = {
+            posId: 1,
+            docId: 1,
+            latitude: 45.0,
+            longitude: 9.0
+        };
+
+        isUrbanPlanner.mockImplementation((req, res, next) => {
+            req.isAuthenticated = jest.fn(() => true);
+            req.user = { role: 'citizen' }; // Not an urban planner
+            return res.status(401).json({ error: 'Not authorized' });
+          });
+
+        const response = await request(app)
+            .put(`/api/positions/${mockPosition.posId}`)
+            .send(mockPosition);
+
+        expect(response.status).toBe(401);
+    });
+
+});
