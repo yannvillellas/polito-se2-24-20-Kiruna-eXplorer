@@ -8,7 +8,7 @@ import { check, validationResult } from 'express-validator';
 import { getUser, createUser } from './src/dao/userDAO.mjs';
 import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
 import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
-import { getLinksType } from './src/dao/LinkTypeDAO.mjs';
+import { getLinksType } from './src/dao/linkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
 import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
 

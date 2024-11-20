@@ -1,4 +1,4 @@
-import { getLinksType } from "./src/dao/LinkTypeDAO.mjs";
+import { getLinksType } from "./src/dao/linkTypeDAO.mjs";
 import fs from "fs";
 
 export const isUrbanPlanner = (req, res, next) => {
