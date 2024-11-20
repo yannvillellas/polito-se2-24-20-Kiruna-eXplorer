@@ -1,5 +1,5 @@
 import {db} from '../database/db.mjs'
-import User from '../models/User.mjs'
+import User from '../models/user.mjs'
 
 export const getUser = (username, password) => {
   return new Promise((resolve, reject) => {

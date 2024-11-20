@@ -1,4 +1,4 @@
-import { getLinksType } from "./src/dao/LinkTypeDAO.mjs";
+import { getLinksType } from "./src/dao/linkTypeDAO.mjs";
 
 export const isUrbanPlanner = (req, res, next) => {
     if (req.isAuthenticated() && req.user.role === 'urbanPlanner') {
