@@ -1,6 +1,6 @@
 services:
   client:
-    image: yannvillellas/polito-se2-24-20-kiruna-explorer-client:latest
+    image: yannvillellas/polito-se2-24-20-kiruna-explorer:client
     build:
       context: ./client
       dockerfile: Dockerfile
@@ -10,7 +10,7 @@ services:
       CHOKIDAR_USEPOLLING: "true" # Enable hot reload in Docker
 
   server:
-    image: yannvillellas/polito-se2-24-20-kiruna-explorer-server:latest
+    image: yannvillellas/polito-se2-24-20-kiruna-explorer:server
     build:
       context: ./server
       dockerfile: Dockerfile
