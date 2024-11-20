@@ -178,7 +178,7 @@ function HomePage(props) {
         <Container fluid className="mt-5">
             <Row>
                 <Col style={{ position: "relative" }}>
-                    <Map documents={documents} handleModifyPosition={handleModifyPosition}/>
+                    <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner}/>
                     {isUrbanPlanner && (
                         <div className="add-document-container">
                             <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />
