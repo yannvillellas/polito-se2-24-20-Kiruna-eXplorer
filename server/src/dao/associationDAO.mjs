@@ -1,6 +1,6 @@
 import { db } from "../database/db.mjs"
 import Association from "../models/association.mjs"
-import { getTypeIdByType } from "./LinkTypeDAO.mjs"
+import { getTypeIdByType } from "./linkTypeDAO.mjs"
 
 //get association for a specific docId
 export const getAssociations = (docId) => {
