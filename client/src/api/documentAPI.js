@@ -32,7 +32,7 @@ const addDocument = async (document) => {
         
         title: document.title, stakeholders: document.stakeholders, 
         scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
-        connections: document.connections, language: document.language, pages: document.pages, 
+        connections: document.connections, language: document.language, pages: `${document.pages}`, 
         description: document.description,
       }),
 
