@@ -240,9 +240,9 @@ function Map(props) {
                 <p>
                   <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
                 </p>
-                <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
+                {props.isUrbanPlanner && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
                   Reposition
-                </Button>
+                </Button>}
                 {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
               </div>
               <div className="download-buttons-container">

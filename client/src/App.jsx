@@ -84,10 +84,16 @@ function App() {
             const newUser = await UserAPI.createUser(credentials);
             if (newUser) {
                 console.log("Registration successful:");
-                setUser(newUser)
-                setLoggedIn(true);
-                setIsUrbanPlanner(true);
-                navigate('/homePage');
+                const response = await AuthAPI.logIn(credentials)
+                if(response){
+                    setUser(newUser)
+                    setLoggedIn(true);
+                    setIsUrbanPlanner(true);
+                    navigate('/homePage');
+                }else{
+                    console.log("errore durante il login")
+                    navigate('/login')
+                }
             }
         } catch (err) {
             console.error("Registration error:", err.message);
@@ -115,10 +121,10 @@ function App() {
             >
                 {/* Routes */}
                 <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/login'} />} />
-                <Route
+                {/*<Route
                     path="/homePage"
                     element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}
-                />
+                />*/}
                 <Route
                     path="/login"
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
@@ -126,7 +132,7 @@ function App() {
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
-                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}/>
+                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
                 <Route path="/documentPage" element={<DocList />} />
                 {/*<Route path="/search" element={<SearchDocuments />} />*/}
                 {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
