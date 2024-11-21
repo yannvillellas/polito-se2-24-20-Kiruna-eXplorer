@@ -1,4 +1,4 @@
-TEMPLATE FOR RETROSPECTIVE (Team #20)
+RETROSPECTIVE Sprint2 (Team #20)
 =====================================
 
 The retrospective should include _at least_ the following
@@ -37,11 +37,11 @@ sections:
 
 | Story        | # Tasks | Points | Hours est. | Hours actual |
 |--------------|---------|--------|------------|--------------|
-| _#0_         |   12    |    -   |  58h       |  55h 35m     |
-| KX-1         |   6     |    2   |  10h 30m   |    9h 30m    |
-| KX-2         |   6     |    1   |   9h       |   12h 25m    |
-| KX-3         |   6     |    1   |   7h       | 7h  55m      |
-| KX-4         |   6     |    2   |   11h 30m  |   10h 35m    |
+| _#0_         |   25    |    -   |   59h 55m  |   60h 5m     |
+| KX-5         |   7     |    1   |   2h 5m    |   2h 45m     |
+| KX-6         |   4     |    2   |   13h 15m  |   12h 30m    |
+| KX-7         |   6     |    2   |   13h 15m  |   12h 55m    |
+| KX-8         |   3     |    1   |   7h 30m   |   7h 45m     |
 
     To be noted:
     1 - _#0_ has been intendend as "uncategorized cards" (our project-setup phase)
@@ -60,11 +60,11 @@ sections:
 
 - Hours per task average, standard deviation (estimate and actual)
 
-      Hours per task average (estimated): 2h 40m (2.667h) 
-      Standard deviation (estimated): 3h 17m  (3.28h)
+      Hours per task average (estimated): 2h 8m (2.13h) 
+      Standard deviation (estimated): 2h 20mm  (2.34h)
 
-      Hours per task average (actual): 2h 40m (2.667h)
-      Standard deviation (actual): 3h 11m (3.18h)
+      Hours per task average (actual): 2h 8m (2.13h)
+      Standard deviation (actual): 2h 28m (2.47h)
 
 - Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1
 
@@ -74,23 +74,23 @@ sections:
 - Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n
 
   $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| $$
-  > Result: 0.326
+  > Result: 0.24
   
 ## QUALITY MEASURES
 
 - Unit Testing:
-  - Total hours estimated : 3d
-  - Total hours spent : 3d 3h 50m
-  - Nr of automated unit test cases : 90
+  - Total hours estimated : 6h 
+  - Total hours spent : 7h 50m
+  - Nr of automated unit test cases : 71
   - Coverage (if available) : white box coverage
   <br></br>
   ![Alt text](./immagini/testCoverage.png)
 - E2E testing:
-  - Total hours estimated : 5
-  - Total hours spent : 6
+  - Total hours estimated : 7h 50m
+  - Total hours spent : 4h 40m
 - Code review
-  - Total hours estimated : 4
-  - Total hours spent : 4.25
+  - Total hours estimated : 7h 30m
+  - Total hours spent : 8h
   
 ## ASSESSMENT
 
