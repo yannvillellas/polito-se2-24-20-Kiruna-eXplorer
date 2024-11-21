@@ -40,11 +40,25 @@ This document explains how to run the project using Docker images and containers
    docker-compose up --build
    ```
 
-### Method 3 (Without Docker): Run Locally
+### Method 3 (without Docker): Run Locally
 
 #### Prerequisites
 
-Ensure that [Node.js](https://nodejs.org/) is installed on your system.
+- Ensure that [Node.js](https://nodejs.org/) is installed on your system.
+
+#### Clone the Repository
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yannvillellas/polito-se2-24-20-kiruna-explorer.git
+   ```
+
+1. Navigate to the project directory:
+
+   ```bash
+   cd polito-se2-24-20-kiruna-explorer
+   ```
 
 #### Steps to Start the Backend
 
@@ -95,6 +109,9 @@ Ensure that [Node.js](https://nodejs.org/) is installed on your system.
 
 - Open a browser and navigate to [http://localhost:5173](http://localhost:5173).
 - This will open the React-based frontend application.
+- If you want to connnect as an urban planner, you can use the following credentials:
+  - username: user1
+  - password: password1
 
 ### Access the Backend API
 
