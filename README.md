@@ -146,3 +146,6 @@ This document explains how to run the project using Docker images and containers
 
 - Check that the backend (`server`) container is running properly.
 - Verify the environment variables, especially `DB_PATH` in the backend.
+
+
+
