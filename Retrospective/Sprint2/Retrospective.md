@@ -1,12 +1,6 @@
-RETROSPECTIVE Sprint2 (Team #20)
+# RETROSPECTIVE Sprint2 (Team #20)
+
 =====================================
-
-The retrospective should include _at least_ the following
-sections:
-
-- [process measures](#process-measures)
-- [quality measures](#quality-measures)
-- [general assessment](#assessment)
 
 ## PROCESS MEASURES
 
@@ -79,11 +73,10 @@ sections:
 ## QUALITY MEASURES
 
 - Unit Testing:
-  - Total hours estimated : 6h 
+  - Total hours estimated : 6h
   - Total hours spent : 7h 50m
   - Nr of automated unit test cases : 71
   - Coverage (if available) : white box coverage
-  <br></br>
   ![Alt text](./immagini/testCoverage.png)
 - E2E testing:
   - Total hours estimated : 7h 50m
@@ -91,37 +84,34 @@ sections:
 - Code review
   - Total hours estimated : 7h 30m
   - Total hours spent : 8h
-  
+
 ## ASSESSMENT
 
 - What caused your errors in estimation (if any)?
 
-      We estimated tasks time as a team, but we did not consider the individual's skills and preferences. This led to some team members spending time on learning tasks they were not familiar with.  
-      To solve this problem, we should first assign tasks to the team members and then estimate the time required for each task. This way, we can consider the individual's skills and make a more accurate estimation.
+      We encountered some technical challenges that we did not expect, which caused us to spend more time on some tasks than we had estimated.
 
 - What lessons did you learn (both positive and negative) in this sprint?
 
       Positive lessons:
-      We learned to work on new library (Leaflet).
-      Understanding the user stories by designing a prototype and a demo to clarify to the team members what the user stories are about.
+      We understood each member's skills and preferences and we did assign tasks based on individual skills and preferences, so each person's performance was better than the previous sprint with less stress.
 
       Negative lessons:
-      We hat to understand each member's skills and preferences because we did not assign tasks based on individual skills and preferences.
+      We tried to focus on improving the UI/UX but because of problems that arise we lacked of time to improve it.
       
 - Which improvement goals set in the previous retrospective were you able to achieve?
 
-      We organized the structure of the project by defining database tables and clarifying the overall architecture. We spent more time to design diagrams to visualize project flow and components.
-      We also created separate branches for each user story and sub-branches for frontend/backend work.
+      We slightly improved our planning and estimation skills by assigning tasks to team members based on their skills. Then we estimated the time required for each task.
 
 - Which ones you were not able to achieve? Why?
 
-      We did not focus to achieve improvement in UI/UX because we focused more on the functionality of the project.
+      We did not achieve big improvements in UI/UX because we focused more on the functionality of the project.
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
 
       We will focus on improving the UI/UX of the project.
-      We will also try to improve our planning and estimation skills by assigning tasks to team members based on their skills and then estimating the time required for each task.
+      We should plan the last meeting date earlier so we can have more time to solve problems if they arise before the sprint review.
 
 - One thing you are proud of as a Team!!
 
-      We are proud that, despite the technical challenges, we were able to complete four user stories.
+      We are proud that, despite the technical challenges, we were able to complete four user stories. We were able to help each other and solve problems together.
