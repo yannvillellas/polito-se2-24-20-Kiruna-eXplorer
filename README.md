@@ -110,8 +110,17 @@ This document explains how to run the project using Docker images and containers
 - Open a browser and navigate to [http://localhost:5173](http://localhost:5173).
 - This will open the React-based frontend application.
 - If you want to connnect as an urban planner, you can use the following credentials:
-  - username: user1
-  - password: password1
+  - username:
+
+      ```bash
+      user1
+      ```
+
+  - password:
+  
+      ```bash
+      password1
+      ```
 
 ### Access the Backend API
 
