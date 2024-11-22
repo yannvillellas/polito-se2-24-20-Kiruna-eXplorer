@@ -8,8 +8,8 @@ function Link(props) {
 
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [doc2, setDoc2] = useState("");
-  const [doc1, setDoc1] = useState("");
+  const [doc2, setDoc2] = useState([]);
+  const [doc1, setDoc1] = useState([]);
 
   // It works
   // Funzione per gestire il cambiamento della checkbox
@@ -43,6 +43,7 @@ function Link(props) {
     e.preventDefault();
 
     try {
+      let errors=[]
       if (!props.alone) {
         const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document
         for (let link of selectedTypes) {
@@ -51,9 +52,16 @@ function Link(props) {
             type: link,
             doc2: doc2
           };
-          await associationAPI.createAssociation(association);
-
+          const response=await associationAPI.createAssociation(association);
+          //console.log(response)
+          if(response.msg){
+            const doc1Title=props.documents.find(doc => doc.docId === association.doc1)
+            const doc2Title=props.documents.find(doc => doc.docId === association.doc2)
+            errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
+            
+          }
         }
+        props.setErrorMsg(errors)
         props.handleClose(); // Close modal after submission
 
       }else{  //the link form is detached from addDocument form
@@ -63,8 +71,14 @@ function Link(props) {
             type: link,
             doc2: doc2
           };
-          await associationAPI.createAssociation(association);
+          const response=await associationAPI.createAssociation(association);
+          if(response.msg){
+            const doc1Title=props.documents.find(doc => doc.docId === association.doc1)
+            const doc2Title=props.documents.find(doc => doc.docId === association.doc2)
+            errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
+          }
         }
+        props.setErrorMsg(errors)
         setDoc1("")
         props.setOnlyLinkForm(false)
       }

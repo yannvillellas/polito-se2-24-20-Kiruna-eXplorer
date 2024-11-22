@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Modal, Offcanvas, Alert } from "react-bootstrap";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "./link/Link"
 import DocumentAPI from "../../../api/documentAPI";
@@ -105,12 +105,12 @@ function UnifiedForms(props) {
             </Button>
 
             {/*Modal only for link documents*/}
-            <Modal show={onlyLinkForm} onHide={()=>setOnlyLinkForm(false)} size="xl">
+            <Modal show={onlyLinkForm} onHide={() => setOnlyLinkForm(false)} size="xl">
                 <Modal.Header closeButton>
                     <Modal.Title>Insert link</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Link documents={props.documents} alone={true} setOnlyLinkForm={setOnlyLinkForm}></Link>
+                    <Link documents={props.documents} alone={true} setOnlyLinkForm={setOnlyLinkForm} setErrorMsg={props.setErrorMsg}></Link>
                 </Modal.Body>
             </Modal>
             {/************************************/}
@@ -125,7 +125,12 @@ function UnifiedForms(props) {
                             <AddDocument handleAddDocumentToModal={handleAddDocumentToModal} handleNext={handleNext} newDocument={newDocument} handleClose={handleClose} />
                         </Carousel.Item>
                         <Carousel.Item>
-                            <Link documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false}></Link>
+                            <Link 
+                                documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} 
+                                newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} 
+                                confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false} 
+                                setErrorMsg={props.setErrorMsg}>
+                            </Link>
                         </Carousel.Item>
                     </Carousel>
 

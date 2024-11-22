@@ -80,3 +80,25 @@ export const UpdateAssociation = (association) => {
         }
     });
 };
+
+
+/* to test */
+export const CheckAssociation = (association)=>{
+    return new Promise(async (resolve, reject) => {
+        try {
+            const typeId = await getTypeIdByType(association.type);
+            const sql = 'SELECT * FROM Association WHERE (doc1=? OR doc1=?) AND (doc2=? OR doc2=?) AND typeId=?';
+            db.all(sql, [parseInt(association.doc1, 10), parseInt(association.doc2, 10), parseInt(association.doc1, 10), parseInt(association.doc2, 10),parseInt(typeId, 10)], (err,rows) => {
+                if (err) {
+                    console.log(err)
+                    reject(err);
+                } else {
+                    console.log(rows)
+                    resolve(rows); //if rows is undefined the association desn't exist
+                }
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
