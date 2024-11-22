@@ -30,25 +30,19 @@ function ChosenPosition(props) {
     const handleOptionChange = (e) => {
         setSelectedOption(e.target.value); // Aggiorna lo stato con il valore selezionato
         if(e.target.value === 'allMunicipalities'){
-            console.log('allMunicipalities');
             props.handleSetPostition(67.8558, 20.2253); 
-            // fixes the problem that after manual insertion you came back from the map and the position was still the one you manually inserted
             setManualLat(null);
             setManualLong(null);   
         } else if(e.target.value === 'pointToPoint'){
-            console.log('pointToPoint');
             setPositionAlreadyChosen(false); // when the radio button is clicked the position is not yet chosen (otherwise the map will not be shown)
-            // fixes the problem that after manual insertion you came back from the map and the position was still the one you manually inserted
             setManualLat(null);
             setManualLong(null);
         } else if(e.target.value === 'manualInsertion'){
-            console.log('manualInsertion');
             setShowLatLongForm(true);
         }
     };
 
     const handleLatLongFormSubmit = () => {
-        console.log("Sono in ChosenPosition.jsx, ho cliccato su submit per la latitudine: ",manualLat," e longitudine: ",manualLong);
         if(manualLat === null || manualLong === null){
             alert("Latitude and longitude must be filled and should be numbers");
             return;
@@ -65,7 +59,6 @@ function ChosenPosition(props) {
         setManualLat(null);
         setManualLong(null);
         setShowLatLongForm(true)
-        console.log("Sono in ChosenPosition.jsx, ho cliccato su change lat long i valori attuali sono (se vedi valori in realtà sono null, null): ", manualLat, manualLong);
     };
 
 
@@ -76,8 +69,6 @@ function ChosenPosition(props) {
           },
         });
     
-        console.log("Sono in Chosen Position.jsx, ho ricavato dal click la posizione: ",position);
-
         return position ? <Marker position={position}></Marker> : null;
     }
 

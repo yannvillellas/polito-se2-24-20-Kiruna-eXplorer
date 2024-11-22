@@ -1,13 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./DocList.css";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
-import { Table, Container, Spinner, Button } from "react-bootstrap";
+import { Table, Container, Button } from "react-bootstrap";
 import Select from "react-select";
-
-import "../../DocList.css";
 import PositionAPI from "../../api/positionAPI";
-
 
 /**
  * 
@@ -33,7 +30,6 @@ function DocList() {
   const fetchDocuments = async () => {
     try {
       const res = await DocumentAPI.listDocuments();
-      // console.log("Sono in DocList.jsx, ricevo dal db i documenti: ", res);
       setDocuments(res || []);
       setAllDocuments(res || []);
     } catch (error) {
@@ -59,7 +55,6 @@ function DocList() {
         } else {
           // Aggiorna solo la lista completa per evitare sovrascritture
           setAllDocuments(res || []);
-          console.log("Polling: Document list updated in background.");
         }
       } catch (error) {
         console.error("Error during polling:", error);
@@ -133,7 +128,6 @@ function DocumentTable(props) {
 }
 
 function DocumentRow(props) {
-  // console.log("Sono in DocList.jsx, DocumentRow, ricevo dal db il documento: ", props.document);
   return (
     <tr >
       <DocumentData document={props.document} />
@@ -151,11 +145,9 @@ function DocumentData(props) {
 
         // Trova la posizione del documento basandosi sul docId di props.document
         const docPos = pos.find((p) => p.docId === props.document.docId);
-        //console.log("Sono in DocList.jsxm DocumentData, ricevo dal db la posizione: (doId, pos)", props.document.docId, docPos);
 
         if (docPos) {
           setPosition({ lat: docPos.latitude, lng: docPos.longitude });
-          // console.log("Sono in DocList.jsx, DocumentData, ho settato la posizione: ", docPos);
         } else {
           setPosition({ lat: "N/A", lng: "N/A" });
         }
@@ -195,7 +187,6 @@ function DocumentFile(props) {
     const fetchFiles = async () => {
       try {
         const files = await DocumentAPI.getFiles(props.document.docId);
-        // console.log("Sono in DocList.jsx, DocumentFile, ricevo dal db i files: ", props.document.docId, files);
         if (files) {
           setFiles(Array.from(files));
         } else {
@@ -210,7 +201,6 @@ function DocumentFile(props) {
 
   const handleDownload = (file) => {
     const URL = `http://localhost:3001/${file.path.slice(1)}`
-    // console.log(URL)
 
     const aTag = document.createElement("a");
     aTag.href = URL
@@ -238,9 +228,6 @@ function DocumentFile(props) {
     </td>
   );
 }
-
-
-
 
 
 export default DocList;

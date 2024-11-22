@@ -1,21 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./addDocument.css";
-import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
+import React, { useState } from "react";
+import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
-import ChosenPosition from "../chosenPosition/ChosenPosition";
-import AddOriginalSource from "../addOriginalSource/AddOriginalSource";
-/**BUGS: 
- *  
- *  Line 137: The date there are no restriction on only year (has to be fixed by Yann)
- *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."
- *  Should be displayed Connections as a field (added by counting how many connections for a specific document in the database)
- *  Line 173: The field "Pages" should be a number field, not a text field but oit could be like: 111, 2, -, 1-43 ; (you can see by checking "card" folder)
- *  Should be checked wich fields are mandatory and which are not
- *  
- * 
+import ChosenPosition from "../../chosenPosition/ChosenPosition";
+import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
+/**BUGS:  
+ *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
 
 function AddDocument(props) {
@@ -43,7 +35,6 @@ function AddDocument(props) {
 
     const handleAddedFiles = (files) => {
         setNewDocument({ ...newDocument, files: files });
-        console.log("Files in AddDocument.jsx:", files);
     };
 
 
@@ -118,7 +109,6 @@ function AddDocument(props) {
             return;
         }
 
-        console.log("Sono in AddDocument.jsx, ho appna creato il documento: ", newDocument);
         props.handleAddDocumentToModal(newDocument);
         props.handleNext();
 

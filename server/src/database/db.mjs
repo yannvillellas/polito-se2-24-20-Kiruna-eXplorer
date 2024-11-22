@@ -16,7 +16,6 @@ export const db = new sqlite3.Database(dbPath, (err) => {
                 console.error("Errore dering the foreign key constraints enable:", pragmaErr);
                 throw pragmaErr;
             }
-            //console.log("Connection to database successful.");
         });
     }
 });
