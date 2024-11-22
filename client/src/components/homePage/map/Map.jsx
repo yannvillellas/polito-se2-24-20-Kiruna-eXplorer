@@ -7,6 +7,7 @@ import DocumentAPI from "../../../api/documentAPI";
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -80,15 +81,6 @@ function Map(props) {
     await handleGetFiles(docs[0].docId)
   };
 
-  const groupedDocuments = documents.reduce((acc, doc) => {
-    const key = `${doc.lat},${doc.lng}`;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(doc);
-    return acc;
-  }, {});
-
 
   const handleModifyPosition = async (newLan, newLng) => {
 
@@ -123,51 +115,28 @@ function Map(props) {
             />
           </LayersControl.BaseLayer>
         </LayersControl>
-        {Object.keys(groupedDocuments).map((key, index) => {
-          const [lat, lng] = key.split(',').map(Number);
-          if (isNaN(lat) || isNaN(lng)) {
-            // console.error(`Invalid coordinates for key ${key}: (${lat}, ${lng})`);
-            return null;
-          }
-          const docs = groupedDocuments[key];
-          return (
+
+        <MarkerClusterGroup
+          showCoverageOnHover={false}
+        >
+          {documents.map((doc, index) => (
             <Marker
               key={index}
-              position={[lat, lng]}
+              position={[doc.lat, doc.lng]}
               eventHandlers={{
-                click: () => handleMarkerClick(docs)
+                click: () => handleMarkerClick([doc])
               }}
             >
             </Marker>
-          );
-        })}
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>
             {selectedDoc ? (
-              groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.length > 1 ? (
-                <Select
-                  options={groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`]?.map((doc) => ({
-                    value: doc.docId,
-                    label: doc.title,
-                  }))}
-                  styles={{ menu: (provided) => ({ ...provided, width: "max-content" }) }}
-                  defaultValue={{
-                    value: selectedDoc.id,
-                    label: selectedDoc.title,
-                  }}
-                  required={true}
-                  onChange={(selected) => {
-                    const relatedDocs = groupedDocuments[`${selectedDoc.lat},${selectedDoc.lng}`];
-                    setSelectedDoc(relatedDocs.find((doc) => doc.docId === selected.value));
-                    handleGetFiles(selected.value)
-                  }}
-                />
-              ) : (
-                <span>{selectedDoc.title}</span>
-              )
+              selectedDoc.title
             ) : (
               <p>Select a marker for visualize the details.</p>
             )}
