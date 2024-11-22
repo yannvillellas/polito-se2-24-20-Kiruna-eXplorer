@@ -6,7 +6,7 @@ import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -109,10 +109,20 @@ function Map(props) {
 
     <Container fluid className="map-container">
       <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-        />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="Google Satellite">
+            <TileLayer
+              url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+              attribution='&copy; <a href="https://maps.google.com">Google</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="OpenStreetMap">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+          </LayersControl.BaseLayer>
+        </LayersControl>
         {Object.keys(groupedDocuments).map((key, index) => {
           const [lat, lng] = key.split(',').map(Number);
           if (isNaN(lat) || isNaN(lng)) {
