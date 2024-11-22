@@ -8,7 +8,6 @@ const listPositions = async () => {
             credentials: 'include'
         })
         .then(response => response.json())
-        //console.log("le api ritornano: ",positions)
         return positions;
     }catch(err){
         console.log(err);
@@ -16,7 +15,6 @@ const listPositions = async () => {
 }
 
 const addPosition = async (position) => {
-    //console.log("sono in positionAPI.js: sto aggiungendo la posizione", position);
     const response = await fetch(`${SERVER_URL}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'}, 
@@ -35,7 +33,6 @@ const addPosition = async (position) => {
 }
 
 const modifyPosition = async (docId, lat, lng) => {
-    //console.log("sono in positionAPI.js: sto modificando la posizione", docId, lat, lng);
     const response = await fetch(`${SERVER_URL}/${docId}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'}, 

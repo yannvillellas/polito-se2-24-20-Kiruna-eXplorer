@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 import Carousel from 'react-bootstrap/Carousel';
-import Link from "../link/Link"
-import DocumentAPI from "../../api/documentAPI";
-import AddDocument from "../addDocument/AddDocument"; // is glitched all the "A"must to be in cap locs
+import Link from "./link/Link"
+import DocumentAPI from "../../../api/documentAPI";
+import AddDocument from "./addDocument/AddDocument";
 
 
 
@@ -38,7 +38,6 @@ function UnifiedForms(props) {
 
     // Controllato: è corretto
     const handleClose = () => {
-        //console.log("sono in Unified Forms, ho premuto il pulsante Close di addDOcument (perciò devo chiudere il modal unifiedForms)");
         setNewDocument({
             docId: null,
             title: "",
@@ -62,8 +61,6 @@ function UnifiedForms(props) {
 
     const handleAddDocumentToModal = (document) => {
         setNewDocument(document);
-        // L'aggiutna del documento al database la si può fare alla fine, quando si preme il pulsante "salva"
-        console.log("Sono in UnifiedForms, ho aggiunto il documento al modal:", document);
     }
 
     const handleNext = () => {

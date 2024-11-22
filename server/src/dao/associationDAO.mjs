@@ -23,7 +23,6 @@ export const insertAssociation = (association) => {
     return new Promise(async (resolve, reject) => {
         try {
             const typeId = await getTypeIdByType(association.type);
-            console.log("sono in associationDAO: ho ritornato typeId", typeId);
             // It should add +1 to the field connections where docId = docId1 or docId = docId2
             db.run('UPDATE Document SET connections = connections + 1 WHERE docId = ? OR docId = ?', [parseInt(association.doc1, 10), parseInt(association.doc2, 10)], function (err) {
                 if (err) {

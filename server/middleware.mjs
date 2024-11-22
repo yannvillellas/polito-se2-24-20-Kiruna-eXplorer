@@ -11,8 +11,6 @@ export const isUrbanPlanner = (req, res, next) => {
 export const isValidType = async (req, res, next) => {
     try {
         const validTypes = await getLinksType();
-        console.log("tipi dal db:", validTypes);
-        console.log("tipo passato dal front:",req.body.type)
         if (validTypes.includes(req.body.type)) {
             return next();
         }

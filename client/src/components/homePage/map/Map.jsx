@@ -3,13 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState, useNavigate } from "react";
 import { Container, Modal, Button, Form } from "react-bootstrap";
 import Select from "react-select";
-
-import DocumentAPI from "../../api/documentAPI";
-
+import DocumentAPI from "../../../api/documentAPI";
+import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import ChosenPosition from "../chosenPosition/ChosenPosition";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
@@ -35,7 +33,6 @@ function Map(props) {
   // So that sync with the parent component
   useEffect(() => {
     if (props.documents) {
-      //console.log("Sono in Map.jsx, ho ricevuto dal db i documenti: ", props.documents);
       setDocuments(props.documents);
     }
   }, [props.documents]);
@@ -56,9 +53,7 @@ function Map(props) {
   };*/
 
   const handleGetFiles = async (docId) => {
-    console.log("prendo i file di: ", docId)
     const files = await DocumentAPI.getFiles(docId);
-    console.log("ricevo: ", files)
     if (files) {
       setFiles(Array.from(files))
     } else {
@@ -69,7 +64,6 @@ function Map(props) {
 
   const handleDownload = (file) => {
     const URL = `http://localhost:3001/${file.path.slice(1)}`
-    console.log(URL)
 
     const aTag = document.createElement("a");
     aTag.href = URL
@@ -105,7 +99,6 @@ function Map(props) {
       alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
       return;
     }
-    console.log("Modify position to ", newLan, newLng);
     await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
     closeDocumentModal();
   };
@@ -115,64 +108,6 @@ function Map(props) {
   return (
 
     <Container fluid className="map-container">
-
-      {/*<Row>
-        <Col>
-          <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: "850px", width: "100%" }}>
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {props.documents && props.documents.length > 0 && (
-              props.documents.map((doc) => {
-                // Controlla se le coordinate sono valide
-                if (doc.lat && doc.lng) {
-                  return (
-                    <Marker
-                      key={doc.docId}
-                      position={[doc.lat, doc.lng]}
-                      eventHandlers={{
-                        click: async() => {await handleMarkerClick(doc)},
-                      }}
-                    />
-                  );
-                }
-                return null; // Non renderizzare il marker se lat o lng sono invalidi
-              })
-            )}
-
-          </MapContainer>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-
-          <Offcanvas show={showOffcanvas} onHide={handleCloseOffcanvas}>
-
-            <Offcanvas.Header closeButton>
-              <Offcanvas.Title>{selectedDoc ? <strong>{selectedDoc.title}</strong> : ""}</Offcanvas.Title>
-            </Offcanvas.Header>
-
-            <Offcanvas.Body>
-              {selectedDoc ? (
-                <>
-                  {Object.entries(selectedDoc).filter(([key, value]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                    <p key={key}>
-                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                    </p>
-                  ))}
-                  <p key="position">
-                    <strong>Position:</strong>{(selectedDoc.lat == 67.856348 && selectedDoc.lng == 20.225785) ? " All municipalities" : `(${selectedDoc.lat}, ${selectedDoc.lng})`}
-                  </p>
-                  {files ? files.map(f => {
-                    return (<>
-                      <Button onClick={()=>handleDownload(f)}><i className="bi bi-file-earmark-text-fill"></i></Button>
-                      <p>{f.name}</p>
-                    </>)
-                  }) : ""}
-                </>*/ }
-
       <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

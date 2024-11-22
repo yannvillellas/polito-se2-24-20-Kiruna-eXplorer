@@ -9,7 +9,6 @@ const SERVER_URL = 'http://localhost:3001/api/associations';
  */
 const createAssociation = async (association) => {
   try {
-    console.log("association api: sto spedendo",association)
     const response = await fetch(SERVER_URL, {
       method: 'POST',
       credentials: 'include',

@@ -14,13 +14,8 @@ function AddOriginalSource(props){
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files); // Convert the FileList object to an Array
         setFiles(selectedFiles); // Save the selected files in the state
-        console.log("Selected files:", selectedFiles);
         props.handleAddedFiles(selectedFiles);
     };
-
-    useEffect(() => {
-        console.log("Files in state", files);
-    }, [files]);
 
 
     return (
