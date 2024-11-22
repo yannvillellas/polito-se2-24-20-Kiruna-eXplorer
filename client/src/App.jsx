@@ -4,15 +4,13 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
 import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
-import Map from './components/map/Map';
-import Login from './components/login/Login';
-import Registration from './components/login/Registration';
-import Link from './components/link/Link';
+import Map from './components/homePage/map/Map';
+import Login from './components/authentication/Login';
+import Registration from './components/authentication/Registration';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
-import DocList from "./components/DocumentList/DocList";
-import SearchDocuments from "./components/searchDocuments/SearchDocuments";
+import DocList from "./components/documentList/DocList";
 
 function App() {
     const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`

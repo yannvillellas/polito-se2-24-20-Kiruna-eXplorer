@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import associationAPI from "../../api/associationAPI";
+import associationAPI from "../../../../api/associationAPI";
 import { Modal, Row, Col, Form, Button } from "react-bootstrap";
 import "./Link.css";
 import Select from "react-select";
@@ -25,19 +25,10 @@ function Link(props) {
 
   };
 
-  // for checking the selected types
-  /*useEffect(() => {
-    console.log("Sono in Link.jsx, ho selezionato i tipi di link: ", selectedTypes);
-  }, [selectedTypes]);*/
-
-
-  // it works
   useEffect(() => {
-    //console.log("Sono in Link.jsx, ho ricevuto da HomePages.jsx questi documenti: ", props.documents)
     const fetchLinkTypes = async () => {
       try {
         const types = await associationAPI.getLinkTypes();
-        //console.log("Sono in Link.jsx, ho ricevuto dal db i tipi di link, in forma di vettore: ", types);
         setLinkTypes(types);
       } catch (error) {
         console.error("Failed to fetch documents:", error);
