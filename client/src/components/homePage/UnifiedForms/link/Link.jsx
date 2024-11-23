@@ -8,8 +8,8 @@ function Link(props) {
 
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [doc2, setDoc2] = useState("");
-  const [doc1, setDoc1] = useState("");
+  const [doc2, setDoc2] = useState([]);
+  const [doc1, setDoc1] = useState([]);
 
   // It works
   // Funzione per gestire il cambiamento della checkbox
@@ -23,6 +23,14 @@ function Link(props) {
       }
     });
 
+  };
+
+  const handleChangeDoc1 = (selectedOptions) => {
+    setDoc1(selectedOptions || []);
+  };
+
+  const handleChangeDoc2 = (selectedOptions) => {
+    setDoc2(selectedOptions || []);
   };
 
   useEffect(() => {
@@ -43,34 +51,54 @@ function Link(props) {
     e.preventDefault();
 
     try {
+      let errors = []
       if (!props.alone) {
         const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document
         for (let link of selectedTypes) {
-          let association = {
-            doc1: docId, //doc1
-            type: link,
-            doc2: doc2
-          };
-          await associationAPI.createAssociation(association);
+          for (let dId2 of doc2) {
+            let association = {
+              doc1: docId,
+              type: link,
+              doc2: parseInt(dId2.value, 10)
+            };
+            const response = await associationAPI.createAssociation(association);
+            if (response.msg) {
+              const doc1Title = props.documents.find(doc => doc.docId === association.doc1)
+              const doc2Title = props.documents.find(doc => doc.docId === association.doc2)
+              errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
 
+            }
+          }
         }
+        props.setErrorMsg(errors)
         props.handleClose(); // Close modal after submission
 
-      }else{  //the link form is detached from addDocument form
+      } else {  //the link form is detached from addDocument form
         for (let link of selectedTypes) {
-          let association = {
-            doc1: doc1, //doc1
-            type: link,
-            doc2: doc2
-          };
-          await associationAPI.createAssociation(association);
+          for (let dId1 of doc1) {
+            for (let dId2 of doc2) {
+              let association = {
+                doc1: dId1.value, //doc1
+                type: link,
+                doc2: dId2.value
+              };
+              const response = await associationAPI.createAssociation(association);
+              if (response.msg) {
+                const doc1Title = props.documents.find(doc => doc.docId === association.doc1)
+                const doc2Title = props.documents.find(doc => doc.docId === association.doc2)
+                errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
+
+              }
+            }
+          }
         }
-        setDoc1("")
+        props.setErrorMsg(errors)
+        setDoc1([])
         props.setOnlyLinkForm(false)
       }
       // Reset form fields after successful submission
       setLinkTypes([]);
-      setDoc2("");
+      setDoc2([]);
     } catch (error) {
       console.error("Failed to create association:", error);
     }
@@ -79,28 +107,31 @@ function Link(props) {
 
   return (
     <Row className="add-link-form">
-      <Col md={6}>
-        <Form  onSubmit={handleSubmit}>
+      <Col>
+        <Form onSubmit={handleSubmit}>
           <Form.Group as={Row} className="mb-3">
 
-            <Form.Label column sm="5">
+            <Form.Label column sm="2">
               Document 1
             </Form.Label>
 
-            <Col sm="7">
+            <Col sm="9">
               {props.alone ?
                 <Select
                   options={props.documents
-                    .filter((d) => d.docId !== doc2)
+                    .filter((d) => !doc2.some((doc) => doc.value === d.docId))
                     .map((d) => {
-                    return { value: d.docId, label: d.title }
-                  })}
+                      return { value: d.docId, label: d.title }
+                    })}
                   isClearable
                   placeholder="Select document"
                   required={true}
-                  onChange={(selectedOption) => {
+                  /*onChange={(selectedOption) => {
                     setDoc1(selectedOption ? selectedOption.value : "");
-                  }}
+                  }}*/
+                  onChange={handleChangeDoc1}
+                  isMulti
+                  value={doc1}
                   menuPlacement="auto"
                   menuPosition="fixed"
                   styles={{
@@ -125,11 +156,11 @@ function Link(props) {
           </Form.Group>
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="5">
+            <Form.Label column sm="2">
               Link Type
             </Form.Label>
 
-            <Col sm="7">
+            <Col sm="9">
               {linkTypes.map((linkType) => (
                 <Form.Check
                   key={linkType}
@@ -145,24 +176,27 @@ function Link(props) {
 
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="5">
+            <Form.Label column sm="2">
               Document 2
             </Form.Label>
 
 
-            <Col sm="7">
+            <Col sm="9">
               <Select
                 options={props.documents
-                  .filter((d) => d.docId !== doc1)
+                  .filter((d) => !doc1.some((doc) => doc.value === d.docId))
                   .map((d) => {
-                  return { value: d.docId, label: d.title }
-                })}
+                    return { value: d.docId, label: d.title }
+                  })}
                 isClearable
                 placeholder="Select document"
                 required={true}
-                onChange={(selectedOption) => {
+                /*onChange={(selectedOption) => {
                   setDoc2(selectedOption ? selectedOption.value : "");
-                }}
+                }}*/
+                isMulti
+                value={doc2}
+                onChange={handleChangeDoc2}
                 menuPlacement="auto" // Posiziona il menu in base allo spazio disponibile
                 menuPosition="fixed" // Evita overflow dal modal
                 styles={{
@@ -187,7 +221,7 @@ function Link(props) {
               <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
             }
 
-            {(doc1!=="" || !props.alone) && selectedTypes.length > 0 && doc2!=="" &&
+            {(doc1 !== "" || !props.alone) && selectedTypes.length > 0 && doc2 !== "" &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>
@@ -201,7 +235,7 @@ function Link(props) {
           </Form.Group>
         </Form>
       </Col>
-      
+
     </Row>
   );
 }

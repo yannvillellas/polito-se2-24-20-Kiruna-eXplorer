@@ -9,7 +9,7 @@ import { getUser, createUser } from './src/dao/userDAO.mjs';
 import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
 import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/linkTypeDAO.mjs';
-import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation } from './src/dao/associationDAO.mjs';
+import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation, CheckAssociation } from './src/dao/associationDAO.mjs';
 import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
 import fileUpload from 'express-fileupload' 
 import path from "path";
@@ -308,8 +308,12 @@ app.post('/api/associations', isUrbanPlanner, isValidType,[
     };
 
     try {
-        const newId=await insertAssociation(association);
-        res.status(200).json({ id: newId });  //return the Id of the new association to the frontend
+        if((await CheckAssociation(association)).length>0 /*|| (await CheckAssociation(association)).length>0*/){    //if the association already exist
+            res.status(201).json({msg:"association already exist", doc1:association.doc1, doc2:association.doc2, type:association.type})  //check if the tatus code is correct
+        }else{  //if not exist create a new association
+            const newId=await insertAssociation(association);
+            res.status(200).json({ id: newId });  //return the Id of the new association to the frontend
+        }
     } catch (e) {
         res.status(500).json({ error: 'Error adding a new link between documents' });
     }

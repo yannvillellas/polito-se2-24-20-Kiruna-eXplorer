@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./homePage.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {Container, Row, Col} from "react-bootstrap";
+import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 
 import Map from './map/Map.jsx'
 import "leaflet/dist/leaflet.css";
@@ -32,14 +32,14 @@ function HomePage(props) {
     const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === 'urbanPlanner' ? true : false);
 
     const [documents, setDocuments] = useState([]); // if is here will be easier for tehe shenzen diagram; position is different for the map and for shenzen diagram so will be managed in their componetns
-    
-    
+    const [errorMsg, setErrorMsg] = useState([]);
+
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
                 const documents = await DocumentAPI.listDocuments();
-                
-                const positions = await PositionAPI.listPositions();                
+
+                const positions = await PositionAPI.listPositions();
                 documents.forEach(document => {
                     const position = positions.find(position => position.docId === document.docId);
                     if (position) {
@@ -49,27 +49,27 @@ function HomePage(props) {
                 });
 
                 setDocuments(documents);
-                
-                
+
+
             } catch (error) {
                 console.error("Error fetching documents:", error);
             }
         }
         fetchDocuments();
     }, []);
-    
+
 
     const handleUpload = async (document) => {
         const formData = new FormData();
         Array.from(document.files).forEach((file) => {
-          formData.append("files", file);
+            formData.append("files", file);
         });
-    
+
         try {
-          await DocumentAPI.addFiles(document.docId,formData)
+            await DocumentAPI.addFiles(document.docId, formData)
         } catch (error) {
-          console.error("Error:", error);
-          alert("Error uploading file.");
+            console.error("Error:", error);
+            alert("Error uploading file.");
         }
     };
 
@@ -77,7 +77,7 @@ function HomePage(props) {
 
         try {
             const docId = await DocumentAPI.addDocument(document);
-            
+
             const position = {
                 docId: docId,
                 lat: document.lat,
@@ -89,15 +89,15 @@ function HomePage(props) {
             /*if(document.files && document.files.length > 0){
                 // await handleUpload(docId, document.files);
             }*/
-            
-            const stateDocument={
+
+            const stateDocument = {
                 docId: docId,
                 title: document.title,
                 stakeholders: document.stakeholders,
                 scale: document.scale,
                 issuanceDate: document.issuanceDate,
                 type: document.type,
-                connections:document.connections,
+                connections: document.connections,
                 language: document.language,
                 pages: document.pages,
                 description: document.description,
@@ -109,12 +109,12 @@ function HomePage(props) {
             setDocuments([...documents, stateDocument]);
 
             // adding files to the document
-            if(document.files.length>0){
-                handleUpload({...document, docId:docId});
+            if (document.files.length > 0) {
+                handleUpload({ ...document, docId: docId });
             }
-            
+
             return docId;
-          } catch (error) {
+        } catch (error) {
             console.error("Error adding document:", error);
         }
     }
@@ -143,12 +143,26 @@ function HomePage(props) {
 
     return (
         <Container fluid className="mt-5">
+            {/*toastCOntainer used to visualize errors messages*/}
+            <ToastContainer className="p-3" position="top-end">
+                {errorMsg.map((error) => (
+                    <Toast
+                        key={errorMsg.indexOf(error)}
+                        onClose={() => setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error))}
+                    >
+                        <Toast.Header closeButton>
+                            <strong className="me-auto">Errore</strong>
+                        </Toast.Header>
+                        <Toast.Body>{error}</Toast.Body>
+                    </Toast>
+                ))}
+            </ToastContainer>
             <Row>
                 <Col style={{ position: "relative" }}>
-                    <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner}/>
+                    <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner} />
                     {isUrbanPlanner && (
                         <div className="add-document-container">
-                            <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} />
+                            <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} setErrorMsg={setErrorMsg} />
                         </div>
                     )}
                 </Col>
