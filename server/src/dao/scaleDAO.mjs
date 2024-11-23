@@ -15,11 +15,11 @@ export const getScales = () => {
 
 export const addScale = (newValue) => {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO Scale (name) VALUES (?)", [newValue], (err, rows) => {
+        db.run("INSERT INTO Scale (name) VALUES (?)", [newValue], function(err) {
             if (err) {
                 reject(err);
             } else {
-                resolve()
+                resolve(this.lastID)
             }
         });
     });

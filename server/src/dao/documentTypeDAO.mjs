@@ -15,11 +15,11 @@ export const getDocumentTypes = () => {
 
 export const addDocumentType = (newValue) => {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO DocumentType (type) VALUES (?)", [newValue], (err, rows) => {
+        db.run("INSERT INTO DocumentType (type) VALUES (?)", [newValue], function(err) {
             if (err) {
                 reject(err);
             } else {
-                resolve()
+                resolve(this.lastID)
             }
         });
     });

@@ -10,6 +10,9 @@ import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDA
 import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/linkTypeDAO.mjs';
 import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation, CheckAssociation } from './src/dao/associationDAO.mjs';
+import { addStakeholder, getStakeholders } from './src/dao/stakeholdersDAO.mjs';
+import { addDocumentType, getDocumentTypes } from './src/dao/documentTypeDAO.mjs';
+import { addScale, getScales } from './src/dao/scaleDAO.mjs';
 import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
 import fileUpload from 'express-fileupload' 
 import path from "path";
@@ -242,8 +245,78 @@ app.delete('/api/documents',isUrbanPlanner,[],async (req, res)=>{
 
 });
 
+/**********************  TO TEST ***************************** */
+
+// documentTypes API
+app.get('/api/documents/types',[], async(req, res) => {
+    try{
+        const documentTypes = await getDocumentTypes();
+        res.status(200).json(documentTypes);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.post('/api/documents/types', isUrbanPlanner, [
+    check('type').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const documentTypeId = await addDocumentType(req.body.type);
+    res.status(201).json(documentTypeId);
+});
+
+// stakeholders API
+app.get('/api/documents/stakeholders',[], async(req, res) => {
+    try{
+        const stakeholders = await getStakeholders();
+        res.status(200).json(stakeholders);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.post('/api/documents/stakeholders', isUrbanPlanner, [
+    check('name').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const stakeholderId = await addDocumentType(req.body.name);
+    res.status(201).json(stakeholderId);
+});
+
+// scales API
+app.get('/api/documents/scales',[], async(req, res) => {
+    try{
+        const scales = await getScales();
+        res.status(200).json(scales);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
+app.post('/api/documents/scales', isUrbanPlanner, [
+    check('name').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const scaleId = await addDocumentType(req.body.name);
+    res.status(201).json(scaleId);
+});
+
+/****************************************************************************/
+
 // add field API
-app.post('/api/documents/fields/:type', isUrbanPlanner, [
+/*app.post('/api/documents/fields/:type', isUrbanPlanner, [
     check('value').isString()
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -267,7 +340,7 @@ app.post('/api/documents/fields/:type', isUrbanPlanner, [
 
     res.status(201).end();
 });
-
+*/
 
 //positionAPI
 app.post('/api/positions', isUrbanPlanner, [

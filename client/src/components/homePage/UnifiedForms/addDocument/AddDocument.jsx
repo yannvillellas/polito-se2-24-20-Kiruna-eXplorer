@@ -7,9 +7,9 @@ import Select from "react-select";
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 import DocumentAPI from "../../../../api/documentAPI";
-import { getStakeholders } from "../../../../../../server/src/dao/stakeholdersDAO.mjs";
-import { getScales } from "../../../../../../server/src/dao/scaleDAO.mjs";
-import { getDocumentTypes } from "../../../../../../server/src/dao/documentTypeDAO.mjs";
+import scaleAPI from "../../../../api/scaleAPI";
+import stakeholderAPI from "../../../../api/stakeholderAPI";
+import documentTypeAPI from "../../../../api/documentTypeAPI";
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
@@ -18,10 +18,10 @@ function AddDocument(props) {
     const [newDocument, setNewDocument] = useState(props.newDocument ? props.newDocument : {
         docId: null,
         title: "",
-        stakeholders: "",
-        scale: "",
+        stakeholders: [],
+        scale: null,
         issuanceDate: "",
-        type: "",
+        type: null,
         connections: 0,
         language: "",
         pages: 0,
@@ -69,9 +69,9 @@ function AddDocument(props) {
 
     useEffect(()=>{
         const fetchOptions = async ()=>{
-            setStakeholdersOptions(await getStakeholders().map((s)=>{return {value:s, label:s}}))
-            setScaleOptions(await getScales.map((s)=>{return {value:s, label:s}}))
-            setTypeOptions(await getDocumentTypes.map((t)=>{return {value:t, label:t}}))
+            setStakeholdersOptions(await stakeholderAPI.getStakeholders().map((s)=>{return {value:parseInt(s.shId,10), label:s.name}}))
+            setScaleOptions(await scaleAPI.getScales().map((s)=>{return {value:parseInt(s.scaleId,10), label:s.name}}))
+            setTypeOptions(await documentTypeAPI.getDocumentTypes().map((t)=>{return {value:parseInt(t.dtId,10), label:t.type}}))
         }
         fetchOptions();
     },[])
@@ -112,27 +112,26 @@ function AddDocument(props) {
 
     const handleSHchange = (selectedOptions) => {
         setSH(selectedOptions || []);
-        setNewDocument({...newDocument,stakeholders:selectedOptions.map((option)=>option.value).join(', ')})
+        setNewDocument({...newDocument,stakeholders:selectedOptions.map((option)=>option.value).join(', ')})  ////// DA MODIFICARE /////////////////////////////////////////
     };
 
     const handleNewStakeholder = async (inputValue) => {
-        const newOption = { value: inputValue, label: inputValue };
-        //setOptions((prevOptions) => [...prevOptions, newOption]); // Aggiungi la nuova opzione
+        const newShId=await stakeholderAPI.addStakeholder(inputValue)
+        const newOption = { value: newShId, label: inputValue };
         setStakeholdersOptions([...stakeholdersOptions, newOption])
-        await DocumentAPI.addField(inputValue, "stakeholder")
         setSH((prevSelected) => [...prevSelected, newOption]); // Seleziona automaticamente la nuova opzione
     };
 
     const handleNewScale = async (inputValue) => {
-        const newOption = { value: inputValue, label: inputValue };
+        const newScaleId=await scaleAPI.addScale(inputValue)
+        const newOption = { value: newScaleId, label: inputValue };
         setScaleOptions([...scaleOptions, newOption])
-        await DocumentAPI.addField(inputValue, "scale")
     };
 
     const handleNewDocType = async (inputValue) => {
-        const newOption = { value: inputValue, label: inputValue };
+        const newDtId=await documentTypeAPI.addDocumentType(inputValue)
+        const newOption = { value: newDtId, label: inputValue };
         setTypeOptions([...typeOptions, newOption])
-        await DocumentAPI.addField(inputValue, "docType")
     };
 
     const handleSaveDocument = (e) => {

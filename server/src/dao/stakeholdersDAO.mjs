@@ -15,11 +15,11 @@ export const getStakeholders = () => {
 
 export const addStakeholder = (newValue) => {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO Stakeholder (name) VALUES (?)", [newValue], (err, rows) => {
+        db.run("INSERT INTO Stakeholder (name) VALUES (?)", [newValue], function(err) {
             if (err) {
                 reject(err);
             } else {
-                resolve()
+                resolve(this.lastID)
             }
         });
     });
