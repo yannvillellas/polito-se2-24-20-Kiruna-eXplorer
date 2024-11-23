@@ -1,11 +1,15 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./addDocument.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
+import DocumentAPI from "../../../../api/documentAPI";
+import { getStakeholders } from "../../../../../../server/src/dao/stakeholdersDAO.mjs";
+import { getScales } from "../../../../../../server/src/dao/scaleDAO.mjs";
+import { getDocumentTypes } from "../../../../../../server/src/dao/documentTypeDAO.mjs";
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
@@ -38,7 +42,7 @@ function AddDocument(props) {
     };
 
 
-    const stakeholdersOptions = [
+    /*const stakeholdersOptions = [
         { value: "LKAB", label: "LKAB" },
         { value: "Kiruna kommun", label: "Kiruna kommun" },
         { value: "Kiruna kommun/White Arkitekter", label: "Kiruna kommun/White Arkitekter" },
@@ -57,7 +61,20 @@ function AddDocument(props) {
         { value: "Design document", label: "Design document" },
         { value: "Technical document", label: "Technical document" },
         { value: "Material effect", label: "Material effect" },
-    ];
+    ];*/
+
+    const [stakeholdersOptions, setStakeholdersOptions] = useState ([]);
+    const [scaleOptions, setScaleOptions] = useState ([]);
+    const [typeOptions, setTypeOptions] = useState([])
+
+    useEffect(()=>{
+        const fetchOptions = async ()=>{
+            setStakeholdersOptions(await getStakeholders().map((s)=>{return {value:s, label:s}}))
+            setScaleOptions(await getScales.map((s)=>{return {value:s, label:s}}))
+            setTypeOptions(await getDocumentTypes.map((t)=>{return {value:t, label:t}}))
+        }
+        fetchOptions();
+    },[])
 
     const languageOptions = [
         { value: "Swedish", label: "Swedish" },
@@ -98,6 +115,26 @@ function AddDocument(props) {
         setNewDocument({...newDocument,stakeholders:selectedOptions.map((option)=>option.value).join(', ')})
     };
 
+    const handleNewStakeholder = async (inputValue) => {
+        const newOption = { value: inputValue, label: inputValue };
+        //setOptions((prevOptions) => [...prevOptions, newOption]); // Aggiungi la nuova opzione
+        setStakeholdersOptions([...stakeholdersOptions, newOption])
+        await DocumentAPI.addField(inputValue, "stakeholder")
+        setSH((prevSelected) => [...prevSelected, newOption]); // Seleziona automaticamente la nuova opzione
+    };
+
+    const handleNewScale = async (inputValue) => {
+        const newOption = { value: inputValue, label: inputValue };
+        setScaleOptions([...scaleOptions, newOption])
+        await DocumentAPI.addField(inputValue, "scale")
+    };
+
+    const handleNewDocType = async (inputValue) => {
+        const newOption = { value: inputValue, label: inputValue };
+        setTypeOptions([...typeOptions, newOption])
+        await DocumentAPI.addField(inputValue, "docType")
+    };
+
     const handleSaveDocument = (e) => {
         e.preventDefault();
         if (newDocument.lat === null || newDocument.lng === null) {
@@ -114,10 +151,6 @@ function AddDocument(props) {
             alert("Please enter a valid architectural scale format.");
             return;
         }
-        /*console.log(sh)
-        console.log(sh.map((option)=>option.value).join(', '))
-        setNewDocument({...newDocument, stakeholders: sh.map((option)=>option.value).join(', ')})
-        console.log("invio: ",newDocument)*/
         props.handleAddDocumentToModal(newDocument);
         props.handleNext();
 
@@ -159,6 +192,7 @@ function AddDocument(props) {
                                 }*/
                                value={sh}
                                onChange={handleSHchange}
+                               onCreateOption={handleNewStakeholder}
                             />
                         </Form.Group>
 
@@ -193,6 +227,7 @@ function AddDocument(props) {
 
                                 }
                                 }
+                                onCreateOption={handleNewScale}
                                 value={isArchitecturalScale ?  scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
                             />
 
@@ -251,6 +286,7 @@ function AddDocument(props) {
                                     setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
                                 }
                                 value={typeOptions.find(opt => opt.value === newDocument.type)}
+                                onCreateOption={handleNewDocType}
                             />
                         </Form.Group>
 

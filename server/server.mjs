@@ -14,6 +14,7 @@ import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
 import fileUpload from 'express-fileupload' 
 import path from "path";
 import fs from "fs";
+import { status } from 'server/reply';
 
 const __dirname = path.resolve()
 const app = express();
@@ -239,6 +240,32 @@ app.delete('/api/documents',isUrbanPlanner,[],async (req, res)=>{
         res.status(500).json({error: err.message});
     }
 
+});
+
+// add field API
+app.post('/api/documents/fields/:type', isUrbanPlanner, [
+    check('value').isString()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    switch(req.params.type){
+        case("stakeholder"):
+            await addStakeholder(req.body.value);
+            break;
+        case("docType"):
+            await addDocumentType(req.body.value);
+            break;
+        case("scale"):
+            await addScale(req.body.value);
+            break;
+        default:
+            return res.status(400)
+    }
+
+    res.status(201).end();
 });
 
 

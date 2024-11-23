@@ -91,6 +91,21 @@ const getFiles = async(docId) =>{
         console.log(err);
     }
 }
+
+const addField = async(value, type) =>{
+    try{
+        const response= await fetch(`${SERVER_URL}/fields/${type}`,{
+            method:'POST',
+            credentials: 'include',
+            body: {value:value},
+        })
+        if (!response.ok) throw new Error('Failed to add new stakeholder');
+        return
+    }catch(e){
+        console.log(e)
+        throw e
+    }
+}
 /*
 const downloadFile = async(docId, fileName)=>{
     try {
