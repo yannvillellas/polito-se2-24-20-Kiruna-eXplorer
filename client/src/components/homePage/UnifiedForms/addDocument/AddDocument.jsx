@@ -91,6 +91,12 @@ function AddDocument(props) {
 
     const handleClose = () => setShowModalAdd(false);
 
+    const [sh, setSH]= useState([])
+
+    const handleSHchange = (selectedOptions) => {
+        setSH(selectedOptions || []);
+        setNewDocument({...newDocument,stakeholders:selectedOptions.map((option)=>option.value).join(', ')})
+    };
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
@@ -108,7 +114,10 @@ function AddDocument(props) {
             alert("Please enter a valid architectural scale format.");
             return;
         }
-
+        /*console.log(sh)
+        console.log(sh.map((option)=>option.value).join(', '))
+        setNewDocument({...newDocument, stakeholders: sh.map((option)=>option.value).join(', ')})
+        console.log("invio: ",newDocument)*/
         props.handleAddDocumentToModal(newDocument);
         props.handleNext();
 
@@ -140,13 +149,16 @@ function AddDocument(props) {
                                 isClearable // Aggiunge una "x" per cancellare la selezione
                                 placeholder="Select Stakeholders"
                                 required={true}
-                                value={stakeholdersOptions.find(opt => opt.value === newDocument.stakeholders)}
+                                isMulti
+                                /*value={stakeholdersOptions.find(opt => opt.value === newDocument.stakeholders)}
                                 onChange={(selectedOption) =>
                                     setNewDocument({
                                         ...newDocument,
                                         stakeholders: selectedOption ? selectedOption.value : ""
                                     })
-                                }
+                                }*/
+                               value={sh}
+                               onChange={handleSHchange}
                             />
                         </Form.Group>
 
