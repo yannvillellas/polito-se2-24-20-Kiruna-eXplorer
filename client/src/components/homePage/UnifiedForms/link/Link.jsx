@@ -221,7 +221,7 @@ function Link(props) {
               <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
             }
 
-            {(doc1 !== "" || !props.alone) && selectedTypes.length > 0 && doc2 !== "" &&
+            {(doc1.length>0 || !props.alone) && selectedTypes.length > 0 && doc2.length>0 &&
               <Button variant="primary" type="submit" >
                 Submit
               </Button>
