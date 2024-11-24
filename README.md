@@ -20,7 +20,7 @@ This document explains how to run the project using Docker images and containers
 
    ```bash
    docker run -d -p 5173:5173 yannvillellas/polito-se2-24-20-kiruna-explorer:client
-   docker run -d -p 3001:3001 yannvillellas polito-se2-24-20-kiruna-explorer:server
+   docker run -d -p 3001:3001 yannvillellas/polito-se2-24-20-kiruna-explorer:server
    ```
 
 ### Method 2 (with Docker): Clone Repository and Build Images
