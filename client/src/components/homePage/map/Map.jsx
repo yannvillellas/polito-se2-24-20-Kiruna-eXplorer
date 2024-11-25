@@ -100,7 +100,7 @@ function Map(props) {
   return (
 
     <Container fluid className="map-container">
-      <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
+      <MapContainer center={[67.8558, 20.2253]} zoom={12} >
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="Google Satellite">
             <TileLayer

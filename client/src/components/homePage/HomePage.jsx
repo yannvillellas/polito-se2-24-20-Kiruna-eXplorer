@@ -142,7 +142,7 @@ function HomePage(props) {
 
 
     return (
-        <Container fluid className="mt-5">
+        <Container fluid>
             {/*toastCOntainer used to visualize errors messages*/}
             <ToastContainer className="p-3" position="top-end">
                 {errorMsg.map((error) => (
@@ -157,7 +157,7 @@ function HomePage(props) {
                     </Toast>
                 ))}
             </ToastContainer>
-            <Row>
+            <Row style={{height: "100%"}}>
                 <Col style={{ position: "relative" }}>
                     <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner} />
                     {isUrbanPlanner && (
