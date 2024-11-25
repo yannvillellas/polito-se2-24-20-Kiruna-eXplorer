@@ -2,6 +2,7 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import MainPage from './components/mainPage/MainPage';
 import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
 import Map from './components/homePage/map/Map';
@@ -67,10 +68,10 @@ function App() {
                     setUser(null);  
                     setIsUrbanPlanner(false);
 
-                    navigate('/login');
+                    navigate('/mainPage');
                 }
             } else {
-                navigate('/login');
+                navigate('/mainPage');
             }
         } catch (err) {
             console.error("Logout error:", err.message);
@@ -130,6 +131,7 @@ function App() {
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
+                <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
                 <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
                 <Route path="/documentPage" element={<DocList />} />
                 {/*<Route path="/search" element={<SearchDocuments />} />*/}

@@ -1,0 +1,95 @@
+/* Contenitore principale */
+.main-page {
+  display: flex;
+  height: 100vh; /* Altezza 100% della viewport */
+  color: white; /* Testo bianco */
+  font-family: 'Arial', sans-serif;
+  overflow: hidden; /* Evita scorrimenti */
+  padding: 0 20px;
+  backdrop-filter: blur(2px);
+
+}
+
+/* Contenitore contenuti */
+.content-wrapper {
+  max-width: 80vw;
+  padding: 30px;
+  border-radius: 15px;
+}
+
+/* Testo principale */
+.welcome-text {
+  text-align: left;
+  font-size: 3.5rem; /* Dimensione principale */
+  font-weight: bold;
+  margin: 10px 0;
+  text-transform: uppercase; /* Maiuscolo */
+  letter-spacing: 2px; /* Spaziatura lettere */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Effetto ombra */
+}
+
+/* Paragrafo descrittivo */
+.content-wrapper p {
+  text-align: left;
+  font-size: 1.6rem; /* Dimensione del testo */
+  line-height: 1.8; /* Altezza riga */
+  margin: 20px 0;
+  color: #f1f1f1; /* Colore leggermente più chiaro */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Ombra testo */
+}
+
+/* Bottone */
+.btn-secondary {
+  display: inline-block;
+  background-color: #9ec5f7;
+  color: black;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: 2px solid;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: #9ec5f7de;
+  transform: scale(1.1); /* Ingrandisce leggermente */
+}
+
+img{
+  margin: 0 4px 4px 0;
+}
+
+/* Responsività */
+@media (max-width: 768px) {
+  .welcome-text {
+    font-size: 2rem;
+  }
+
+  .content-wrapper p {
+    font-size: 1rem;
+  }
+
+  .btn-secondary {
+    font-size: 1rem;
+    padding: 8px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-text {
+    font-size: 1.5rem;
+  }
+
+  .content-wrapper p {
+    font-size: 0.9rem;
+  }
+
+  .btn-secondary {
+    font-size: 0.9rem;
+    padding: 7px 12px;
+  }
+}

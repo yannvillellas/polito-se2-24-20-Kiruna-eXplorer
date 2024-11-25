@@ -14,3 +14,12 @@
   --black-color: #000000;
 }
 
+body{
+  background-image: url("https://lkab.com/wp-content/uploads/2023/05/LKABs-industriomrade-i-Kiruna_Kiirunavaara_grabergshogar_sommar-scaled.webp");
+  background-image: url("https://lkab.com/wp-content/uploads/2022/03/kiruna-bg-1920.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+

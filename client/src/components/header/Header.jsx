@@ -1,6 +1,6 @@
 import './header.css';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from './logoKiruna.png';
+import logo from '../../asset/logo.png'
 
 function Header(props) {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Header(props) {
             src={logo}
             alt="Kiruna-Express Logo"
             className="logo-img"
-            onClick={() => navigate('/homePage')}
+            onClick={() => navigate('/mainPage')}
           />
           <span className="separator">|</span>
           <nav className="header-center">

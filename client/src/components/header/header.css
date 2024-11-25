@@ -69,9 +69,9 @@ nav ul li a:hover {
 }
 
 .logout-btn, .login-btn {
-    background-color: #FF5757;
-    color: white;
-    border: none;
+    background-color: #9ec5f7;
+    color: black;
+    border: 1px solid;
     margin-right: 10px;
     padding: 10px 15px;
     border-radius: 5px;
@@ -80,7 +80,7 @@ nav ul li a:hover {
 }
 
 .logout-btn:hover, .login-btn:hover {
-    background-color: #FF3232;
+    background-color: #9ec5f7de;
 }
 
 /* Responsività */
