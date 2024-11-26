@@ -105,7 +105,6 @@ function App() {
 
   return (
         <Routes>
-            {/* Layout with Header */}
             <Route
                 element={
                     <>
@@ -118,12 +117,8 @@ function App() {
                     </>
                 }
             >
-                {/* Routes */}
-                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/login'} />} />
-                {/*<Route
-                    path="/homePage"
-                    element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}
-                />*/}
+
+                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/mainPage'} />} />
                 <Route
                     path="/login"
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
@@ -134,8 +129,7 @@ function App() {
                 <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
                 <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
                 <Route path="/documentPage" element={<DocList />} />
-                {/*<Route path="/search" element={<SearchDocuments />} />*/}
-                {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
+
             </Route>
         </Routes>
     );

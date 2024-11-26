@@ -1,5 +1,33 @@
 .add-document-form {
-    background-color: white !important; /* Assicura uno sfondo bianco */
+    background-color: white !important; /* Sfondo bianco */
+    padding: 20px; /* Padding interno */
+    border-radius: 10px; /* Bordi arrotondati */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Effetto ombra */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.add-document-form input,
+.add-document-form textarea,
+.add-document-form select {
+    border: 2px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 8px;           /* Spazio interno */
+    margin-bottom: 15px;    /* Distanza tra elementi */
+    outline: none;          /* Rimuove bordo blu standard */
+    box-shadow: none;       /* Rimuove ombre predefinite */
+    transition: border-color 0.3s ease; /* Transizione per il focus */
+    width: 100%;            /* Larghezza massima */
+    box-sizing: border-box; /* Include padding nella larghezza */
+}
+
+.add-document-form input:focus,
+.add-document-form textarea:focus,
+.add-document-form select:focus {
+    border-color: #000; /* Cambia bordo al focus */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Aggiunge un'ombra nera al focus */
 }
 
 .add-document-form button:hover,
@@ -7,3 +35,69 @@
     transform: none !important;
     transition: none !important;
 }
+
+.add-document-form .form-group {
+    border: 1px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 10px;          /* Spazio interno */
+    margin-bottom: 20px;    /* Distanza tra gruppi */
+    background-color: #f9f9f9; /* Sfondo chiaro */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.add-document-form .form-group:hover {
+    border-color: #000;        /* Mantiene il bordo nero */
+    background-color: #f0f0f0; /* Sfondo leggermente più scuro */
+}
+
+.col-md-5,
+.col-md-6 {
+    margin-left: 20px;
+}
+
+.btn-modal {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between; /* Distribuisce i pulsanti */
+}
+
+.btn-modal .btn-modal-close,
+.btn-modal .btn-modal-save {
+    border: 2px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 10px 20px;     /* Spazio interno */
+    font-weight: bold;      /* Testo in grassetto */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra inferiore */
+}
+
+.btn-modal .btn-modal-close {
+    background-color: #f9f9f9; /* Sfondo chiaro */
+    color: #000;              /* Testo nero */
+}
+
+.btn-modal .btn-modal-save {
+    background-color: #9EC5F7; /* Azzurro */
+    color: #fff;               /* Testo bianco */
+}
+
+.btn-modal .btn-modal-close:hover {
+    background-color: #333;    /* Sfondo scuro */
+    color: #fff;               /* Testo bianco */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+}
+
+.btn-modal .btn-modal-save:hover {
+    background-color: #7BAFEE; /* Azzurro più scuro */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+}
+
+.css-b62m3t-container {
+    border: 2px solid #000;     /* Bordo nero */
+    background-color: #f9f9f9; /* Sfondo chiaro */
+}
+
+.css-b62m3t-container:hover {
+    border-color: #333; /* Cambia il bordo al passaggio del mouse */
+}
+

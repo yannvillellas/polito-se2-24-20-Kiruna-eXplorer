@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./chosenPosition.css";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
@@ -19,7 +20,7 @@ function ChosenPosition(props) {
     const [selectedOption, setSelectedOption] = useState('');
 
     // for point to point
-    const [position, setPosition] = useState(null);
+    const [position, setPosition] = useState({ lat: 67.8558, lng: 20.2253 }); // Coordinate di default
     const [positionAlreadyChosen, setPositionAlreadyChosen] = useState(false);
 
     // for manual insertion
@@ -64,19 +65,26 @@ function ChosenPosition(props) {
 
     function LocationMarker() {
         useMapEvents({
-          click(e) {
-            setPosition(e.latlng);
-          },
+            click(e) {
+                const { lat, lng } = e.latlng; // Ottieni latitudine e longitudine dal clic
+                setPosition({ lat, lng }); // Aggiorna lo stato di posizione
+                props.handleSetPostition(lat, lng); // Passa le coordinate al componente genitore
+            },
         });
     
-        return position ? <Marker position={position}></Marker> : null;
+        // Crea il marker solo se `lat` e `lng` sono definiti
+        return position && position.lat !== undefined && position.lng !== undefined ? (
+            <Marker position={[position.lat, position.lng]}></Marker>
+        ) : null;
     }
+    
+    
 
     return (
         <>
-        <Container fluid>
+        <Container fluid className="cp-container">
                     {/**here i put the checkbox/radio */}
-                    <Form.Group>
+                    <Form.Group className="radio-group">
                         <Form.Check
                             type="radio"
                             label="All municipalities"
@@ -106,66 +114,62 @@ function ChosenPosition(props) {
 
                     </Form.Group>
 
-                    {/**here i put the map */}
-                    {selectedOption === 'pointToPoint' && !positionAlreadyChosen &&
-                        <>
-                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
-                                <TileLayer
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                />
-                                <LocationMarker />
-                            </MapContainer>
+                    <div className="show">
+                        {/**here i put the map */}
+                        {selectedOption === 'pointToPoint' && !positionAlreadyChosen &&
+                            <>
+                                <MapContainer center={[position.lat || 67.8558, position.lng || 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                    <LocationMarker />
+                                </MapContainer>
 
-                            <Button variant="primary" onClick={() => {
-                                props.handleSetPostition(position.lat, position.lng)
-                                setPositionAlreadyChosen(true)
-                                }}>
-                                Set 
-                            </Button>
-                        </>
-                    }
 
-                    {/**here i put the form */}
-                    {selectedOption === 'manualInsertion' && showLatLongForm &&
-                        <>
-                            <Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Latitude</Form.Label>
-                                    <Form.Control 
-                                        type="number" 
-                                        placeholder="Enter latitude" 
-                                        step="0.000001" 
-                                        required={true}
-                                        onChange={(e) => setManualLat(parseFloat(e.target.value))}
-                                    />
+                            </>
+                        }
+
+                        {/**here i put the form */}
+                        {selectedOption === 'manualInsertion' && showLatLongForm &&
+                            <>
+                                <Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Latitude</Form.Label>
+                                        <Form.Control 
+                                            type="number" 
+                                            placeholder="Enter latitude" 
+                                            step="0.000001" 
+                                            required={true}
+                                            onChange={(e) => setManualLat(parseFloat(e.target.value))}
+                                        />
+                                    </Form.Group>
+
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Longitude</Form.Label>
+                                        <Form.Control 
+                                            type="number" 
+                                            placeholder="Enter longitude" 
+                                            step="0.000001" 
+                                            required={true}
+                                            onChange={(e) => setManualLong(parseFloat(e.target.value))}
+                                        />
+                                    </Form.Group>
+
+                                    <Button variant="primary" onClick={handleLatLongFormSubmit}>
+                                        Save
+                                    </Button>
                                 </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Longitude</Form.Label>
-                                    <Form.Control 
-                                        type="number" 
-                                        placeholder="Enter longitude" 
-                                        step="0.000001" 
-                                        required={true}
-                                        onChange={(e) => setManualLong(parseFloat(e.target.value))}
-                                    />
-                                </Form.Group>
-
-                                <Button variant="primary" onClick={handleLatLongFormSubmit}>
-                                    Save
-                                </Button>
-                            </Form.Group>
-                        </>
-                    }
+                            </>
+                        }
 
 
-                    {/**If i choose the (lat, long) i want to see them */}
-                    {selectedOption === 'manualInsertion' && !showLatLongForm && manualLat && manualLong &&
-                        <>
-                            <h3 className="mt-5">Latitude: {manualLat}, Longitude: {manualLong}</h3>
-                            <Button variant="primary" onClick={handleResetLatLong}> Change Latitude and longitude</Button>
-                        </>
-                    }
+                        {/**If i choose the (lat, long) i want to see them */}
+                        {selectedOption === 'manualInsertion' && !showLatLongForm && manualLat && manualLong &&
+                            <>
+                                <h3 className="mt-5">Latitude: {manualLat}, Longitude: {manualLong}</h3>
+                                <Button variant="primary" onClick={handleResetLatLong}> Change Latitude and longitude</Button>
+                            </>
+                        }
+                    </div>
+                    
 
         </Container>
 

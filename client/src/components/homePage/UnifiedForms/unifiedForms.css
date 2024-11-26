@@ -1,0 +1,34 @@
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Dispone i figli (header, body, footer) in colonna */
+    top: 10vh;
+    margin: 0 auto; /* Centra orizzontalmente */
+    bottom: 15vh;
+    border: 3px solid;
+    max-width: 75vw;
+    max-height: 75vh;
+}
+
+.modal-header,
+.modal-footer {
+    flex-shrink: 0; /* Evita che header e footer si comprimano */
+}
+
+.modal-header{
+    padding-bottom: 0;
+}
+
+.modal-body {
+    flex-grow: 1; /* Il corpo occupa lo spazio disponibile */
+    overflow-y: auto; /* Aggiungi uno scroll nel caso il contenuto del corpo ecceda */
+    padding: 10px; /* Aggiungi un padding */
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between; /* Distribuisci i bottoni */
+    padding: 10px; /* Spaziatura per il footer */
+    background-color: #f1f1f1; /* Sfondo leggero per separare il footer */
+    border-top: 1px solid #ccc; /* Linea di separazione */
+}

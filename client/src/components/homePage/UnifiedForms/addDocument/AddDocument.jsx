@@ -94,25 +94,26 @@ function AddDocument(props) {
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
+    
         if (newDocument.lat === null || newDocument.lng === null) {
-            alert("Please select a position on the map");
+            alert("Please select a valid position on the map.");
             return;
         }
-
+    
         if (!isIssuanceDateValid) {
             alert("Please enter a valid issuance date.");
             return;
         }
-
+    
         if (isArchitecturalScale && !isArchitecturalScaleFormat) {
             alert("Please enter a valid architectural scale format.");
             return;
         }
-
+    
         props.handleAddDocumentToModal(newDocument);
         props.handleNext();
-
     };
+    
 
 
     return (
@@ -275,22 +276,45 @@ function AddDocument(props) {
                                 onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
                                 value={newDocument.description}
                             />
-                        </Form.Group>
 
-                        <ChosenPosition
+                        </Form.Group>
+                        <Row className="btn-modal justify-content-between align-items-end">
+                            <Col className="d-flex justify-content-start">
+                                <Button variant="secondary" className="btn-modal-close" onClick={() => props.handleClose()}> 
+                                    ← Close
+                                </Button>
+                            </Col>
+                            <Col className="d-flex justify-content-end">
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    className="btn-modal-save"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (!newDocument.title) {
+                                            alert("Title is mandatory.");
+                                            return;
+                                        }
+                                        props.handleAddDocumentToModal(newDocument);
+                                        props.handleNext();
+                                    }}
+                                >
+                                    Next →
+                                </Button>
+
+                            </Col>
+                        </Row>
+
+
+                        {/* <ChosenPosition
                             handleSetPostition={handleSetPostition}
                         />
                         
-                        <AddOriginalSource handleAddedFiles={handleAddedFiles} />
+                        <AddOriginalSource handleAddedFiles={handleAddedFiles} /> */}
+                        
 
                     </Col>
 
-                </Row>
-                <Row>
-                    <Col>
-                        <Button variant="secondary" onClick={()=>props.handleClose()}> Close</Button>
-                        <Button variant="primary" type='submit'> Save </Button>
-                    </Col>
                 </Row>
             </Form>
         </>
