@@ -17,6 +17,7 @@ L.Icon.Default.mergeOptions({
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import UnifiedForms from "./UnifiedForms/UnifiedForms";
+import areaAPI from "../../api/areaAPI";
 
 /** BUGS:
  *  
@@ -73,6 +74,41 @@ function HomePage(props) {
         }
     };
 
+    const handleAddArea = async (document) => {
+        try {
+            /**
+             *         
+             * if (layerType === "polygon") {
+                    shape = {
+                        id: Date.now(),
+                        type: layerType,
+                        latlngs: JSON.stringify(layer.getLatLngs()),
+                    };
+                } else if (layerType === "circle") {
+                    shape = {
+                        id: Date.now(),
+                        type: layerType,
+                        center: JSON.stringify(layer.getLatLng()),
+                        radius: JSON.stringify(layer.getRadius()),
+                    };
+                } else if (layerType === "circlemarker") {
+                    shape = {
+                        id: Date.now(),
+                        type: layerType,
+                        center: JSON.stringify(layer.getLatLng()),
+                    };
+             */
+            console.log("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
+            const areaId = await areaAPI.addArea(document.docId, document.area);
+            console.log("Sono in Homepage.jsx, handleAddArea, ho ricevuto dalle API areaId:", areaId);
+
+            return areaId;
+        } catch (error) {
+            console.error("Error adding area:", error);
+        }
+    }
+
+
     const handleAddDocument = async (document) => {
 
         try {
@@ -90,6 +126,11 @@ function HomePage(props) {
                 // await handleUpload(docId, document.files);
             }*/
 
+            let areaId = null;
+            if (document.area) {
+                areaId = handleAddArea({ ...document, docId: docId });
+            }
+
             const stateDocument = {
                 docId: docId,
                 title: document.title,
@@ -103,15 +144,17 @@ function HomePage(props) {
                 description: document.description,
                 lat: document.lat,
                 lng: document.lng,
-                //files:document.files
+                // files:document.files
+                areaId: areaId,
 
             }
             setDocuments([...documents, stateDocument]);
-
+            
             // adding files to the document
             if (document.files.length > 0) {
                 handleUpload({ ...document, docId: docId });
             }
+
 
             return docId;
         } catch (error) {

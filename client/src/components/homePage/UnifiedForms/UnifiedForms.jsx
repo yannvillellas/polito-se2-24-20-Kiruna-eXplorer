@@ -29,6 +29,7 @@ function UnifiedForms(props) {
         lat: null,
         lng: null,
         files: [],
+        area: null,
     });
 
     const [closeConfirmation, setCloseConfirmation] = useState(false)
@@ -52,6 +53,7 @@ function UnifiedForms(props) {
             lat: null,
             lng: null,
             files: [],
+            area: null,
         });
         setIndex(0)
         setShowModalAdd(false);

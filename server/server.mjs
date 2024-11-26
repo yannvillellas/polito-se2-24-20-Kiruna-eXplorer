@@ -9,9 +9,10 @@ import { getUser, createUser } from './src/dao/userDAO.mjs';
 import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDAO.mjs';
 import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/linkTypeDAO.mjs';
-import { getAssociations, insertAssociation,deleteAssociation,UpdateAssociation, CheckAssociation } from './src/dao/associationDAO.mjs';
-import { isUrbanPlanner,isValidType, createFolder} from './middleware.mjs';
-import fileUpload from 'express-fileupload' 
+import { addArea, listAreas, listAreaAssociations } from './src/dao/areaDAO.mjs';
+import { getAssociations, insertAssociation, deleteAssociation, UpdateAssociation, CheckAssociation } from './src/dao/associationDAO.mjs';
+import { isUrbanPlanner, isValidType, createFolder } from './middleware.mjs';
+import fileUpload from 'express-fileupload'
 import path from "path";
 import fs from "fs";
 
@@ -135,7 +136,7 @@ app.post('/api/users', [
         res.status(200).json(user);
     } catch (err) {
         console.error('Error creating user:', err);
-        
+
         // Gestione di errori specifici per conflitti di username
         if (err.code === 'SQLITE_CONSTRAINT') {
             res.status(409).json({ error: 'Username already exists.' });
@@ -196,12 +197,12 @@ app.post("/api/documents/:docId/files", (req, res) => {
     res.send("Files uploaded succesfully!");
 });
 
-app.get('/api/documents',[], async(req, res) => {
-    try{
+app.get('/api/documents', [], async (req, res) => {
+    try {
         const documents = await listDocuments();
         res.status(200).json(documents);
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -217,7 +218,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
 
     // Verifica che la sottocartella richiesta esista: res.status(400).send("Sottocartella non valida o non trovata.")
     if (!availableFolders.includes(subfolder)) {
-        return ;
+        return;
     }
 
     const folderPath = path.join(uploadDir, subfolder);
@@ -231,15 +232,84 @@ app.get("/api/documents/:docId/files", (req, res) => {
     res.json(files);
 });
 
-app.delete('/api/documents',isUrbanPlanner,[],async (req, res)=>{
-    try{
+app.delete('/api/documents', isUrbanPlanner, [], async (req, res) => {
+    try {
         await deleteDocument(req.body.docId);
         res.status(200).end();
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 
 });
+
+
+//areaAPI
+
+app.post('/api/:docId/areas', isUrbanPlanner, async (req, res) => {
+
+    const docId = req.params.docId;
+    const area = req.body;
+
+    console.log("Sono in serve.mjs, :docId/areas, ho ricevuto (docID, area): ",docId, area);
+
+    if(area.type === "polygon"){
+        /**
+         *  type: 'polygon',
+            latlngs: '[[{"lat":67.85923341814025,"lng":20.202684405958284},{"lat":67.85320538037035,"lng":20.198907855665315},
+            {"lat":67.85002869054144,"lng":20.234785083448518},{"lat":67.85677053723843,"lng":20.250406268751252}]]'
+         * 
+         */
+        const coordinates = JSON.stringify(area.latlngs); // => il recupero va fatto con "const savedCoordinates = JSON.parse(row.coordinates);"
+        const areaType = "polygon";
+        const areaId = await addArea(docId, areaType, coordinates);
+        console.log("Sono in serve.mjs, :docId/areas, ho aggiunto un'area di tipo polygon il DB mi ha ritornato id: ", areaId);
+
+        /**DA CANCELLARE: 
+        const tutteLeAree = await listAreas();
+        console.log("Sono in serve.mjs, :docId/areas, ho recuperato tutte le aree: ", tutteLeAree);
+        */
+
+        res.status(201).json(areaId);
+
+
+    } else if (area.type === "circlemarker"){
+        /** type: 'circlemarker',
+            center: '{"lat":67.85314055429082,"lng":20.229291919386018}' 
+        */
+        const coordinates = JSON.stringify(area.center);
+        const areaType = "circlemarker";
+        /*const areaId = await addArea(docId, areaType, coordinates);
+        console.log("Sono in serve.mjs, :docId/areas, ho aggiunto un'area di tipo circlemarker il DB mi ha ritornato id: ", areaId);
+        res.status(201).json(areaId); */
+    } else{
+        res.status(400).json({ error: 'Invalid area type' });
+    }
+
+});
+
+app.get('/api/areas', [], async (req, res) => {
+    try {
+        const areas = await listAreas(); // areas are a list of OBJECTS
+        console.log("Sono in serve.mjs, /api/areas, ho recuperato tutte le aree: ", areas);
+        res.status(200).json(areas);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+app.get('/api/areasAssociations', [], async (req, res) => {
+    try {
+        const areasAssociations = await listAreaAssociations(); // areasAssociations are a list of OBJECTS
+        res.status(200).json(areasAssociations);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+
+
 
 
 //positionAPI
@@ -262,12 +332,12 @@ app.post('/api/positions', isUrbanPlanner, [
     res.status(201).end();
 });
 
-app.get('/api/positions',[], async(req, res) => {
-    try{
+app.get('/api/positions', [], async (req, res) => {
+    try {
         const positions = await listPositions();
         res.status(200).json(positions);
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -291,14 +361,14 @@ app.put('/api/positions/:docId', isUrbanPlanner, [
 
 
 //associationsAPI
-app.post('/api/associations', isUrbanPlanner, isValidType,[
+app.post('/api/associations', isUrbanPlanner, isValidType, [
     check('doc1').notEmpty().isNumeric(),
     check('doc2').notEmpty().isNumeric(),
     check('type').notEmpty().isString()/*.isIn(validTypes),*/ //controllare
-  ], async (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+        return res.status(422).json({ errors: errors.array() });
     }
 
     const association = {
@@ -308,10 +378,10 @@ app.post('/api/associations', isUrbanPlanner, isValidType,[
     };
 
     try {
-        if((await CheckAssociation(association)).length>0 /*|| (await CheckAssociation(association)).length>0*/){    //if the association already exist
-            res.status(201).json({msg:"association already exist", doc1:association.doc1, doc2:association.doc2, type:association.type})  //check if the tatus code is correct
-        }else{  //if not exist create a new association
-            const newId=await insertAssociation(association);
+        if ((await CheckAssociation(association)).length > 0 /*|| (await CheckAssociation(association)).length>0*/) {    //if the association already exist
+            res.status(201).json({ msg: "association already exist", doc1: association.doc1, doc2: association.doc2, type: association.type })  //check if the tatus code is correct
+        } else {  //if not exist create a new association
+            const newId = await insertAssociation(association);
             res.status(200).json({ id: newId });  //return the Id of the new association to the frontend
         }
     } catch (e) {
@@ -319,25 +389,25 @@ app.post('/api/associations', isUrbanPlanner, isValidType,[
     }
 });
 
-app.get('/api/associations/:docId',[], async(req, res) => {
-    try{
+app.get('/api/associations/:docId', [], async (req, res) => {
+    try {
         const associations = await getAssociations(parseInt(req.params.docId)); // verify if docId are integers
         res.status(200).json(associations);
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
-app.delete('/api/associations/:aId',isUrbanPlanner,[],async (req, res)=>{
-    try{
+app.delete('/api/associations/:aId', isUrbanPlanner, [], async (req, res) => {
+    try {
         await deleteAssociation(parseInt(req.params.aId)); // verify if aId is integer
         res.status(200).end();
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
-app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
+app.put('/api/associations/:aId', isUrbanPlanner, isValidType, [
     check('doc1').notEmpty().isString(),
     check('doc2').notEmpty().isString(),
     check('type').notEmpty().isString()/*.isIn(validTypes),*/
@@ -362,20 +432,20 @@ app.put('/api/associations/:aId', isUrbanPlanner,isValidType,[
 });
 
 //linkTypeAPI
-  // load the valid links type at the server start
-  //let validTypes = loadValidTypes();
-app.get('/api/linkTypes',[], async(req, res) => {
-    try{
+// load the valid links type at the server start
+//let validTypes = loadValidTypes();
+app.get('/api/linkTypes', [], async (req, res) => {
+    try {
         const types = await getLinksType();
         res.status(200).json(types);
-    }catch(err){
-        res.status(500).json({error: err.message});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
 //if (require.main === module) {
-    app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
+app.listen(PORT, () => { console.log(`API server started at http://localhost:${PORT}`); });
 //}
 export default app;

@@ -5,6 +5,7 @@ import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
+import ChosenArea from "../../chosenArea/ChosenArea";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
@@ -25,6 +26,7 @@ function AddDocument(props) {
         lat: null,
         lng: null,
         files: [],
+        area: null
     });
 
 
@@ -32,9 +34,14 @@ function AddDocument(props) {
     const handleSetPostition = (lat, lng) => {
         setNewDocument({ ...newDocument, lat: lat, lng: lng });
     };
-
+    
     const handleAddedFiles = (files) => {
         setNewDocument({ ...newDocument, files: files });
+    };
+
+    const handleSetArea = (area) => {
+        console.log("AddDocument.jsx, sto salvando area:", area);
+        setNewDocument({ ...newDocument, area: area });
     };
 
 
@@ -106,6 +113,11 @@ function AddDocument(props) {
 
         if (isArchitecturalScale && !isArchitecturalScaleFormat) {
             alert("Please enter a valid architectural scale format.");
+            return;
+        }
+
+        if(newDocument.area === null){
+            alert("Please select an area on the map");
             return;
         }
 
@@ -280,6 +292,8 @@ function AddDocument(props) {
                         <ChosenPosition
                             handleSetPostition={handleSetPostition}
                         />
+
+                        <ChosenArea handleSetArea={handleSetArea} />
                         
                         <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
