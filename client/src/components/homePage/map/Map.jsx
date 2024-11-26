@@ -6,7 +6,9 @@ import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, GeoJSON } from 'react-leaflet';
+
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
+
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import kirunaGeoJson from "../../../data/KirunaMunicipality.json";
 
@@ -17,11 +19,37 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
-
+import areaAPI from "../../../api/areaAPI";
+import geojsonData from "./KirunaMunicipality.json"
 
 function Map(props) {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [areas, setAreas] = useState([]);
+
+  const onFeatureClick = (e) => {
+    // Ottieni il layer (poligono, multipoligono, ecc.)
+    const layer = e.target;
+
+    // Estrai l'ID o altre informazioni dalla feature
+    const areaId = layer.feature.properties.stat_id; // O usa il campo che ti interessa, ad esempio stat_id o un altro campo
+    console.log("Clicked area ID:", areaId);
+  };
+
+  const geojsonStyle = {
+    color: "white",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.1
+  };
+
+  const onEachFeature = (feature, layer) => {
+    // Aggiungi l'evento di clic alla feature
+    layer.on({
+      click: onFeatureClick
+    });
+  };
+
 
 
 
@@ -44,7 +72,20 @@ function Map(props) {
     if (props.documents) {
       setDocuments(props.documents);
     }
+
+    const fetchAreas = async () => {
+      try {
+        const areas = await areaAPI.listAreas();
+        console.log("Sono in Map.jsx, ecco tutte le aree: ", areas);
+        setAreas(areas);
+      } catch (error) {
+        console.error("Error fetching areas:", error);
+      }
+      
+    }
+    fetchAreas();
   }, [props.documents]);
+
 
 
   const closeDocumentModal = () => {
@@ -145,7 +186,40 @@ function Map(props) {
             >
             </Marker>
           ))}
+
         </MarkerClusterGroup>
+
+        {/**Show all the areas by document: */}
+
+        {areas.length > 0 && areas.map((area, index) => {
+          if (area.areaType === "polygon") {
+            try {
+              const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+              return (
+                <Polygon
+                  key={index}
+                  positions={positions}
+                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                  eventHandlers={{
+                    click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
+                  }}
+                />
+              );
+            } catch (error) {
+              console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
+              return null;
+            }
+          }
+          return null;
+        })}
+
+
+        <GeoJSON
+          data={geojsonData}
+          style={geojsonStyle}
+          onEachFeature={onEachFeature} // Assegna l'evento di clic ad ogni feature
+        />
+
       </MapContainer>
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
