@@ -6,8 +6,10 @@ import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, GeoJSON } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
+import kirunaGeoJson from "../../../data/KirunaMunicipality.json";
+
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,6 +32,12 @@ function Map(props) {
   const [manualLat, setManualLat] = useState(null);
   const [manualLong, setManualLong] = useState(null);
 
+  const geoJsonStyle = {
+    color: 'red',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0 // No fill color
+  };
 
   // So that sync with the parent component
   useEffect(() => {
@@ -116,6 +124,14 @@ function Map(props) {
           </LayersControl.BaseLayer>
         </LayersControl>
 
+        <GeoJSON data={kirunaGeoJson} style={{
+          color: 'red',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0
+          }}
+        />
+        
         <MarkerClusterGroup
           showCoverageOnHover={false}
         >
