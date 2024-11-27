@@ -298,9 +298,10 @@ app.get('/api/areas', [], async (req, res) => {
 });
 
 
-app.get('/api/areasAssociations', [], async (req, res) => {
+app.get('/api/areaAssociations', [], async (req, res) => {
     try {
         const areasAssociations = await listAreaAssociations(); // areasAssociations are a list of OBJECTS
+        console.log("Sono in serve.mjs, /api/areaAssociations, ho recuperato tutte le aree association: ", areasAssociations);
         res.status(200).json(areasAssociations);
     } catch (err) {
         res.status(500).json({ error: err.message });
