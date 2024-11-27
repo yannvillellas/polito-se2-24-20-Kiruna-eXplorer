@@ -81,7 +81,7 @@ function Map(props) {
       } catch (error) {
         console.error("Error fetching areas:", error);
       }
-      
+
     }
     fetchAreas();
   }, [props.documents]);
@@ -102,171 +102,178 @@ function Map(props) {
 
   };*/
 
+  // Funzione mdocificata (restituiva errore)
   const handleGetFiles = async (docId) => {
-    const files = await DocumentAPI.getFiles(docId);
-    if (files) {
-      setFiles(Array.from(files))
-    } else {
-      setFiles()
+    try {
+      const files = await DocumentAPI.getFiles(docId); // Risolvi la Promise
+      if (files) {
+        setFiles(Array.from(files));
+      } else {
+        setFiles([]); // Inizializza con array vuoto se non ci sono file
+      }
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      setFiles([]); // Fallback in caso di errore
     }
-
-  }
-
-  const handleDownload = (file) => {
-    const URL = `http://localhost:3001/${file.path.slice(1)}`
-
-    const aTag = document.createElement("a");
-    aTag.href = URL
-    aTag.setAttribute("download", file.name)
-    document.body.appendChild(aTag)
-    aTag.click();
-    aTag.remove();
-  }
-
-  const handleMarkerClick = async (docs) => {
-    setSelectedDoc(docs[0]);
-    setShowDocumentModal(true);
-
-    await handleGetFiles(docs[0].docId)
   };
 
 
-  const handleModifyPosition = async (newLan, newLng) => {
+const handleDownload = (file) => {
+  const URL = `http://localhost:3001/${file.path.slice(1)}`
 
-    if (newLan === null || newLng === null) {
-      alert("Latitude and longitude must be filled and should be numbers");
-      return;
-    } else if (newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180) {
-      alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
-      return;
-    }
-    await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
-    closeDocumentModal();
-  };
+  const aTag = document.createElement("a");
+  aTag.href = URL
+  aTag.setAttribute("download", file.name)
+  document.body.appendChild(aTag)
+  aTag.click();
+  aTag.remove();
+}
+
+const handleMarkerClick = async (docs) => {
+  setSelectedDoc(docs[0]);
+  setShowDocumentModal(true);
+
+  await handleGetFiles(docs[0].docId)
+
+};
+
+
+const handleModifyPosition = async (newLan, newLng) => {
+
+  if (newLan === null || newLng === null) {
+    alert("Latitude and longitude must be filled and should be numbers");
+    return;
+  } else if (newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180) {
+    alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
+    return;
+  }
+  await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
+  closeDocumentModal();
+};
 
 
 
-  return (
+return (
 
-    <Container fluid className="map-container">
-      <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
-        <LayersControl position="topright">
-          <LayersControl.BaseLayer checked name="Google Satellite">
-            <TileLayer
-              url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-              attribution='&copy; <a href="https://maps.google.com">Google</a>'
-            />
-          </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer name="OpenStreetMap">
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-            />
-          </LayersControl.BaseLayer>
-        </LayersControl>
+  <Container fluid className="map-container">
+    <MapContainer center={[67.8558, 20.2253]} zoom={12} style={{ height: '80vh', width: '100%' }}>
+      <LayersControl position="topright">
+        <LayersControl.BaseLayer checked name="Google Satellite">
+          <TileLayer
+            url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+            attribution='&copy; <a href="https://maps.google.com">Google</a>'
+          />
+        </LayersControl.BaseLayer>
+        <LayersControl.BaseLayer name="OpenStreetMap">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+          />
+        </LayersControl.BaseLayer>
+      </LayersControl>
 
-        <GeoJSON data={kirunaGeoJson} style={{
-          color: 'red',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0
-          }}
-        />
-        
-        <MarkerClusterGroup
-          showCoverageOnHover={false}
-        >
-          {documents.map((doc, index) => (
-            <Marker
-              key={index}
-              position={[doc.lat, doc.lng]}
-              eventHandlers={{
-                click: () => handleMarkerClick([doc])
-              }}
-            >
-            </Marker>
-          ))}
+      <GeoJSON data={kirunaGeoJson} style={{
+        color: 'red',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0
+      }}
+      />
 
-        </MarkerClusterGroup>
+      <MarkerClusterGroup
+        showCoverageOnHover={false}
+      >
+        {documents.map((doc, index) => (
+          <Marker
+            key={index}
+            position={[doc.lat, doc.lng]}
+            eventHandlers={{
+              click: () => handleMarkerClick([doc])
+            }}
+          >
+          </Marker>
+        ))}
 
-        {/**Show all the areas by document: */}
+      </MarkerClusterGroup>
 
-        {areas.length > 0 && areas.map((area, index) => {
-          if (area.areaType === "polygon") {
-            try {
-              const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
-              return (
-                <Polygon
-                  key={index}
-                  positions={positions}
-                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
-                  eventHandlers={{
-                    click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
-                  }}
-                />
-              );
-            } catch (error) {
-              console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
-              return null;
-            }
+      {/**Show all the areas by document: */}
+
+      {areas.length > 0 && areas.map((area, index) => {
+        if (area.areaType === "polygon") {
+          try {
+            const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+            return (
+              <Polygon
+                key={index}
+                positions={positions}
+                pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                eventHandlers={{
+                  click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
+                }}
+              />
+            );
+          } catch (error) {
+            console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
+            return null;
           }
-          return null;
-        })}
+        }
+        return null;
+      })}
 
 
-        <GeoJSON
-          data={geojsonData}
-          style={geojsonStyle}
-          onEachFeature={onEachFeature} // Assegna l'evento di clic ad ogni feature
-        />
+      <GeoJSON
+        data={geojsonData}
+        style={geojsonStyle}
+        onEachFeature={onEachFeature} // Assegna l'evento di clic ad ogni feature
+      />
 
-      </MapContainer>
+    </MapContainer>
 
-      <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {selectedDoc ? (
-              selectedDoc.title
-            ) : (
-              <p>Select a marker for visualize the details.</p>
-            )}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+    <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
+      <Modal.Header closeButton>
+        <Modal.Title>
           {selectedDoc ? (
-            <>
-              {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                </p>
-              ))}
-              <div key={"position"}>
-                <p>
-                  <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
-                </p>
-                {props.isUrbanPlanner && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
-                  Reposition
-                </Button>}
-                {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
-              </div>
-              <div className="download-buttons-container">
-                {files ? files.map((f, index) => (
-                  <div key={f.name || index} className="download-btns">
-                    <Button onClick={() => handleDownload(f)} className="files">
-                      <i className="bi bi-file-earmark-text-fill"></i>
-                    </Button>
-                    <p className="file-name">{f.name}</p>
-                  </div>
-                )) : ""}
-              </div>
-            </>
+            selectedDoc.title
           ) : (
             <p>Select a marker for visualize the details.</p>
           )}
-        </Modal.Body>
-      </Modal>
-    </Container>
-  );
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {selectedDoc ? (
+          <>
+            {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
+              <p key={key}>
+                <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+              </p>
+            ))}
+            <div key={"position"}>
+              <p>
+                <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
+              </p>
+              {props.isUrbanPlanner && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
+                Reposition
+              </Button>}
+              {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
+            </div>
+            <div className="download-buttons-container">
+              {files ? files.map((f, index) => (
+                <div key={f.name || index} className="download-btns">
+                  <Button onClick={() => handleDownload(f)} className="files">
+                    <i className="bi bi-file-earmark-text-fill"></i>
+                  </Button>
+                  <p className="file-name">{f.name}</p>
+                </div>
+              )) : ""}
+            </div>
+          </>
+        ) : (
+          <p>Select a marker for visualize the details.</p>
+        )}
+      </Modal.Body>
+    </Modal>
+  </Container>
+);
 }
 
 export default Map;
