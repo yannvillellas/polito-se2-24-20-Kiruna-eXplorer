@@ -21,6 +21,7 @@ L.Icon.Default.mergeOptions({
 });
 import areaAPI from "../../../api/areaAPI";
 import geojsonData from "./KirunaMunicipality.json"
+import { area } from "@turf/turf";
 
 function Map(props) {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
@@ -171,24 +172,38 @@ function Map(props) {
   const handleMouseOver = (docId) => {
     console.log(`Mouseover on docId: ${docId}`);  // Aggiungi un log per monitorare
     // Imposto la visibilità dell'area tramite areaAssociations
-    const areaId = areaAssociations.find((a) => a.docId === docId).areaId;
-    setVisibleAreas( (prevState) => {
-      if(prevState.includes(areaId)){
-        return prevState;
-      } else {
-        return [...prevState, areaId];
-      }
-    });
-    
+    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
+    if(!areaAssociation){
+      return;
+    }
+
+    const areaId = areaAssociation.areaId;
+    if (areaId) {
+      setVisibleAreas((prevState) => {
+        if (prevState.includes(areaId)) {
+          return prevState;
+        } else {
+          return [...prevState, areaId];
+        }
+      });
+    }
+
   };
-  
+
   const handleMouseOut = (docId) => {
     console.log(`Mouseout on docId: ${docId}`);  // Aggiungi un log per monitorare
     // rimuovo areaId da visibleAreas
-    const areaId = areaAssociations.find((a) => a.docId === docId).areaId;
-    setVisibleAreas( (prevState) => {
-      return prevState.filter((a) => a !== areaId);
-    });
+    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
+    if(!areaAssociation){
+      return;
+    }
+
+    const areaId = areaAssociation.areaId;
+    if (areaId) {
+      setVisibleAreas((prevState) => {
+        return prevState.filter((a) => a !== areaId);
+      });
+    }
   };
 
   const handleModifyPosition = async (newLan, newLng) => {
