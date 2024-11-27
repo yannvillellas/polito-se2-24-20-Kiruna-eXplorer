@@ -1,12 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./addDocument.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
 import ChosenArea from "../../chosenArea/ChosenArea";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
+import { booleanContains, polygon } from "@turf/turf";
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
@@ -32,15 +33,32 @@ function AddDocument(props) {
 
 
     const handleSetPostition = (lat, lng) => {
-        setNewDocument({ ...newDocument, lat: lat, lng: lng });
+        console.log("AddDocument.jsx, ho ricevuto lat e lng (dall'area):", lat, lng);
+        // Modo corretto per aggiornare un oggetto in React
+        setNewDocument((prevDocument) => {
+            const updatedDocument = { ...prevDocument, lat: lat, lng: lng };
+            console.log("AddDocument.jsx, ho salvato lat e lng in newDocument:", updatedDocument.lat, updatedDocument.lng);
+            return updatedDocument;
+        });
     };
-    
+
+    useEffect(() => {
+        console.log("AddDocument.jsx, stato di newDocument aggiornato:", newDocument);
+    }, [newDocument]);
+
+
     const handleAddedFiles = (files) => {
-        setNewDocument({ ...newDocument, files: files });
+        console.log("AddDocument.jsx, ho ricevuto i files:", files);
+        setNewDocument((prevDocument) => {
+            const updatedDocument = { ...prevDocument, files: files };
+            console.log("AddDocument.jsx, ho salvato i files in newDocument:", updatedDocument.files);
+            return updatedDocument;
+        });
     };
 
     const handleSetArea = (area) => {
         console.log("AddDocument.jsx, sto salvando area:", area);
+        // Chiamo qui handle set position perche' ho bisogno di calcolare il centroide dell'area:
         setNewDocument({ ...newDocument, area: area });
     };
 
@@ -101,6 +119,10 @@ function AddDocument(props) {
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
+
+        console.log("AddDocument.jsx, hai premuto SAVE ecco tutte le info di newDocument: newDocument:", newDocument);
+
+
         if (newDocument.lat === null || newDocument.lng === null) {
             alert("Please select a position on the map");
             return;
@@ -116,7 +138,7 @@ function AddDocument(props) {
             return;
         }
 
-        if(newDocument.area === null){
+        if (newDocument.area === null) {
             alert("Please select an area on the map");
             return;
         }
@@ -175,8 +197,8 @@ function AddDocument(props) {
 
                                     setIsArchitecturalScale(scaleValue === "Architectural Scale");
 
-                                    isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({...newDocument, scale: scaleValue})
-                                    
+                                    isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({ ...newDocument, scale: scaleValue })
+
                                     /*
                                     if (selectedOption) {
                                         if (selectedOption.value === "Architectural Scale") {
@@ -193,51 +215,51 @@ function AddDocument(props) {
 
                                 }
                                 }
-                                value={isArchitecturalScale ?  scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
+                                value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
                             />
 
-                            </Form.Group>
-                                                {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}       
-                            {isArchitecturalScale && 
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Architectural Scale Format (x:y)*</Form.Label> 
-                                    <Form.Control
-                                        type="text"
-                                        required={true}
-                                        placeholder="Enter scale in x:y format"
-                                        onChange={(e) => {
-                                            const regex = /^\d+:\d+$/;
-                                            if(regex.test(e.target.value)){
-                                                setIsArchitecturalScaleFormat(true);
-                                                setNewDocument({...newDocument, scale: e.target.value})
-                                            } else{
-                                                setIsArchitecturalScaleFormat(false);
-                                            }
-                                        }}
-                                        isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
-                                        
-                                    />
-                                    {/* I'm not setting the value, thevalue will be still tehre untill the comontent is not unmounted (refreshed the page). 
-                                    isArchitecturalScale  is still true untill you unmount the component */}
-                                    <Form.Control.Feedback type="invalid">
-                                            Please enter the scale in "x:y" format (e.g., 1:100).
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                            }
+                        </Form.Group>
+                        {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}
+                        {isArchitecturalScale &&
                             <Form.Group className="mb-3">
-                                <Form.Label>Issuance Date*</Form.Label>
+                                <Form.Label>Architectural Scale Format (x:y)*</Form.Label>
                                 <Form.Control
                                     type="text"
                                     required={true}
-                                    placeholder="Enter date in yyyy/mm/dd format"
-                                    value={issuanceDate}
-                                    onChange={handleDateChange}
-                                    isInvalid={!isIssuanceDateValid}
+                                    placeholder="Enter scale in x:y format"
+                                    onChange={(e) => {
+                                        const regex = /^\d+:\d+$/;
+                                        if (regex.test(e.target.value)) {
+                                            setIsArchitecturalScaleFormat(true);
+                                            setNewDocument({ ...newDocument, scale: e.target.value })
+                                        } else {
+                                            setIsArchitecturalScaleFormat(false);
+                                        }
+                                    }}
+                                    isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+
                                 />
+                                {/* I'm not setting the value, thevalue will be still tehre untill the comontent is not unmounted (refreshed the page). 
+                                    isArchitecturalScale  is still true untill you unmount the component */}
                                 <Form.Control.Feedback type="invalid">
-                                        Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                                    Please enter the scale in "x:y" format (e.g., 1:100).
                                 </Form.Control.Feedback>
                             </Form.Group>
+                        }
+                        <Form.Group className="mb-3">
+                            <Form.Label>Issuance Date*</Form.Label>
+                            <Form.Control
+                                type="text"
+                                required={true}
+                                placeholder="Enter date in yyyy/mm/dd format"
+                                value={issuanceDate}
+                                onChange={handleDateChange}
+                                isInvalid={!isIssuanceDateValid}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                            </Form.Control.Feedback>
+                        </Form.Group>
 
 
                         <Form.Group className="mb-3">
@@ -293,8 +315,8 @@ function AddDocument(props) {
                             handleSetPostition={handleSetPostition}
                         />
 
-                        <ChosenArea handleSetArea={handleSetArea} />
-                        
+                        <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition}/>
+
                         <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
                     </Col>
@@ -302,7 +324,7 @@ function AddDocument(props) {
                 </Row>
                 <Row>
                     <Col>
-                        <Button variant="secondary" onClick={()=>props.handleClose()}> Close</Button>
+                        <Button variant="secondary" onClick={() => props.handleClose()}> Close</Button>
                         <Button variant="primary" type='submit'> Save </Button>
                     </Col>
                 </Row>

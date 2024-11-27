@@ -7,7 +7,7 @@ import L from "leaflet";
 
 import areaAPI from "../../../api/areaAPI";
 import geojsonData from "./KirunaMunicipality.json"
-import { booleanContains, polygon } from "@turf/turf";
+import { booleanContains, centroid, polygon } from "@turf/turf";
 
 // Configura le icone per Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -22,6 +22,8 @@ function ChosenArea(props) {
     const [selectedOption, setSelectedOption] = useState(''); // Stato per il valore selezionato
     const [areas, setAreas] = useState([]);
     const [selectedArea, setSelectedArea] = useState(null); // Here there is the selected areaId
+
+
 
     useEffect(() => {
         const fetchAreas = async () => {
@@ -49,7 +51,15 @@ function ChosenArea(props) {
 
     const handleSetPreExistingArea = (area) => {
         console.log("Sono in ChosenArea.jsx, Area selected: ", area);
-        setSelectedArea(area);
+        props.handleSetArea(area);
+
+        // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
+        const latlngs = JSON.parse(area.coordinates)[0];
+        const center = calculateCenterOfPolygon(latlngs);
+        console.log("Centro calcolato come media delle coordinate:", center);
+        // Passa il centro come lat, lng
+        props.handleSetPostition(center[0], center[1]);
+
     };
 
     function isAreaContained(area1, area2) {
@@ -72,6 +82,27 @@ function ChosenArea(props) {
             return false;
         }
     }
+
+    // Per calcolare centro con la media aritmetica delle coordinate (TURF ha problemi con il centroide del triangolo)
+    function calculateCenterOfPolygon(latlngs) {
+        let latSum = 0;
+        let lngSum = 0;
+        const numPoints = latlngs.length;
+
+        // Somma le coordinate
+        latlngs.forEach(latlng => {
+            latSum += latlng.lat;
+            lngSum += latlng.lng;
+        });
+
+        // Calcola la media delle coordinate
+        const centerLat = latSum / numPoints;
+        const centerLng = lngSum / numPoints;
+
+        return [centerLat, centerLng];
+    }
+
+
 
     const onCreated = (e) => {
         const { layerType, layer } = e;
@@ -114,6 +145,36 @@ function ChosenArea(props) {
         if (isAreaContained(areaToGeoJson, geojsonData)) {
             console.log("Sono in choseArea.jsx, l'area è contenuta nel municipio!");
             props.handleSetArea(shape);
+
+            /** Calcolo il centro dell'area TURF (ha problemi con centroide del triangolo) (passo quello come coordinate (lat, lng)*/
+            /*
+            const latlngs = JSON.parse(shape.latlngs)[0];
+            console.log("Sono in ChosenArea.jsx, latlngs dell'area appena disegnata: (JSON.parse) ", latlngs);
+            const polygonGeoJSON = {
+                type: "Feature",
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [latlngs.map(latlng => [latlng.lng, latlng.lat])] // Inverti in [lon, lat]
+                }
+            };
+
+            console.log("Sono in ChosenArea.jsx, polygonGeoJSON, ricavato: ", polygonGeoJSON);
+
+            
+            let centroid = turf.centroid(polygonGeoJSON);
+            console.log("AddDocument.jsx, centroide calcolato con turf (e' un po' strano)", centroid, centroid.geometry.coordinates); // [lon, lat]
+            props.handleSetPostition(centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]); // Inverto in [lat, lon]
+            */
+
+
+            // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
+            const latlngs = JSON.parse(shape.latlngs)[0];
+            const center = calculateCenterOfPolygon(latlngs);
+            console.log("Centro calcolato come media delle coordinate:", center);
+            // Passa il centro come lat, lng
+            props.handleSetPostition(center[0], center[1]);
+
+
         } else {
             alert("The area is not inside the municipality");
         }
@@ -160,7 +221,7 @@ function ChosenArea(props) {
                                         rectangle: false,
                                         polygon: true,
                                         circle: false,
-                                        circleMarker: true,
+                                        circleMarker: false,
                                         polyline: false,
                                         marker: false,
                                     }}
@@ -183,9 +244,9 @@ function ChosenArea(props) {
                                     onCreated={onCreated}
                                     draw={{
                                         rectangle: false,
-                                        polygon: true,
+                                        polygon: false,
                                         circle: false,
-                                        circleMarker: true,
+                                        circleMarker: false,
                                         polyline: false,
                                         marker: false,
                                     }}
