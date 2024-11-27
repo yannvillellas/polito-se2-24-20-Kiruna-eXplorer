@@ -36,7 +36,7 @@ const addArea = async (docId, area) => {
     }
 }
 
-const listAreaAssociation = async () => {
+const listAreaAssociations = async () => {
     try {
         const response = await fetch(`${SERVER_URL}/api/areaAssociations`, {
             method: 'GET',
@@ -58,7 +58,7 @@ const listAreaAssociation = async () => {
 const areaAPI = {
     listAreas,
     addArea,
-    listAreaAssociation
+    listAreaAssociations
 };
 
 export default areaAPI;
