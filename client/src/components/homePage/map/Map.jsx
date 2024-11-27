@@ -72,7 +72,11 @@ function Map(props) {
     if (props.documents) {
       setDocuments(props.documents);
     }
+  }, [props.documents]);
 
+  /* Non mi si aggiorna in automatico le aree appena aggiunto documento, perciò temporaneamente opto per il polling */
+  // Lascio anceh questa perchè così le aree mi vengono caricate subito all'apertura della pagina
+  useEffect(() => {
     const fetchAreas = async () => {
       try {
         const areas = await areaAPI.listAreas();
@@ -81,10 +85,29 @@ function Map(props) {
       } catch (error) {
         console.error("Error fetching areas:", error);
       }
-
     }
     fetchAreas();
-  }, [props.documents]);
+  }, []);
+ 
+
+  // Polling per le aree
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const fetchAreas = async () => {
+        try {
+          const areas = await areaAPI.listAreas();
+          setAreas(areas);
+        } catch (error) {
+          console.error("Error fetching areas:", error);
+        }
+      }
+      fetchAreas();
+    }, 5000); // Ogni 5 secondi
+    return () => clearInterval(interval);
+  }, []);
+
+
+
 
 
 
