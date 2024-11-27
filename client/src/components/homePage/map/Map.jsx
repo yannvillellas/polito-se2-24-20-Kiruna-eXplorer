@@ -23,7 +23,20 @@ import areaAPI from "../../../api/areaAPI";
 import geojsonData from "./KirunaMunicipality.json"
 import { area } from "@turf/turf";
 
+
+/** BUGS:
+ *  - If i press on a marker and i close the area is still visible untill i pass over that marker again
+ * 
+ */
+
 function Map(props) {
+  const [documents, setDocuments] = useState([]);
+  const [documentShown, setDocumentShown] = useState([]);
+  const [isOnlyAllMunicipalityDocument, setIsOnlyAllMunicipalityDocument] = useState(false);
+
+  const [files, setFiles] = useState();
+  const [isPositionToModify, setIsPositionToModify] = useState(false);
+
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [areas, setAreas] = useState([]);
@@ -56,12 +69,7 @@ function Map(props) {
 
 
 
-  const [documents, setDocuments] = useState([]);
 
-  const [files, setFiles] = useState();
-  const [isPositionToModify, setIsPositionToModify] = useState(false);
-  const [manualLat, setManualLat] = useState(null);
-  const [manualLong, setManualLong] = useState(null);
 
   const geoJsonStyle = {
     color: 'red',
@@ -173,7 +181,7 @@ function Map(props) {
     console.log(`Mouseover on docId: ${docId}`);  // Aggiungi un log per monitorare
     // Imposto la visibilità dell'area tramite areaAssociations
     const areaAssociation = areaAssociations.find((a) => a.docId === docId);
-    if(!areaAssociation){
+    if (!areaAssociation) {
       return;
     }
 
@@ -194,7 +202,7 @@ function Map(props) {
     console.log(`Mouseout on docId: ${docId}`);  // Aggiungi un log per monitorare
     // rimuovo areaId da visibleAreas
     const areaAssociation = areaAssociations.find((a) => a.docId === docId);
-    if(!areaAssociation){
+    if (!areaAssociation) {
       return;
     }
 
@@ -219,6 +227,11 @@ function Map(props) {
     closeDocumentModal();
   };
 
+  const handleShowOnlyAllMunicipalityDocument = () => {
+    setIsOnlyAllMunicipalityDocument(true);
+    setDocumentShown(documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
+
+  }
 
 
 
@@ -252,7 +265,20 @@ function Map(props) {
         <MarkerClusterGroup
           showCoverageOnHover={false}
         >
-          {documents.map((doc, index) => (
+          {!isOnlyAllMunicipalityDocument && documents.map((doc, index) => (
+            <Marker
+              key={index}
+              position={[doc.lat, doc.lng]}
+              eventHandlers={{
+                click: () => handleMarkerClick([doc]),
+                mouseover: () => handleMouseOver(doc.docId),
+                mouseout: () => handleMouseOut(doc.docId),
+              }}
+            >
+            </Marker>
+          ))}
+
+          {isOnlyAllMunicipalityDocument && documentShown.map((doc, index) => (
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
@@ -299,6 +325,15 @@ function Map(props) {
         />
 
       </MapContainer>
+
+      {!isOnlyAllMunicipalityDocument &&
+        <Button variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
+      }
+
+      { isOnlyAllMunicipalityDocument &&
+        <Button variant="primary" onClick={() => setIsOnlyAllMunicipalityDocument(false)}>Show all documents</Button>
+      }
+
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>
