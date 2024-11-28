@@ -158,15 +158,20 @@ app.post('/api/documents', isUrbanPlanner, [
     check('pages').optional().isString(),
     check('description').isString(),
 ], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+    try{
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        // Here i manage teh first infos of the document
+        const documentId = await addDocument(req.body);
+
+        res.status(201).json(documentId);
+    }catch(err){
+        console.error('Error adding document:', err.message);
+        res.status(500).json({error: err.message});
     }
-
-    // Here i manage teh first infos of the document
-    const documentId = await addDocument(req.body);
-
-    res.status(201).json(documentId);
 });
 
 app.post("/api/documents/:docId/files", (req, res) => {

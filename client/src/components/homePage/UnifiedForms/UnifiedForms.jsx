@@ -148,6 +148,7 @@ function UnifiedForms(props) {
                                 handleNext={handleNext}
                                 newDocument={newDocument}
                                 handleClose={handleClose}
+                                index={index}
                             />
                         </Carousel.Item>
 
@@ -178,9 +179,15 @@ function UnifiedForms(props) {
                                             variant="primary"
                                             type="button"
                                             className="btn-modal-save"
-                                            onClick={() => {
-                                                props.handleAddDocument(newDocument);
-                                                handleClose();
+                                            onClick={async() => {
+                                                if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
+                                                    console.log("sto aggiungendo il doc: ", newDocument)
+                                                    await props.handleAddDocument(newDocument);
+                                                    console.log("ho finito: ")
+                                                    handleClose();
+                                                }else{
+                                                    alert("Please select a position")
+                                                }
                                             }}
                                         >
                                             Save & Close →

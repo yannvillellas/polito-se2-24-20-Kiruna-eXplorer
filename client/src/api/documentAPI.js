@@ -16,6 +16,7 @@ const listDocuments = async () => {
 
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
+    console.log('sono in documentAPI ',document);
     const response = await fetch(`${SERVER_URL}`, {
 
       method: 'POST',

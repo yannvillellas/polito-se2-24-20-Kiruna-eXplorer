@@ -21,6 +21,10 @@
     align-items: center;
     gap: 10px; /* Spazio tra il radio button e la scritta */
     margin-bottom: 10px;
+
+    label{
+        margin-bottom: 15px;
+    }
 }
 
 .cp-container .form-check input[type="radio"] {

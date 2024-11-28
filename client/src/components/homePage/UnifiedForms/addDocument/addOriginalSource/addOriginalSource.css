@@ -1,0 +1,32 @@
+.file-list {
+    list-style: disc; /* Mostra i puntini */
+    list-style-position: inside; /* I puntini si trovano all'interno del riquadro */
+    padding-left: 30px; /* Allinea i puntini correttamente */
+    margin-top: 10px;
+  }
+
+  
+  .file-item {
+    display: flex; /* Disposizione in riga */
+    align-items: center; /* Centra verticalmente gli elementi */
+    justify-content: space-between; /* Lascia spazio tra nome e bottone */
+    margin-bottom: 10px; /* Spazio tra gli elementi */
+    padding: 5px;
+  }
+  
+  .file-name {
+    flex: 0 0 70%; /* Occupa il 70% della larghezza */
+    white-space: nowrap; /* Impedisce il wrapping */
+    overflow: hidden; /* Nasconde il contenuto eccedente */
+    text-overflow: ellipsis; /* Mostra i tre puntini per overflow */
+  }
+  
+  .delete-button {
+    flex: 0 0 auto; /* Dimensione fissa per il bottone */
+    margin-left: 10px;
+    background: none; /* Rimuove lo sfondo del bottone */
+    border: none; /* Rimuove il bordo del bottone */
+    cursor: pointer;
+    padding: 0;
+  }
+  

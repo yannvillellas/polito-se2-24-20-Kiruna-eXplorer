@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 
-import ChosenPosition from "../../chosenPosition/ChosenPosition";
-import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
@@ -26,16 +24,6 @@ function AddDocument(props) {
         lng: null,
         files: [],
     });
-
-
-
-    const handleSetPostition = (lat, lng) => {
-        setNewDocument({ ...newDocument, lat: lat, lng: lng });
-    };
-
-    const handleAddedFiles = (files) => {
-        setNewDocument({ ...newDocument, files: files });
-    };
 
 
     const stakeholdersOptions = [
@@ -84,30 +72,30 @@ function AddDocument(props) {
         setIssuanceDate(value);
     };
 
-    const [showModalAdd, setShowModalAdd] = useState(false);
-
-    //const [selectedFiles, setSelectedFiles] = useState([]);
-
-
-    const handleClose = () => setShowModalAdd(false);
-
-
     const handleSaveDocument = (e) => {
         e.preventDefault();
-    
-        if (newDocument.lat === null || newDocument.lng === null) {
-            alert("Please select a valid position on the map.");
-            return;
+        console.log('index: ',props.index)
+        if(props.index === 0){
+            if (newDocument.title === "" || newDocument.stakeholders === "" || newDocument.scale === "" || newDocument.type === "") {
+                alert("Please fill in all required fields.");
+                return;
+            }
+        
+            if (!isIssuanceDateValid) {
+                alert("Please enter a valid issuance date.");
+                return;
+            }
+        
+            if (isArchitecturalScale && !isArchitecturalScaleFormat) {
+                alert("Please enter a valid architectural scale format.");
+                return;
+            }
         }
-    
-        if (!isIssuanceDateValid) {
-            alert("Please enter a valid issuance date.");
-            return;
-        }
-    
-        if (isArchitecturalScale && !isArchitecturalScaleFormat) {
-            alert("Please enter a valid architectural scale format.");
-            return;
+        if(props.index === 1){
+            if (newDocument.lat === null || newDocument.lng === null) {
+                alert("Please select a valid position on the map.");
+                return;
+            }
         }
     
         props.handleAddDocumentToModal(newDocument);
@@ -289,29 +277,13 @@ function AddDocument(props) {
                                     variant="primary"
                                     type="submit"
                                     className="btn-modal-save"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        if (!newDocument.title) {
-                                            alert("Title is mandatory.");
-                                            return;
-                                        }
-                                        props.handleAddDocumentToModal(newDocument);
-                                        props.handleNext();
-                                    }}
+                                    onClick={(e) => handleSaveDocument(e)}
                                 >
                                     Next →
                                 </Button>
 
                             </Col>
-                        </Row>
-
-
-                        {/* <ChosenPosition
-                            handleSetPostition={handleSetPostition}
-                        />
-                        
-                        <AddOriginalSource handleAddedFiles={handleAddedFiles} /> */}
-                        
+                        </Row>                       
 
                     </Col>
 
