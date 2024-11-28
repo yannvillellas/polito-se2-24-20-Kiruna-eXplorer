@@ -20,19 +20,22 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 import areaAPI from "../../../api/areaAPI";
+import associationAPI from "../../../api/associationAPI";
 import geojsonData from "./KirunaMunicipality.json"
 import { area } from "@turf/turf";
 
 
+
 /** BUGS:
  *  - If i press on a marker and i close the area is still visible untill i pass over that marker again
- * 
+ * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
  */
 
 function Map(props) {
   const [documents, setDocuments] = useState([]);
   const [documentShown, setDocumentShown] = useState([]);
-  const [isOnlyAllMunicipalityDocument, setIsOnlyAllMunicipalityDocument] = useState(false);
+  const [filterOn, setFilterOn] = useState(false);
+  const [isVisualizeAssociation, setIsVisualizeAssociation] = useState(false); // vedi sulla mappa solo i documenti associati ad uno specifico documento
 
   const [files, setFiles] = useState();
   const [isPositionToModify, setIsPositionToModify] = useState(false);
@@ -82,6 +85,7 @@ function Map(props) {
   useEffect(() => {
     if (props.documents) {
       setDocuments(props.documents);
+
     }
   }, [props.documents]);
 
@@ -228,9 +232,32 @@ function Map(props) {
   };
 
   const handleShowOnlyAllMunicipalityDocument = () => {
-    setIsOnlyAllMunicipalityDocument(true);
+    setFilterOn(true);
     setDocumentShown(documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
 
+  }
+
+  const handleShowAllLinkedDocument = async (docId) => {
+
+    if(!docId) { // Se non è stato selezionato nessun documento
+      setFilterOn(false);
+      return;
+    }
+
+    setFilterOn(true);
+    console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId.value);
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
+    let docToShow = [];
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        docToShow.push(documents.find(doc => doc.docId === association.doc2));
+      }
+    }
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docToShow);
+    docToShow = documents.filter(doc => docToShow.includes(doc));
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
+    setDocumentShown(docToShow);
   }
 
 
@@ -265,7 +292,7 @@ function Map(props) {
         <MarkerClusterGroup
           showCoverageOnHover={false}
         >
-          {!isOnlyAllMunicipalityDocument && documents.map((doc, index) => (
+          {!filterOn && documents.map((doc, index) => (
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
@@ -278,7 +305,7 @@ function Map(props) {
             </Marker>
           ))}
 
-          {isOnlyAllMunicipalityDocument && documentShown.map((doc, index) => (
+          {filterOn && documentShown.map((doc, index) => (
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
@@ -326,13 +353,28 @@ function Map(props) {
 
       </MapContainer>
 
-      {!isOnlyAllMunicipalityDocument &&
+      {!filterOn &&
         <Button variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
       }
 
-      { isOnlyAllMunicipalityDocument &&
-        <Button variant="primary" onClick={() => setIsOnlyAllMunicipalityDocument(false)}>Show all documents</Button>
+      {filterOn &&
+        <Button variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
       }
+
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Choose a document so all linked-document will be shown</Form.Label>
+          <Select
+            options={documents.map((doc) => {
+              return { value: doc.docId, label: doc.title }
+            })}
+            isClearable
+            placeholder="Select document"
+            required={true}
+            onChange={(selectedOption) => handleShowAllLinkedDocument(selectedOption?.value || null)}
+          />
+        </Form.Group>
+      </Form>
 
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
