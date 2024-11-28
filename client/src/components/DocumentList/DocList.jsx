@@ -14,19 +14,22 @@ import PositionAPI from "../../api/positionAPI";
  * 
  */
 
-function DocList() {
+import { Row, Col, Form } from "react-bootstrap";
 
+function DocList() {
   const [documents, setDocuments] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]);
 
+  const [filters, setFilters] = useState({
+    title: "",
+    description: "",
+    stakeholder: "",
+    scale: "",
+    issuanceDate: "",
+    type: "",
+    connections: "",
+  });
 
-  const documentOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.title,
-  }));
-  const [selectedDocument, setSelectedDocument] = useState(null);
-
-  // for some reasons sometimes documents is empty (if i use it in DocList)
   const fetchDocuments = async () => {
     try {
       const res = await DocumentAPI.listDocuments();
@@ -37,67 +40,106 @@ function DocList() {
     }
   };
 
-  // Fetch documents on component mount
   useEffect(() => {
     fetchDocuments();
   }, []);
 
-  // Polling: and then update the document after 5 sec
   useEffect(() => {
-    const intervalId = setInterval(async () => {
-      try {
-        const res = await DocumentAPI.listDocuments();
+    const applyFilters = () => {
+      const filteredDocs = allDocuments.filter((doc) => {
+        return (
+          (!filters.title || doc.title.toLowerCase().includes(filters.title.toLowerCase())) &&
+          (!filters.description || doc.description.toLowerCase().includes(filters.description.toLowerCase())) &&
+          (!filters.stakeholder || (doc.stackeholders && doc.stackeholders.includes(filters.stakeholder))) &&
+          (!filters.scale || doc.scale === filters.scale) &&
+          (!filters.issuanceDate || doc.issuanceDate === filters.issuanceDate) &&
+          (!filters.type || doc.type === filters.type) &&
+          (!filters.connections || (doc.connections && doc.connections.includes(filters.connections)))
+        );
+      });
+      setDocuments(filteredDocs);
+    };
 
-        if (!selectedDocument) {
-          // Aggiorna sia la lista completa sia i documenti mostrati
-          setAllDocuments(res || []);
-          setDocuments(res || []);
-        } else {
-          // Aggiorna solo la lista completa per evitare sovrascritture
-          setAllDocuments(res || []);
-        }
-      } catch (error) {
-        console.error("Error during polling:", error);
-      }
-    }, 5000);
+    applyFilters();
+  }, [filters, allDocuments]);
 
-    return () => clearInterval(intervalId);
-  }, [selectedDocument]);
-
-
-  // Gestione del cambio selezione nel Select
-  const handleSelectChange = (selectedOption) => {
-    if (selectedOption) {
-      setSelectedDocument(selectedOption);
-      setDocuments(allDocuments.filter((doc) => doc.docId === selectedOption.value));
-    } else {
-      setSelectedDocument(null);
-      setDocuments(allDocuments); // Ripristina solo quando non c'è selezione
-    }
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
-    <>
-      <Container fluid className="mt-3">
-        <h1 className="mt-3">
-          "Kiruna's Document Library"
-          <Select
-            options={documentOptions}
-            isClearable // will set selectedDocument (the value) to null => i can use it for the polling
-            placeholder="Select a document"
-            required={true}
-            value={selectedDocument}
-            onChange={handleSelectChange}
-
+    <Container fluid className="mt-3">
+      <h1 className="mb-4">"Kiruna's Document Library"</h1>
+      
+      {/* Barra di Filtri */}
+      <Row className="g-3 mb-4 align-items-center bg-light p-3 rounded shadow-sm">
+        <Col md={3}>
+          <Form.Control
+            type="text"
+            placeholder="Filter by Title"
+            onChange={(e) => handleFilterChange("title", e.target.value)}
           />
+        </Col>
+        <Col md={3}>
+          <Form.Control
+            type="text"
+            placeholder="Filter by Description"
+            onChange={(e) => handleFilterChange("description", e.target.value)}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.stackeholders))]
+              .filter(Boolean)
+              .map((s) => ({ value: s, label: s }))}
+            placeholder="Filter by Stakeholder"
+            isClearable
+            onChange={(option) => handleFilterChange("stakeholder", option ? option.value : "")}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.scale))]
+              .filter(Boolean)
+              .map((scale) => ({ value: scale, label: scale }))}
+            placeholder="Filter by Scale"
+            isClearable
+            onChange={(option) => handleFilterChange("scale", option ? option.value : "")}
+          />
+        </Col>
+        <Col md={3}>
+          <Form.Control
+            type="date"
+            placeholder="Filter by Issuance Date"
+            onChange={(e) => handleFilterChange("issuanceDate", e.target.value)}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.type))]
+              .filter(Boolean)
+              .map((type) => ({ value: type, label: type }))}
+            placeholder="Filter by Type"
+            isClearable
+            onChange={(option) => handleFilterChange("type", option ? option.value : "")}
+          />
+        </Col>
+        <Col md={3}>
+          <Form.Control
+            type="text"
+            placeholder="Filter by Connections"
+            onChange={(e) => handleFilterChange("connections", e.target.value)}
+          />
+        </Col>
+      </Row>
 
-        </h1>
-        <DocumentTable documents={documents} />
-      </Container>
-
-    </>
+      {/* Tabella dei documenti */}
+      <DocumentTable documents={documents} />
+    </Container>
   );
 }
+
+
 
 function DocumentTable(props) {
   const { documents } = props;
