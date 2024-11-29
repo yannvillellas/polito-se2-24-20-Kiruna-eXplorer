@@ -7,6 +7,68 @@
     flex-direction: column;
     height: 100%;
     justify-content: space-between;
+
+    .custom-dropdown-trigger {
+        padding: 10px;
+        border: 2px solid black;
+        
+        background-color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+        width: 100%;
+        text-align: left;
+        font-size: 16px;
+        color: #000;
+        position: relative;
+
+        .hint {
+          color: #808080; 
+        }
+        .arrow {
+          margin-left: auto;
+          font-size: 14px;
+          color: #000;
+          transform: rotate(0);
+          transition: transform 0.2s ease-in-out;
+        }
+
+      }
+      
+      .custom-dropdown-trigger:hover {
+          border-color: black; /* Cambia colore al passaggio del mouse */
+          background-color: #f9f9f9;
+      }
+      
+      .checkbox-container {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        max-height: 200px; /* Altezza massima per lo scroll */
+        overflow-y: auto; /* Aggiungi scroll verticale */
+
+        .custom-checkbox .form-check-input {
+          width: 18px;
+          height: 18px;
+          border: 2px solid #007bff; /* Bordo blu */
+          border-radius: 3px; /* Angoli leggermente arrotondati */
+          background-color: #fff;
+          margin-right: 10px;
+        }
+
+        .custom-checkbox .form-check-input:checked {
+          background-color: #007bff; /* Sfondo blu quando selezionato */
+          border-color: #0056b3;
+        }
+
+        .custom-checkbox .form-check-label {
+          font-size: 14px;
+          color: #000;
+        }
+      }    
 }
 
 .add-document-form input,

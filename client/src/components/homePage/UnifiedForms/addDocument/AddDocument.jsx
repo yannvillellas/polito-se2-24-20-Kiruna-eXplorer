@@ -29,9 +29,8 @@ function AddDocument(props) {
         files: [],
         area: null
     });
-
-
-
+    const [selectedStakeholders, setSelectedStakeholders] = useState([]);
+    const [showCheckboxes, setShowCheckboxes] = useState(false);
 
     const handleSetPostition = (lat, lng) => {
         console.log("AddDocument.jsx, ho ricevuto lat e lng (dall'area):", lat, lng);
@@ -157,6 +156,18 @@ function AddDocument(props) {
         
     }
 
+    const handleCheckboxChange = (stakeholder) => {
+        setSelectedStakeholders((prevSelected) => {
+            const alreadySelected = prevSelected.some((s) => s.value === stakeholder.value);
+            if (alreadySelected) {
+                return prevSelected.filter((s) => s.value !== stakeholder.value);
+            } else {
+                return [...prevSelected, stakeholder];
+            }
+        });
+    };
+    
+
         return (
             <>
                 <Form className="add-document-form" onSubmit={handleSaveDocument}>
@@ -177,7 +188,7 @@ function AddDocument(props) {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Stakeholders*</Form.Label>
-                                <Select
+                                {/* <Select
                                     options={stakeholdersOptions} // Opzioni definite
                                     isClearable // Aggiunge una "x" per cancellare la selezione
                                     placeholder="Select Stakeholders"
@@ -189,7 +200,35 @@ function AddDocument(props) {
                                             stakeholders: selectedOption ? selectedOption.value : ""
                                         })
                                     }
-                                />
+                                /> */}
+                                <div
+                                    className="custom-dropdown-trigger"
+                                    onClick={() => setShowCheckboxes(!showCheckboxes)}
+                                >
+                                    {selectedStakeholders.length > 0 ? (
+                                        `Selected: ${selectedStakeholders.map((s) => s.label).join(", ")}`
+                                    ) : (
+                                        <span className="hint">Select type(s)</span>
+                                    )}
+
+                                    <span className="arrow">&#9662;</span>
+                                </div>
+
+                                {showCheckboxes && (
+                                    <div className="checkbox-container">
+                                        {stakeholdersOptions.map((stakeholder) => (
+                                            <Form.Check
+                                                key={stakeholder.value}
+                                                type="checkbox"
+                                                id={`checkbox-${stakeholder.value}`}
+                                                label={stakeholder.label} // Usa "label" per il testo visibile
+                                                checked={selectedStakeholders.some((s) => s.value === stakeholder.value)}
+                                                onChange={() => handleCheckboxChange(stakeholder)}
+                                                className="custom-checkbox"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </Form.Group>
 
                             <Form.Group className="mb-3">
