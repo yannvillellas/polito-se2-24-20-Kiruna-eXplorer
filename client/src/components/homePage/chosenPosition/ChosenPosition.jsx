@@ -133,6 +133,15 @@ function ChosenPosition(props) {
                             onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
                         />
 
+                        <Form.Check
+                            type="radio"
+                            label="Choose prexisting Area"
+                            name="choosed" // all the radio button must have the same name to be able to select only one
+                            value="choosePrexistingArea" // value for this specific choice
+                            checked={selectedOption === 'chooseArea'} // if the selectedOption is equal to this value then the radio button will be checked
+                            onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
+                        />
+
                     </Form.Group>
 
                     <div className="show">
