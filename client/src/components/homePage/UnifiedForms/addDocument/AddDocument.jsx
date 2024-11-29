@@ -154,8 +154,8 @@ function AddDocument(props) {
             props.handleAddDocumentToModal(newDocument);
             props.handleNext();
         };
-
-
+        
+    }
 
         return (
             <>
@@ -362,6 +362,6 @@ function AddDocument(props) {
                 </Form>
             </>
         )
-    }
+    
 }
 export default AddDocument;
