@@ -1,16 +1,25 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  text-decoration: none;
-  list-style: none;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 :root {
   --primary-color: #ffffff;
   --second-color: #d0d0d0;
   --black-color: #000000;
+}
+
+body{
+  background-image: url("https://lkab.com/wp-content/uploads/2023/05/LKABs-industriomrade-i-Kiruna_Kiirunavaara_grabergshogar_sommar-scaled.webp");
+  background-image: url("https://lkab.com/wp-content/uploads/2022/03/kiruna-bg-1920.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 

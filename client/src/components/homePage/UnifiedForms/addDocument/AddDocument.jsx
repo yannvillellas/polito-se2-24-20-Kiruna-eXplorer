@@ -3,11 +3,11 @@ import "./addDocument.css";
 import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import Select from "react-select";
-
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
 import ChosenArea from "../../chosenArea/ChosenArea";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 import { booleanContains, polygon } from "@turf/turf";
+
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
 */
@@ -29,6 +29,7 @@ function AddDocument(props) {
         files: [],
         area: null
     });
+
 
 
 
@@ -109,16 +110,25 @@ function AddDocument(props) {
         setIssuanceDate(value);
     };
 
-    const [showModalAdd, setShowModalAdd] = useState(false);
-
-    //const [selectedFiles, setSelectedFiles] = useState([]);
-
-
-    const handleClose = () => setShowModalAdd(false);
-
-
     const handleSaveDocument = (e) => {
         e.preventDefault();
+
+        console.log('index: ',props.index)
+        if(props.index === 0){
+            if (newDocument.title === "" || newDocument.stakeholders === "" || newDocument.scale === "" || newDocument.type === "" || newDocument.description === "") {
+                alert("Please fill in all required fields.");
+                return;
+            }
+        
+            if (!isIssuanceDateValid) {
+                alert("Please enter a valid issuance date.");
+                return;
+            }
+        
+            if (isArchitecturalScale && !isArchitecturalScaleFormat) {
+                alert("Please enter a valid architectural scale format.");
+                return;
+            }
 
         console.log("AddDocument.jsx, hai premuto SAVE ecco tutte le info di newDocument: newDocument:", newDocument);
 
@@ -126,17 +136,15 @@ function AddDocument(props) {
         if (newDocument.lat === null || newDocument.lng === null) {
             alert("Please select a position on the map");
             return;
+
+        }
+        if(props.index === 1){
+            if (newDocument.lat === null || newDocument.lng === null) {
+                alert("Please select a valid position on the map.");
+                return;
+            }
         }
 
-        if (!isIssuanceDateValid) {
-            alert("Please enter a valid issuance date.");
-            return;
-        }
-
-        if (isArchitecturalScale && !isArchitecturalScaleFormat) {
-            alert("Please enter a valid architectural scale format.");
-            return;
-        }
 
         if (newDocument.area === null) {
             alert("Please select an area on the map");
@@ -145,8 +153,8 @@ function AddDocument(props) {
 
         props.handleAddDocumentToModal(newDocument);
         props.handleNext();
-
     };
+    
 
 
     return (
@@ -309,25 +317,48 @@ function AddDocument(props) {
                                 onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
                                 value={newDocument.description}
                             />
-                        </Form.Group>
 
-                        <ChosenPosition
+
+                        </Form.Group>
+                        <Row className="btn-modal justify-content-between align-items-end">
+                            <Col className="d-flex justify-content-start">
+                                <Button variant="secondary" className="btn-modal-close" onClick={()=>{}}> 
+                                    New Stakeholder
+                                </Button>
+                            </Col>
+                            <Col className="d-flex justify-content-end">
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    className="btn-modal-save"
+                                    onClick={(e) => handleSaveDocument(e)}
+                                >
+                                    Next →
+                                </Button>
+
+                            </Col>
+                        </Row>                       
+
+                        {/*<ChosenPosition
                             handleSetPostition={handleSetPostition}
-                        />
+                        />*/}
 
                         <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition}/>
 
                         <AddOriginalSource handleAddedFiles={handleAddedFiles} />
 
+
                     </Col>
 
                 </Row>
-                <Row>
+
+                          {/*<Row>
                     <Col>
                         <Button variant="secondary" onClick={() => props.handleClose()}> Close</Button>
                         <Button variant="primary" type='submit'> Save </Button>
                     </Col>
-                </Row>
+                </Row>*/}
+
             </Form>
         </>
     )

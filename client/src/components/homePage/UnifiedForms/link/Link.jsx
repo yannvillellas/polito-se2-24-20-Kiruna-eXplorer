@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import associationAPI from "../../../../api/associationAPI";
 import { Modal, Row, Col, Form, Button } from "react-bootstrap";
-import "./Link.css";
+import "./link.css";
 import Select from "react-select";
 
 function Link(props) {
-
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [doc2, setDoc2] = useState([]);
   const [doc1, setDoc1] = useState([]);
+  const [showCheckboxes, setShowCheckboxes] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false); // Stato per il modal di conferma
 
-  // It works
   // Funzione per gestire il cambiamento della checkbox
   const handleCheckboxChange = (linkType) => {
     setSelectedTypes((prevSelected) => {
@@ -45,56 +45,72 @@ function Link(props) {
     fetchLinkTypes();
   }, []);
 
-
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
-      let errors = []
+      let errors = [];
       if (!props.alone) {
-        const docId = await props.handleAddDocument(props.newDocument); // this sentd to HomePage.jsx the new document
+        const docId = await props.handleAddDocument(props.newDocument); // this sends to HomePage.jsx the new document
         for (let link of selectedTypes) {
           for (let dId2 of doc2) {
             let association = {
               doc1: docId,
               type: link,
-              doc2: parseInt(dId2.value, 10)
+              doc2: parseInt(dId2.value, 10),
             };
             const response = await associationAPI.createAssociation(association);
             if (response.msg) {
-              const doc1Title = props.documents.find(doc => doc.docId === association.doc1)
-              const doc2Title = props.documents.find(doc => doc.docId === association.doc2)
-              errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
-
+              const doc1Title = props.documents.find(
+                (doc) => doc.docId === association.doc1
+              );
+              const doc2Title = props.documents.find(
+                (doc) => doc.docId === association.doc2
+              );
+              errors.push(
+                <>
+                  The link of type <strong>{link}</strong> between documents{" "}
+                  <strong>{doc1Title.title}</strong> and{" "}
+                  <strong>{doc2Title.title}</strong> already exists
+                </>
+              );
             }
           }
         }
-        props.setErrorMsg(errors)
+        props.setErrorMsg(errors);
         props.handleClose(); // Close modal after submission
-
-      } else {  //the link form is detached from addDocument form
+      } else {
         for (let link of selectedTypes) {
           for (let dId1 of doc1) {
             for (let dId2 of doc2) {
               let association = {
                 doc1: dId1.value, //doc1
                 type: link,
-                doc2: dId2.value
+                doc2: dId2.value,
               };
-              const response = await associationAPI.createAssociation(association);
+              const response = await associationAPI.createAssociation(
+                association
+              );
               if (response.msg) {
-                const doc1Title = props.documents.find(doc => doc.docId === association.doc1)
-                const doc2Title = props.documents.find(doc => doc.docId === association.doc2)
-                errors.push(<>the link of type <strong>{link}</strong> between documents <strong>{doc1Title.title}</strong> and <strong>{doc2Title.title}</strong> already exist</>)
-
+                const doc1Title = props.documents.find(
+                  (doc) => doc.docId === association.doc1
+                );
+                const doc2Title = props.documents.find(
+                  (doc) => doc.docId === association.doc2
+                );
+                errors.push(
+                  <>
+                    The link of type <strong>{link}</strong> between documents{" "}
+                    <strong>{doc1Title.title}</strong> and{" "}
+                    <strong>{doc2Title.title}</strong> already exists
+                  </>
+                );
               }
             }
           }
         }
-        props.setErrorMsg(errors)
-        setDoc1([])
-        props.setOnlyLinkForm(false)
+        props.setErrorMsg(errors);
+        setDoc1([]);
+        props.setOnlyLinkForm(false);
       }
       // Reset form fields after successful submission
       setLinkTypes([]);
@@ -102,33 +118,27 @@ function Link(props) {
     } catch (error) {
       console.error("Failed to create association:", error);
     }
-
   };
 
   return (
     <Row className="add-link-form">
       <Col>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group as={Row} className="mb-3">
-
-            <Form.Label column sm="2">
-              Document 1
+        <Form>
+          <Form.Group as={Row} className="rows">
+            <Form.Label column sm="2" className="name-label">
+              Source Document
             </Form.Label>
-
-            <Col sm="9">
-              {props.alone ?
+            <Col sm="8">
+              {props.alone ? (
                 <Select
                   options={props.documents
                     .filter((d) => !doc2.some((doc) => doc.value === d.docId))
                     .map((d) => {
-                      return { value: d.docId, label: d.title }
+                      return { value: d.docId, label: d.title };
                     })}
                   isClearable
                   placeholder="Select document"
                   required={true}
-                  /*onChange={(selectedOption) => {
-                    setDoc1(selectedOption ? selectedOption.value : "");
-                  }}*/
                   onChange={handleChangeDoc1}
                   isMulti
                   value={doc1}
@@ -141,64 +151,71 @@ function Link(props) {
                     }),
                     menuList: (base) => ({
                       ...base,
-                      maxHeight: '200px',
-                      overflowY: 'auto',
+                      maxHeight: "200px",
+                      overflowY: "auto",
                     }),
                   }}
                 />
-                :
-                <Form.Label>
-                  {props.title}
-                </Form.Label>
-              }
+              ) : (
+                <Form.Label>{props.title}</Form.Label>
+              )}
             </Col>
-
           </Form.Group>
 
-          <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="2">
+          <Form.Group as={Row} className="rows">
+            <Form.Label column sm="2" className="name-label">
               Link Type
             </Form.Label>
+            <Col sm="8" className="col-link">
+              <div
+                className="custom-dropdown-trigger"
+                onClick={() => setShowCheckboxes(!showCheckboxes)}
+              >
+                {selectedTypes.length > 0 ? (
+                  `Selected: ${selectedTypes.join(", ")}`
+                ) : (
+                  <span className="hint">Select type(s)</span>
+                )}
+                <span className="arrow">&#9662;</span>
+              </div>
 
-            <Col sm="9">
-              {linkTypes.map((linkType) => (
-                <Form.Check
-                  key={linkType}
-                  type="checkbox"
-                  id={`checkbox-${linkType}`}
-                  label={linkType}
-                  checked={selectedTypes.includes(linkType)}
-                  onChange={() => handleCheckboxChange(linkType)}
-                />
-              ))}
+              {showCheckboxes && (
+                <div className="checkbox-container">
+                  {linkTypes.map((linkType) => (
+                    <Form.Check
+                      key={linkType}
+                      type="checkbox"
+                      id={`checkbox-${linkType}`}
+                      label={linkType}
+                      checked={selectedTypes.includes(linkType)}
+                      onChange={() => handleCheckboxChange(linkType)}
+                      className="custom-checkbox"
+                    />
+                  ))}
+                </div>
+              )}
             </Col>
           </Form.Group>
 
-
-          <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm="2">
-              Document 2
+          <Form.Group as={Row} className="rows">
+            <Form.Label column sm="2" className="name-label">
+              Target Document
             </Form.Label>
-
-
-            <Col sm="9">
+            <Col sm="8">
               <Select
                 options={props.documents
                   .filter((d) => !doc1.some((doc) => doc.value === d.docId))
                   .map((d) => {
-                    return { value: d.docId, label: d.title }
+                    return { value: d.docId, label: d.title };
                   })}
                 isClearable
                 placeholder="Select document"
                 required={true}
-                /*onChange={(selectedOption) => {
-                  setDoc2(selectedOption ? selectedOption.value : "");
-                }}*/
                 isMulti
                 value={doc2}
                 onChange={handleChangeDoc2}
-                menuPlacement="auto" // Posiziona il menu in base allo spazio disponibile
-                menuPosition="fixed" // Evita overflow dal modal
+                menuPlacement="auto"
+                menuPosition="fixed"
                 styles={{
                   menu: (base) => ({
                     ...base,
@@ -206,36 +223,71 @@ function Link(props) {
                   }),
                   menuList: (base) => ({
                     ...base,
-                    maxHeight: '200px', // Imposta l'altezza massima del menu
-                    overflowY: 'auto', // Abilita lo scroll verticale
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }),
                 }}
               />
             </Col>
-
           </Form.Group>
-          <Form.Group>
-            {props.alone ?
-              <Button onClick={() => props.setOnlyLinkForm(false)} variant="secondary">Close</Button>
-              :
-              <Button onClick={() => props.handlePrev()} variant="secondary">Previous</Button>
-            }
 
-            {(doc1 !== "" || !props.alone) && selectedTypes.length > 0 && doc2 !== "" &&
-              <Button variant="primary" type="submit" >
-                Submit
+          <Form.Group className="btn-modal d-flex justify-content-end">
+            {props.alone ? (
+              <Button
+                onClick={() => props.setOnlyLinkForm(false)}
+                variant="secondary"
+              >
+                Close
               </Button>
-            }
+            ) : (
+              <Button onClick={() => props.handlePrev()} variant="secondary">
+                ← Back
+              </Button>
+            )}
 
-            {props.alone == false ?
-              <Button variant="danger" onClick={() => props.confirmClose()}>Skip links</Button>
-              :
-              ""
-            }
+            {(doc1 !== "" || !props.alone) &&
+              selectedTypes.length > 0 &&
+              doc2 !== "" && (
+                <Button
+                  variant="primary"
+                  type="button"
+                  onClick={() => setShowConfirmation(true)}
+                >
+                  Submit
+                </Button>
+              )}
           </Form.Group>
         </Form>
       </Col>
 
+      {/* Modal di Conferma */}
+      <Modal
+        show={showConfirmation}
+        onHide={() => setShowConfirmation(false)}
+        centered
+        className="modal-confirm"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Submission</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to submit this link association?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmation(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              handleSubmit();
+              setShowConfirmation(false);
+            }}
+          >
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Row>
   );
 }

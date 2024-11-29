@@ -1,0 +1,54 @@
+.cp-container {
+    display: flex;
+    flex-direction: row;
+}
+
+/* Sezione superiore per i radio button */
+.cp-container .radio-group {
+    flex: 1; /* Occupa metà altezza del contenitore */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra verticalmente i radio button */
+    align-items: flex-start; /* Allinea i radio button a sinistra */
+    padding: 20px 0 20px 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd; /* Divisore tra la sezione radio e show */
+}
+
+/* Stile per i singoli radio button */
+.cp-container .form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Spazio tra il radio button e la scritta */
+    margin-bottom: 10px;
+
+    label{
+        margin-bottom: 15px;
+    }
+}
+
+.cp-container .form-check input[type="radio"] {
+    width: 16px; /* Dimensione standard del radio button */
+    height: 16px;
+}
+
+.cp-container .form-check label {
+    font-size: 16px; /* Dimensione normale del testo */
+    font-weight: normal;
+}
+
+/* Sezione inferiore per la mappa o il form */
+.cp-container .show {
+    flex: 1; /* Occupa metà altezza del contenitore */
+    
+    display: flex;
+    justify-content: center; /* Centra il contenuto orizzontalmente */
+    align-items: flex-start; /* Allinea il contenuto in alto */
+    background-color: #ffffff;
+    overflow: auto; /* Permette lo scroll se necessario */
+
+    .btn-set{
+        position:relative;
+    }
+}
+

@@ -112,6 +112,7 @@ function HomePage(props) {
     const handleAddDocument = async (document) => {
 
         try {
+            console.log("sono in handleAddDocument")
             const docId = await DocumentAPI.addDocument(document);
 
             const position = {
@@ -119,7 +120,9 @@ function HomePage(props) {
                 lat: document.lat,
                 lng: document.lng,
             };
+            console.log("sono in handleAddDocument2")
             await PositionAPI.addPosition(position);
+            console.log("sono in handleAddDocument3")
 
             // Here i check if there are files to upload (and so i not create folders if there are no files)
             /*if(document.files && document.files.length > 0){
@@ -185,7 +188,7 @@ function HomePage(props) {
 
 
     return (
-        <Container fluid className="mt-5">
+        <Container fluid>
             {/*toastCOntainer used to visualize errors messages*/}
             <ToastContainer className="p-3" position="top-end">
                 {errorMsg.map((error) => (
@@ -200,7 +203,7 @@ function HomePage(props) {
                     </Toast>
                 ))}
             </ToastContainer>
-            <Row>
+            <Row style={{height: "100%"}}>
                 <Col style={{ position: "relative" }}>
                     <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner} />
                     {isUrbanPlanner && (
