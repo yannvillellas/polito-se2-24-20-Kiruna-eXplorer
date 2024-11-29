@@ -12,17 +12,11 @@ import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Po
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import kirunaGeoJson from "../../../data/KirunaMunicipality.json";
 
-import L from 'leaflet';
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
 import areaAPI from "../../../api/areaAPI";
 import associationAPI from "../../../api/associationAPI";
 import geojsonData from "./KirunaMunicipality.json"
 import { area } from "@turf/turf";
+import { Icon } from 'leaflet';
 
 
 
@@ -30,6 +24,47 @@ import { area } from "@turf/turf";
  *  - If i press on a marker and i close the area is still visible untill i pass over that marker again
  * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
  */
+
+
+const designIcon = new Icon({
+  iconUrl: "icons/design.png",
+  iconSize: [25, 25],
+});
+
+const informativeIcon = new Icon({
+  iconUrl: "icons/informative.png",
+  iconSize: [25, 25],
+});
+
+const prescriptiveIcon = new Icon({
+  iconUrl: "icons/prescriptive.png",
+  iconSize: [25, 25],
+});
+
+const technicalIcon = new Icon({
+  iconUrl: "icons/technical.png",
+  iconSize: [25, 25],
+});
+
+const otherIcon = new Icon({
+  iconUrl: "icons/other.png",
+});
+
+
+const getIconByDocType = (docType) => {
+  switch (docType) {
+    case 'Design document':
+      return designIcon;
+    case 'Informative Document':
+      return informativeIcon;
+    case 'Prescriptive document':
+      return prescriptiveIcon;
+    case 'Technical document':
+      return technicalIcon;
+    default:
+      return otherIcon;
+  }
+};
 
 function Map(props) {
   const [documents, setDocuments] = useState([]);
@@ -296,6 +331,7 @@ function Map(props) {
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
+              icon={getIconByDocType(doc.type)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
@@ -309,6 +345,7 @@ function Map(props) {
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
+              icon={getIconByDocType(doc.type)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
