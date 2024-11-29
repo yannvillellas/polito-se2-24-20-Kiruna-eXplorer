@@ -6,8 +6,12 @@ import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
+
 import MarkerClusterGroup from 'react-leaflet-cluster';
+import kirunaGeoJson from "../../../data/KirunaMunicipality.json";
+
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -15,28 +19,116 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
+import areaAPI from "../../../api/areaAPI";
+import associationAPI from "../../../api/associationAPI";
+import geojsonData from "./KirunaMunicipality.json"
+import { area } from "@turf/turf";
 
+
+
+/** BUGS:
+ *  - If i press on a marker and i close the area is still visible untill i pass over that marker again
+ * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
+ */
 
 function Map(props) {
-  const [showDocumentModal, setShowDocumentModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState(null);
-
-
-
   const [documents, setDocuments] = useState([]);
+  const [documentShown, setDocumentShown] = useState([]);
+  const [filterOn, setFilterOn] = useState(false);
+  const [isVisualizeAssociation, setIsVisualizeAssociation] = useState(false); // vedi sulla mappa solo i documenti associati ad uno specifico documento
 
   const [files, setFiles] = useState();
   const [isPositionToModify, setIsPositionToModify] = useState(false);
-  const [manualLat, setManualLat] = useState(null);
-  const [manualLong, setManualLong] = useState(null);
 
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [areas, setAreas] = useState([]);
+  const [visibleAreas, setVisibleAreas] = useState([]);
+  const [areaAssociations, setAreaAssociations] = useState([]);
+
+  const onFeatureClick = (e) => {
+    // Ottieni il layer (poligono, multipoligono, ecc.)
+    const layer = e.target;
+
+    // Estrai l'ID o altre informazioni dalla feature
+    const areaId = layer.feature.properties.stat_id; // O usa il campo che ti interessa, ad esempio stat_id o un altro campo
+    console.log("Clicked area ID:", areaId);
+  };
+
+  const geojsonStyle = {
+    color: "white",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.1
+  };
+
+  const onEachFeature = (feature, layer) => {
+    // Aggiungi l'evento di clic alla feature
+    layer.on({
+      click: onFeatureClick
+    });
+  };
+
+
+
+
+
+
+  const geoJsonStyle = {
+    color: 'red',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0 // No fill color
+  };
 
   // So that sync with the parent component
   useEffect(() => {
     if (props.documents) {
       setDocuments(props.documents);
+
     }
   }, [props.documents]);
+
+  /* Non mi si aggiorna in automatico le aree appena aggiunto documento, perciò temporaneamente opto per il polling */
+  // Lascio anceh questa perchè così le aree mi vengono caricate subito all'apertura della pagina
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const areas = await areaAPI.listAreas();
+        console.log("Sono in Map.jsx, ecco tutte le aree: ", areas);
+        const areaAssociations = await areaAPI.listAreaAssociations();
+        console.log("Sono in Map.jsx, ecco tutte le areeAssociation: ", areaAssociations);
+        setAreas(areas);
+        setAreaAssociations(areaAssociations);
+      } catch (error) {
+        console.error("Error fetching areas:", error);
+      }
+    }
+    fetchAreas();
+  }, []);
+
+
+  // Polling per le aree ( e le areeAssociation)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const fetchAreas = async () => {
+        try {
+          const areas = await areaAPI.listAreas();
+          const areaAssociations = await areaAPI.listAreaAssociations();
+          setAreas(areas);
+          setAreaAssociations(areaAssociations);
+        } catch (error) {
+          console.error("Error fetching areas:", error);
+        }
+      }
+      fetchAreas();
+    }, 5000); // Ogni 5 secondi
+    return () => clearInterval(interval);
+  }, []);
+
+
+
+
 
 
   const closeDocumentModal = () => {
@@ -53,15 +145,21 @@ function Map(props) {
 
   };*/
 
+  // Funzione mdocificata (restituiva errore)
   const handleGetFiles = async (docId) => {
-    const files = await DocumentAPI.getFiles(docId);
-    if (files) {
-      setFiles(Array.from(files))
-    } else {
-      setFiles()
+    try {
+      const files = await DocumentAPI.getFiles(docId); // Risolvi la Promise
+      if (files) {
+        setFiles(Array.from(files));
+      } else {
+        setFiles([]); // Inizializza con array vuoto se non ci sono file
+      }
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      setFiles([]); // Fallback in caso di errore
     }
+  };
 
-  }
 
   const handleDownload = (file) => {
     const URL = `http://localhost:3001/${file.path.slice(1)}`
@@ -79,8 +177,46 @@ function Map(props) {
     setShowDocumentModal(true);
 
     await handleGetFiles(docs[0].docId)
+
   };
 
+  // da fixare tenendo conto di areeAssociation
+  const handleMouseOver = (docId) => {
+    console.log(`Mouseover on docId: ${docId}`);  // Aggiungi un log per monitorare
+    // Imposto la visibilità dell'area tramite areaAssociations
+    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
+    if (!areaAssociation) {
+      return;
+    }
+
+    const areaId = areaAssociation.areaId;
+    if (areaId) {
+      setVisibleAreas((prevState) => {
+        if (prevState.includes(areaId)) {
+          return prevState;
+        } else {
+          return [...prevState, areaId];
+        }
+      });
+    }
+
+  };
+
+  const handleMouseOut = (docId) => {
+    console.log(`Mouseout on docId: ${docId}`);  // Aggiungi un log per monitorare
+    // rimuovo areaId da visibleAreas
+    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
+    if (!areaAssociation) {
+      return;
+    }
+
+    const areaId = areaAssociation.areaId;
+    if (areaId) {
+      setVisibleAreas((prevState) => {
+        return prevState.filter((a) => a !== areaId);
+      });
+    }
+  };
 
   const handleModifyPosition = async (newLan, newLng) => {
 
@@ -94,6 +230,35 @@ function Map(props) {
     await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
     closeDocumentModal();
   };
+
+  const handleShowOnlyAllMunicipalityDocument = () => {
+    setFilterOn(true);
+    setDocumentShown(documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
+
+  }
+
+  const handleShowAllLinkedDocument = async (docId) => {
+
+    if(!docId) { // Se non è stato selezionato nessun documento
+      setFilterOn(false);
+      return;
+    }
+
+    setFilterOn(true);
+    console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId.value);
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
+    let docToShow = [];
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        docToShow.push(documents.find(doc => doc.docId === association.doc2));
+      }
+    }
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docToShow);
+    docToShow = documents.filter(doc => docToShow.includes(doc));
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
+    setDocumentShown(docToShow);
+  }
 
 
 
@@ -116,21 +281,101 @@ function Map(props) {
           </LayersControl.BaseLayer>
         </LayersControl>
 
+        <GeoJSON data={kirunaGeoJson} style={{
+          color: 'red',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0
+        }}
+        />
+
         <MarkerClusterGroup
           showCoverageOnHover={false}
         >
-          {documents.map((doc, index) => (
+          {!filterOn && documents.map((doc, index) => (
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
               eventHandlers={{
-                click: () => handleMarkerClick([doc])
+                click: () => handleMarkerClick([doc]),
+                mouseover: () => handleMouseOver(doc.docId),
+                mouseout: () => handleMouseOut(doc.docId),
               }}
             >
             </Marker>
           ))}
+
+          {filterOn && documentShown.map((doc, index) => (
+            <Marker
+              key={index}
+              position={[doc.lat, doc.lng]}
+              eventHandlers={{
+                click: () => handleMarkerClick([doc]),
+                mouseover: () => handleMouseOver(doc.docId),
+                mouseout: () => handleMouseOut(doc.docId),
+              }}
+            >
+            </Marker>
+          ))}
+
         </MarkerClusterGroup>
+
+        {/**Show all the areas by document: */}
+
+        {areas.length > 0 && areas.map((area, index) => {
+          if (visibleAreas.includes(area.areaId) && area.areaType === "polygon") {
+            try {
+              const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+              return (
+                <Polygon
+                  key={index}
+                  positions={positions}
+                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                  eventHandlers={{
+                    click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
+                  }}
+                />
+              );
+            } catch (error) {
+              console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
+              return null;
+            }
+          }
+          return null;
+        })}
+
+
+        <GeoJSON
+          data={geojsonData}
+          style={geojsonStyle}
+          onEachFeature={onEachFeature} // Assegna l'evento di clic ad ogni feature
+        />
+
       </MapContainer>
+
+      {!filterOn &&
+        <Button variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
+      }
+
+      {filterOn &&
+        <Button variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
+      }
+
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Choose a document so all linked-document will be shown</Form.Label>
+          <Select
+            options={documents.map((doc) => {
+              return { value: doc.docId, label: doc.title }
+            })}
+            isClearable
+            placeholder="Select document"
+            required={true}
+            onChange={(selectedOption) => handleShowAllLinkedDocument(selectedOption?.value || null)}
+          />
+        </Form.Group>
+      </Form>
+
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
         <Modal.Header closeButton>

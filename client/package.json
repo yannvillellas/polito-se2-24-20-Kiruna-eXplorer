@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-leaflet/core": "^2.1.0",
+    "@turf/turf": "^7.1.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "leaflet": "^1.9.4",
@@ -19,8 +21,10 @@
     "react-icons": "^5.3.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-cluster": "^2.1.0",
+    "react-leaflet-draw": "^0.20.4",
     "react-router-dom": "^6.27.0",
     "react-select": "^5.8.3",
+    "turf": "^3.0.14",
     "vite-project": "file:"
   },
   "devDependencies": {
