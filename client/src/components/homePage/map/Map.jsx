@@ -360,7 +360,7 @@ function Map(props) {
         <Button className="btn-municipality" variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
       }
 
-      <Form>
+      <Form className="search-document">
         <Form.Group className="mb-3">
           <Form.Label>Choose a document so all linked-document will be shown</Form.Label>
           <Select

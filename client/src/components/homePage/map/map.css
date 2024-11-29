@@ -61,3 +61,11 @@
     left: 20px;
     z-index: 1000; /* Assicura che sia visibile sopra la mappa */
   }
+
+  .search-document{
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 1%;
+    left: 40%;
+    z-index: 1000; /* Assicura che sia visibile sopra la mappa */
+  }
