@@ -343,9 +343,9 @@ function AddDocument(props) {
                             handleSetPostition={handleSetPostition}
                         />*/}
 
-                            <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition} />
+                            {/* <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition} />
 
-                            <AddOriginalSource handleAddedFiles={handleAddedFiles} />
+                            <AddOriginalSource handleAddedFiles={handleAddedFiles} /> */}
 
 
                         </Col>

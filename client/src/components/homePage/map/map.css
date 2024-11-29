@@ -55,4 +55,9 @@
     max-width: 100%;
   }
   
-  
+  .btn-municipality{
+    position: absolute;
+    bottom: 15%;
+    left: 20px;
+    z-index: 1000; /* Assicura che sia visibile sopra la mappa */
+  }

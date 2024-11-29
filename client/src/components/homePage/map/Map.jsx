@@ -353,12 +353,11 @@ function Map(props) {
 
       </MapContainer>
 
-      {!filterOn &&
-        <Button variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
-      }
-
-      {filterOn &&
-        <Button variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
+      {
+        !filterOn ?
+        <Button className="btn-municipality" variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
+        :
+        <Button className="btn-municipality" variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
       }
 
       <Form>

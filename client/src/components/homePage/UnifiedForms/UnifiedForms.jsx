@@ -91,23 +91,26 @@ function UnifiedForms(props) {
     }
 
     return (
-        <>
+        <>  
+        <div className="btnUnifiedForms">
             <Button
-                onClick={onBtnSelectAdd}
-                className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-                variant="primary"
-                style={{ width: "50px", height: "50px" }}
-            >
-                <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+                    onClick={onBtnSelectAdd}
+                    className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                    variant="primary"
+                    style={{ width: "50px", height: "50px" }}
+                >
+                    <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+                </Button>
+                <Button
+                    className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
+                    variant="primary"
+                    style={{ width: "50px", height: "50px" }}
+                    onClick={() => setOnlyLinkForm(true)}
+                >
+                    <i className="bi bi-link-45deg"></i>
             </Button>
-            <Button
-                className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-                variant="primary"
-                style={{ width: "50px", height: "50px" }}
-                onClick={() => setOnlyLinkForm(true)}
-            >
-                <i className="bi bi-link-45deg"></i>
-            </Button>
+        </div>
+            
 
             {/*Modal only for link documents*/}
             <Modal show={onlyLinkForm} onHide={() => setOnlyLinkForm(false)} size="xl">
