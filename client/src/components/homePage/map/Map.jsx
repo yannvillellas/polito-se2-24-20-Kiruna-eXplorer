@@ -25,45 +25,31 @@ import { Icon } from 'leaflet';
  * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
  */
 
-
-const designIcon = new Icon({
-  iconUrl: "icons/design.png",
-  iconSize: [25, 25],
-});
-
-const informativeIcon = new Icon({
-  iconUrl: "icons/informative.png",
-  iconSize: [25, 25],
-});
-
-const prescriptiveIcon = new Icon({
-  iconUrl: "icons/prescriptive.png",
-  iconSize: [25, 25],
-});
-
-const technicalIcon = new Icon({
-  iconUrl: "icons/technical.png",
-  iconSize: [25, 25],
-});
-
-const otherIcon = new Icon({
-  iconUrl: "icons/other.png",
-});
-
-
-const getIconByDocType = (docType) => {
-  switch (docType) {
-    case 'Design document':
-      return designIcon;
-    case 'Informative Document':
-      return informativeIcon;
-    case 'Prescriptive document':
-      return prescriptiveIcon;
-    case 'Technical document':
-      return technicalIcon;
+const getIcon = (docType, stakeholders) => {
+  let iconUrl;
+  switch (stakeholders) {
+    case "LKAB":
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_lkab.png`;
+      break;
+    case "Municipality":
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_municipality.png`;
+      break;
+    case "Regional authority":
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_regional-authority.png`;
+      break;
+    case "Architecture firms":
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_architecture-firms.png`;
+      break;
+    case "Citizens":
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_citizens.png`;
+      break;
     default:
-      return otherIcon;
+      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_others.png`;
   }
+  return new Icon({
+    iconUrl,
+    iconSize: [32, 32],
+  });
 };
 
 function Map(props) {
@@ -331,7 +317,7 @@ function Map(props) {
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
-              icon={getIconByDocType(doc.type)}
+              icon={getIcon(doc.type, doc.stackeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
@@ -345,7 +331,7 @@ function Map(props) {
             <Marker
               key={index}
               position={[doc.lat, doc.lng]}
-              icon={getIconByDocType(doc.type)}
+              icon={getIcon(doc.type, doc.stackeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
