@@ -1,107 +1,147 @@
-/* src/components/link/Link.css */
-
-/*.container {
-    display: grid;
-    grid-template-areas: 
-      "header header"
-      "sidebar mainContent";
-    grid-template-columns: 200px 1fr;
-    grid-template-rows: auto 1fr;
-    height: 100vh;
-  }
+.add-link-form{
+  display: flex;
+  align-items: center;
+  min-height: 30vh;
+  margin-top: 20px;
+  font-size: 20px;
   
-  .header {
-    grid-area: header;
-    background-color: #f8f9fa;
+  .rows{
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    padding: 10px 20px;
-    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 30px;
+
+    .name-label{
+      font-weight: bolder;
+      width: 30%;
+      text-align: center;
+    }
+
+    .select{
+      width: 50px;
+    }
+
+    .col-link{
+      .custom-dropdown-trigger {
+        padding: 10px;
+        border: 1px solid black;
+        
+        background-color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+        width: 100%;
+        text-align: left;
+        font-size: 16px;
+        color: #000;
+        position: relative;
+
+        .hint {
+          color: #808080; 
+        }
+        .arrow {
+          margin-left: auto;
+          font-size: 14px;
+          color: #000;
+          transform: rotate(0);
+          transition: transform 0.2s ease-in-out;
+        }
+
+      }
+      
+      .custom-dropdown-trigger:hover {
+          border-color: black; /* Cambia colore al passaggio del mouse */
+          background-color: #f9f9f9;
+      }
+      
+      .checkbox-container {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        max-height: 200px; /* Altezza massima per lo scroll */
+        overflow-y: auto; /* Aggiungi scroll verticale */
+
+        .custom-checkbox .form-check-input {
+          width: 18px;
+          height: 18px;
+          border: 2px solid #007bff; /* Bordo blu */
+          border-radius: 3px; /* Angoli leggermente arrotondati */
+          background-color: #fff;
+          margin-right: 10px;
+        }
+
+        .custom-checkbox .form-check-input:checked {
+          background-color: #007bff; /* Sfondo blu quando selezionato */
+          border-color: #0056b3;
+        }
+
+        .custom-checkbox .form-check-label {
+          font-size: 14px;
+          color: #000;
+        }
+      }    
+    }
   }
-  
-  .logout {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .sidebar {
-    grid-area: sidebar;
-    background-color: #e9ecef;
-    padding: 20px;
+
+  .btn-modal {
+    margin-right: 20px;
+    margin-top: 20px;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-right: 2px solid #dee2e6;
-  }
-  
-  .sidebar h3 {
-    color: #495057;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .mainContent {
-    grid-area: mainContent;
-    padding: 20px;
-  }
-  
-  .mainContent h2 {
-    color: #495057;
-    margin-bottom: 1rem;
-  }
-  
-  .form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 400px;
-  }
-  
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .formGroup label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .select {
-    padding: 8px;
-    font-size: 1rem;
-  }
-  
-  .buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .submitButton, .cancelButton {
-    padding: 8px 16px;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-    border: none;
-  }
-  
-  .submitButton {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .cancelButton {
-    background-color: #6c757d;
-    color: white;
-  }*/
-  
+    justify-content: flex-end; /* Allinea i bottoni a destra */
+    gap: 10px; /* Spaziatura tra i bottoni */
+
+    .btn-modal-action {
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-modal-action:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: red; /* Cambia colore al passaggio del mouse */
+      color: #fff;
+      transform: translateY(-2px); /* Effetto di sollevamento */
+    }
 
 
-  .add-link-form {
-    background-color: white !important; /* Assicura uno sfondo bianco */
+  }
+
+  .modal{
+
+    .modal-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .modal-footer {
+      background-color: #f8f9fa;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px; /* Spaziatura tra i bottoni nel footer */
+    }
+  }
+
+  .error-messages p {
+    margin: 0;
+    font-size: 14px;
+  }
 }

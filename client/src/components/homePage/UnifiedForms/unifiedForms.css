@@ -16,7 +16,17 @@
 }
 
 .modal-header{
-    padding-bottom: 0;
+    border-bottom: 1px solid #ccc; /* Linea di separazione */
+    padding-bottom: 10px; /* Spaziatura interna */
+
+    .modal-title{
+        font-size: 30px;
+        font-weight: bold;
+
+        .modal-icon{
+            margin-bottom: 10px;
+        }
+    }
 }
 
 .modal-body {

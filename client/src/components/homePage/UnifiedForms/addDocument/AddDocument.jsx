@@ -76,7 +76,7 @@ function AddDocument(props) {
         e.preventDefault();
         console.log('index: ',props.index)
         if(props.index === 0){
-            if (newDocument.title === "" || newDocument.stakeholders === "" || newDocument.scale === "" || newDocument.type === "") {
+            if (newDocument.title === "" || newDocument.stakeholders === "" || newDocument.scale === "" || newDocument.type === "" || newDocument.description === "") {
                 alert("Please fill in all required fields.");
                 return;
             }
@@ -268,8 +268,8 @@ function AddDocument(props) {
                         </Form.Group>
                         <Row className="btn-modal justify-content-between align-items-end">
                             <Col className="d-flex justify-content-start">
-                                <Button variant="secondary" className="btn-modal-close" onClick={() => props.handleClose()}> 
-                                    ← Close
+                                <Button variant="secondary" className="btn-modal-close" onClick={()=>{}}> 
+                                    New Stakeholder
                                 </Button>
                             </Col>
                             <Col className="d-flex justify-content-end">

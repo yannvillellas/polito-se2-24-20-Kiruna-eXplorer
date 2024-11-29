@@ -1,14 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./unifiedForms.css";
-import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
+import React, {useState} from "react";
 import { Container, Row, Col, Button, Form, Modal, Offcanvas, Alert } from "react-bootstrap";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "./link/Link"
 import DocumentAPI from "../../../api/documentAPI";
 import AddDocument from "./addDocument/AddDocument";
 import {TiDocumentAdd} from "react-icons/ti"
-
+import link from "../../../asset/link.svg"
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addDocument/addOriginalSource/AddOriginalSource";
 
@@ -111,21 +110,26 @@ function UnifiedForms(props) {
             {/*Modal only for link documents*/}
             <Modal show={onlyLinkForm} onHide={() => setOnlyLinkForm(false)} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>Insert link</Modal.Title>
+                    <Modal.Title className="modal-title"> <img src={link} alt="" /> Insert link</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Link documents={props.documents} alone={true} setOnlyLinkForm={setOnlyLinkForm} setErrorMsg={props.setErrorMsg}></Link>
+                    <Link 
+                        documents={props.documents} 
+                        alone={true} 
+                        setOnlyLinkForm={setOnlyLinkForm} 
+                        setErrorMsg={props.setErrorMsg}>
+                    </Link>
                 </Modal.Body>
             </Modal>
             {/************************************/}
 
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title className="modal-title">
-                        <TiDocumentAdd className="modal-icon"/> Add Document
+                    <Modal.Title className="modal-title"> 
+                        {index === 2 ? <><img src={link} alt=""/> Add Link </> : <><TiDocumentAdd className="modal-icon"/> Add Document</>}
                     </Modal.Title>
                     <div style={{ position: 'absolute', top: '30px', right: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
-                        {[0, 1].map((slideIndex) => (
+                        {[0, 1, 2].map((slideIndex) => (
                             <div
                                 key={slideIndex}
                                 style={{
@@ -184,20 +188,51 @@ function UnifiedForms(props) {
                                                     console.log("sto aggiungendo il doc: ", newDocument)
                                                     await props.handleAddDocument(newDocument);
                                                     console.log("ho finito: ")
-                                                    handleClose();
+                                                    handleNext();
                                                 }else{
                                                     alert("Please select a position")
                                                 }
                                             }}
                                         >
-                                            Save & Close →
+                                            Save →
+                                        </Button>
+                                    </Col>
+                                    <Col className="d-flex justify-content-end">
+                                        <Button
+                                            variant="primary"
+                                            type="button"
+                                            className="btn-modal-save"
+                                            onClick={async() => {
+                                                if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
+                                                    console.log("sto aggiungendo il doc: ", newDocument)
+                                                    await props.handleAddDocument(newDocument);
+                                                    console.log("ho finito: ")
+                                                    handleNext();
+                                                }else{
+                                                    alert("Please select a position")
+                                                }
+                                            }}
+                                        >
+                                            Add link
                                         </Button>
                                     </Col>
                                 </Row>
                             </Form>
                         </Carousel.Item>
+
+                        <Carousel.Item>
+
+                            <Modal.Body>
+                                <Link 
+                                     documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} 
+                                     newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} 
+                                     confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false} 
+                                     setErrorMsg={props.setErrorMsg}
+                                ></Link>
+                            </Modal.Body>
+                        </Carousel.Item>
                     </Carousel>
-                </Modal.Body>
+                </Modal.Body> 
                 <Modal.Footer>
                     <p>All fields marked with * are mandatory.</p>
                 </Modal.Footer>

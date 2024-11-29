@@ -55,8 +55,8 @@
     margin-left: 20px;
 }
 
-.btn-modal {
-    margin-top: 20px;
+.col-md-6 .btn-modal {
+    margin-top: 260px;
     display: flex;
     justify-content: space-between; /* Distribuisce i pulsanti */
 }
