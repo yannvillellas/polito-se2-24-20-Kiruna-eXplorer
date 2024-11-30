@@ -30,6 +30,7 @@ function ChosenPosition(props) {
 
     // for area selection:
     const [areas, setAreas] = useState([]);
+    const [selectedAreaId, setSelectedAreaId] = useState(null);  // So taht if the user press teh area it will change color
 
     // Fetch all areas from the database (at the construction of the component)
     useEffect(() => {
@@ -230,6 +231,10 @@ function ChosenPosition(props) {
     };
 
     const handleSetPreExistingArea = (area) => {
+
+        console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
+        setSelectedAreaId((prevId) => (prevId === area.areaId ? null : area.areaId)); // Cambia colore solo all'area cliccata
+
         console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
         props.handleSetArea(area);
 
@@ -450,11 +455,13 @@ function ChosenPosition(props) {
                                     if (area.areaType === "polygon") {
                                         try {
                                             const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+                                            const isSelected = selectedAreaId === area.areaId; // Verifica se l'area è selezionata
+                                            const color = isSelected ? 'red' : 'blue'; // Colore dinamico in base alla selezione
                                             return (
                                                 <Polygon
                                                     key={index}
                                                     positions={positions}
-                                                    pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                                                    pathOptions={{ color, fillOpacity: 0.5 }}
                                                     eventHandlers={{
                                                         click: () => {
                                                             console.log(`Clicked polygon ID: ${area.areaId}`)
