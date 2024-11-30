@@ -24,40 +24,39 @@ function ChosenPosition(props) {
 
     // for point to point
     const [position, setPosition] = useState({ lat: null, lng: null }); // Coordinate di default
-    const [positionAlreadyChosen, setPositionAlreadyChosen] = useState(false);
 
     // for manual insertion
     const [showLatLongForm, setShowLatLongForm] = useState(false);
-    const [manualLat, setManualLat] = useState(null);
-    const [manualLong, setManualLong] = useState(null);
+
 
     const handleOptionChange = (e) => {
         setSelectedOption(e.target.value); // Aggiorna lo stato con il valore selezionato
-        if (e.target.value === 'allMunicipalities') {
+        setPosition({ lat: null, lng: null });
 
+        if (e.target.value === 'allMunicipalities') {
             // I'm not setting the position based on the cetroid of teh area because will be srtange to have a marker in the middle of the map
             // So i'm leaving it on (67.8558, 20.2253) that is in the middle of the city
             props.handleAddLatLongToDocumentModal(67.8558, 20.2253);
-            setManualLat(null);
-            setManualLong(null);
-        } else if (e.target.value === 'pointToPoint') {
-            setPositionAlreadyChosen(false); // when the radio button is clicked the position is not yet chosen (otherwise the map will not be shown)
-            setManualLat(null);
-            setManualLong(null);
         } else if (e.target.value === 'manualInsertion') {
             setShowLatLongForm(true);
         }
     };
 
     const handleLatLongFormSubmit = () => {
-        if (manualLat === null || manualLong === null) {
+        // Extra control:
+        if(!position){
+            alert("Please set a position!");
+            return;
+        }
+
+        if (position.lat === null || position.lng === null) {
             alert("Latitude and longitude must be filled and should be numbers");
             return;
-        } else if (manualLat < -90 || manualLat > 90 || manualLong < -180 || manualLong > 180) {
+        } else if (position.lat < -90 || position.lat > 90 || position.lng < -180 || position.lng > 180) {
             alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
             return;
         }
-        props.handleSetPostition(manualLat, manualLong);
+        props.handleAddLatLongToDocumentModal(position.lat, position.lng);
         setShowLatLongForm(false);
     };
 
@@ -65,8 +64,8 @@ function ChosenPosition(props) {
 
     // Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them)
     const handleResetLatLong = async () => {
-        setManualLat(null);
-        setManualLong(null);
+        props.handleAddLatLongToDocumentModal(null, null);
+        setPosition({ lat: null, lng: null });
         setShowLatLongForm(true)
     };
 
@@ -175,7 +174,7 @@ function ChosenPosition(props) {
 
 
                     {/**here i put the map */}
-                    {selectedOption === 'pointToPoint' && !positionAlreadyChosen &&
+                    {selectedOption === 'pointToPoint' &&
                         <>
                             <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
                                 <TileLayer
@@ -183,15 +182,6 @@ function ChosenPosition(props) {
                                 />
                                 <LocationMarker />
                             </MapContainer>
-
-                            {/*( // sostituito con props.handleAddLatLongToDocumentModal
-                            <Button variant="primary" onClick={() => {
-                                props.handleSetPostition(position.lat, position.lng)
-                                setPositionAlreadyChosen(true)
-                            }}>
-                                Set
-                            </Button>
-                            */}
                         </>
                     }
 
@@ -219,7 +209,7 @@ function ChosenPosition(props) {
                                         step="0.000001"
                                         required={true}
                                         value={position.lng || ''}
-                                        onChange={(e) => setPosition({ lat: position.lng, lng: parseFloat(e.target.value) })}
+                                        onChange={(e) => setPosition({ lat: position.lat, lng: parseFloat(e.target.value) })}
                                     />
                                 </Form.Group>
 
