@@ -230,7 +230,7 @@ function ChosenPosition(props) {
     };
 
     const handleSetPreExistingArea = (area) => {
-        console.log("Sono in ChosenArea.jsx, Area selected: ", area);
+        console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
         props.handleSetArea(area);
 
         // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
@@ -238,7 +238,8 @@ function ChosenPosition(props) {
         const center = calculateCenterOfPolygon(latlngs);
         console.log("Centro calcolato come media delle coordinate:", center);
         // Passa il centro come lat, lng
-        props.handleSetPostition(center[0], center[1]);
+        props.handleAddLatLongToDocumentModal(center[0], center[1]);
+        setPosition({ lat: center[0], lng: center[1] });
 
     };
 
