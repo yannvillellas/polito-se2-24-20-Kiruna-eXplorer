@@ -32,6 +32,7 @@ function ChosenPosition(props) {
     const handleOptionChange = (e) => {
         setSelectedOption(e.target.value); // Aggiorna lo stato con il valore selezionato
         setPosition({ lat: null, lng: null });
+        props.handleAddLatLongToDocumentModal(null, null); // otherwise if you change and go back it will be saved as the previous value
 
         if (e.target.value === 'allMunicipalities') {
             // I'm not setting the position based on the cetroid of teh area because will be srtange to have a marker in the middle of the map
@@ -64,8 +65,10 @@ function ChosenPosition(props) {
 
     // Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them)
     const handleResetLatLong = async () => {
-        props.handleAddLatLongToDocumentModal(null, null);
-        setPosition({ lat: null, lng: null });
+        props.handleAddLatLongToDocumentModal(null, null); // so that the value is not saved
+
+
+        setPosition({ lat: position.lat, lng: position.lng });
         setShowLatLongForm(true)
     };
 
@@ -139,7 +142,7 @@ function ChosenPosition(props) {
                         label="Choose prexisting Area"
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="choosePrexistingArea" // value for this specific choice
-                        checked={selectedOption === 'chooseArea'} // if the selectedOption is equal to this value then the radio button will be checked
+                        checked={selectedOption === 'choosePrexistingArea'} // if the selectedOption is equal to this value then the radio button will be checked
                         onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
                     />
 
