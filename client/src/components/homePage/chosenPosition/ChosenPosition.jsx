@@ -111,6 +111,48 @@ function ChosenPosition(props) {
 
 
 
+    function isAreaContained(area1, area2) {
+        // area1: GeoJSON della potenziale area "contenente"
+        // area2: json(per il problema della mano destrorsa) dell'area da verificare, ricorda che geojsonData è di "type":"FeatureCollection"
+        try {
+            if (area2.type === "FeatureCollection" && area2.features.length > 0) {
+                for (let feature of area2.features) {
+                    // Se l'area1 non è contetnuta in anceh solo un'area di area2, ritorna false
+                    // Se area1 è contenuta in una delle features di area2, ritorna true
+                    if (turf.booleanContains(feature, area1)) {
+                        console.log("Area1 è contenuta in una delle features di area2");
+                        return true;
+                    }
+                }
+            }
+            return false; // se area1 è interamente contenuta
+        } catch (error) {
+            console.error('Errore durante il controllo delle aree:', error);
+            return false;
+        }
+    }
+
+    // Per calcolare centro con la media aritmetica delle coordinate (TURF ha problemi con il centroide del triangolo)
+    function calculateCenterOfPolygon(latlngs) {
+        let latSum = 0;
+        let lngSum = 0;
+        const numPoints = latlngs.length;
+
+        // Somma le coordinate
+        latlngs.forEach(latlng => {
+            latSum += latlng.lat;
+            lngSum += latlng.lng;
+        });
+
+        // Calcola la media delle coordinate
+        const centerLat = latSum / numPoints;
+        const centerLng = lngSum / numPoints;
+
+        return [centerLat, centerLng];
+    }
+
+
+
     const onCreated = (e) => {
         const { layerType, layer } = e;
         let shape;
@@ -146,11 +188,11 @@ function ChosenPosition(props) {
         }
 
         const areaToGeoJson = layer.toGeoJSON();
-        console.log("Sono in ChosenArea.jsx, ho convertito Area to GeoJson: ", areaToGeoJson);
+        console.log("Sono in ChosenPosition.jsx, ho convertito Area to GeoJson: ", areaToGeoJson);
 
 
         if (isAreaContained(areaToGeoJson, geojsonData)) {
-            console.log("Sono in choseArea.jsx, l'area è contenuta nel municipio!");
+            console.log("Sono in ChosenPosition.jsx, l'area è contenuta nel municipio!");
             props.handleSetArea(shape);
 
             /** Calcolo il centro dell'area TURF (ha problemi con centroide del triangolo) (passo quello come coordinate (lat, lng)*/
@@ -179,16 +221,26 @@ function ChosenPosition(props) {
             const center = calculateCenterOfPolygon(latlngs);
             console.log("Centro calcolato come media delle coordinate:", center);
             // Passa il centro come lat, lng
-            props.handleSetPostition(center[0], center[1]);
-
+            props.handleAddLatLongToDocumentModal(center[0], center[1]);
+            setPosition({ lat: center[0], lng: center[1] });
 
         } else {
             alert("The area is not inside the municipality");
         }
     };
 
+    const handleSetPreExistingArea = (area) => {
+        console.log("Sono in ChosenArea.jsx, Area selected: ", area);
+        props.handleSetArea(area);
 
+        // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
+        const latlngs = JSON.parse(area.coordinates)[0];
+        const center = calculateCenterOfPolygon(latlngs);
+        console.log("Centro calcolato come media delle coordinate:", center);
+        // Passa il centro come lat, lng
+        props.handleSetPostition(center[0], center[1]);
 
+    };
 
 
     return (
@@ -225,7 +277,7 @@ function ChosenPosition(props) {
 
                     <Form.Check
                         type="radio"
-                        label="Choose Area"
+                        label="Add new area"
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="addNewArea" // value for this specific choice
                         checked={selectedOption === 'addNewArea'} // if the selectedOption is equal to this value then the radio button will be checked

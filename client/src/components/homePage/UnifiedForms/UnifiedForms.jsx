@@ -81,6 +81,14 @@ function UnifiedForms(props) {
 
     };
 
+    const handleSetArea = (area) => {  
+        console.log("Sono in UnifiedForms, handleSetArea, ho ricevuto:", area);
+        setNewDocument((prevDocument) => ({
+            ...prevDocument,
+            area: area,
+        }));
+    };
+
     useEffect(() => {
         console.log("Sono in UnifiedForms, newDocument:", newDocument);
     }, [newDocument]);
@@ -185,6 +193,7 @@ function UnifiedForms(props) {
                                     <Col >
                                         <ChosenPosition
                                             handleAddLatLongToDocumentModal={handleAddLatLongToDocumentModal}
+                                            handleSetArea={handleSetArea}
                                         />
                                     </Col>
                                 </Row>
