@@ -1,14 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./chosenPosition.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, FeatureGroup, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON, useMapEvents } from 'react-leaflet';
+import { EditControl } from "react-leaflet-draw";
 
-
-import geojsonData from "./KirunaMunicipality.json"
-
+import "leaflet-draw/dist/leaflet.draw.css";
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -17,7 +16,8 @@ L.Icon.Default.mergeOptions({
     shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 
-
+import geojsonData from "./KirunaMunicipality.json"
+import areaAPI from "../../../api/areaAPI";
 
 function ChosenPosition(props) {
     const [selectedOption, setSelectedOption] = useState('');
@@ -27,6 +27,24 @@ function ChosenPosition(props) {
 
     // for manual insertion
     const [showLatLongForm, setShowLatLongForm] = useState(false);
+
+    // for area selection:
+    const [areas, setAreas] = useState([]);
+
+    // Fetch all areas from the database (at the construction of the component)
+    useEffect(() => {
+        const fetchAreas = async () => {
+            try {
+                const areas = await areaAPI.listAreas();
+                console.log("Sono in ChosenArea.jsx, ecco tutte le aree che mi sono arrivate dal DB:", areas);
+                setAreas(areas);
+            } catch (error) {
+                console.error("Error fetching areas:", error);
+            }
+        };
+        fetchAreas();
+    }, []);
+
 
 
     const handleOptionChange = (e) => {
@@ -45,7 +63,7 @@ function ChosenPosition(props) {
 
     const handleLatLongFormSubmit = () => {
         // Extra control:
-        if(!position){
+        if (!position) {
             alert("Please set a position!");
             return;
         }
@@ -66,7 +84,6 @@ function ChosenPosition(props) {
     // Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them)
     const handleResetLatLong = async () => {
         props.handleAddLatLongToDocumentModal(null, null); // so that the even if you cahnge the lat, long if you don't press "save" (under the lat,lng form) the value will not be saved 
-
         // If the user want to change the lat, lng he is not forced to write from zero again
         setPosition({ lat: position.lat, lng: position.lng });
         setShowLatLongForm(true)
@@ -90,6 +107,84 @@ function ChosenPosition(props) {
         weight: 2,
         opacity: 1,
         fillOpacity: 0.1
+    };
+
+
+
+    const onCreated = (e) => {
+        const { layerType, layer } = e;
+        let shape;
+
+        if (layerType === "polygon") {
+            shape = {
+                id: Date.now(),
+                type: layerType,
+                latlngs: JSON.stringify(layer.getLatLngs()),
+            };
+        }
+
+        /*
+        else if (layerType === "circle") {
+            shape = {
+                id: Date.now(),
+                type: layerType,
+                center: JSON.stringify(layer.getLatLng()),
+                radius: JSON.stringify(layer.getRadius()),
+            };
+        } else if (layerType === "circlemarker") {
+            shape = {
+                id: Date.now(),
+                type: layerType,
+                center: JSON.stringify(layer.getLatLng()),
+            };
+           
+        }  */
+
+        else {
+            console.warn(`Tipo di layer non gestito: ${layerType}`);
+            return;
+        }
+
+        const areaToGeoJson = layer.toGeoJSON();
+        console.log("Sono in ChosenArea.jsx, ho convertito Area to GeoJson: ", areaToGeoJson);
+
+
+        if (isAreaContained(areaToGeoJson, geojsonData)) {
+            console.log("Sono in choseArea.jsx, l'area è contenuta nel municipio!");
+            props.handleSetArea(shape);
+
+            /** Calcolo il centro dell'area TURF (ha problemi con centroide del triangolo) (passo quello come coordinate (lat, lng)*/
+            /*
+            const latlngs = JSON.parse(shape.latlngs)[0];
+            console.log("Sono in ChosenArea.jsx, latlngs dell'area appena disegnata: (JSON.parse) ", latlngs);
+            const polygonGeoJSON = {
+                type: "Feature",
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [latlngs.map(latlng => [latlng.lng, latlng.lat])] // Inverti in [lon, lat]
+                }
+            };
+
+            console.log("Sono in ChosenArea.jsx, polygonGeoJSON, ricavato: ", polygonGeoJSON);
+
+            
+            let centroid = turf.centroid(polygonGeoJSON);
+            console.log("AddDocument.jsx, centroide calcolato con turf (e' un po' strano)", centroid, centroid.geometry.coordinates); // [lon, lat]
+            props.handleSetPostition(centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]); // Inverto in [lat, lon]
+            */
+
+
+            // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
+            const latlngs = JSON.parse(shape.latlngs)[0];
+            const center = calculateCenterOfPolygon(latlngs);
+            console.log("Centro calcolato come media delle coordinate:", center);
+            // Passa il centro come lat, lng
+            props.handleSetPostition(center[0], center[1]);
+
+
+        } else {
+            alert("The area is not inside the municipality");
+        }
     };
 
 
@@ -132,8 +227,8 @@ function ChosenPosition(props) {
                         type="radio"
                         label="Choose Area"
                         name="choosed" // all the radio button must have the same name to be able to select only one
-                        value="chooseArea" // value for this specific choice
-                        checked={selectedOption === 'chooseArea'} // if the selectedOption is equal to this value then the radio button will be checked
+                        value="addNewArea" // value for this specific choice
+                        checked={selectedOption === 'addNewArea'} // if the selectedOption is equal to this value then the radio button will be checked
                         onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
                     />
 
@@ -141,8 +236,8 @@ function ChosenPosition(props) {
                         type="radio"
                         label="Choose prexisting Area"
                         name="choosed" // all the radio button must have the same name to be able to select only one
-                        value="choosePrexistingArea" // value for this specific choice
-                        checked={selectedOption === 'choosePrexistingArea'} // if the selectedOption is equal to this value then the radio button will be checked
+                        value="selectExistingArea" // value for this specific choice
+                        checked={selectedOption === 'selectExistingArea'} // if the selectedOption is equal to this value then the radio button will be checked
                         onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called     
                     />
 
@@ -250,6 +345,84 @@ function ChosenPosition(props) {
 
                         </>
                     }
+
+                    {selectedOption === 'addNewArea' &&
+                        <>
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <FeatureGroup>
+                                    <EditControl
+                                        position="topright"
+                                        onCreated={onCreated}
+                                        draw={{
+                                            rectangle: false,
+                                            polygon: true,
+                                            circle: false,
+                                            circleMarker: false,
+                                            polyline: false,
+                                            marker: false,
+                                        }}
+                                    />
+                                </FeatureGroup>
+
+                            </MapContainer>
+                        </>
+                    }
+
+                    {selectedOption === 'selectExistingArea' &&
+                        <>
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <FeatureGroup>
+                                    <EditControl
+                                        position="topright"
+                                        onCreated={onCreated}
+                                        draw={{
+                                            rectangle: false,
+                                            polygon: false,
+                                            circle: false,
+                                            circleMarker: false,
+                                            polyline: false,
+                                            marker: false,
+                                        }}
+                                    />
+                                </FeatureGroup>
+
+                                {/**Show all the areas by document: */}
+                                {areas.length > 0 && areas.map((area, index) => {
+                                    if (area.areaType === "polygon") {
+                                        try {
+                                            const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+                                            return (
+                                                <Polygon
+                                                    key={index}
+                                                    positions={positions}
+                                                    pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                                                    eventHandlers={{
+                                                        click: () => {
+                                                            console.log(`Clicked polygon ID: ${area.areaId}`)
+                                                            handleSetPreExistingArea(area);
+                                                        },
+                                                    }}
+                                                />
+                                            );
+                                        } catch (error) {
+                                            console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
+                                            return null;
+                                        }
+                                    }
+                                    return null;
+                                })}
+
+                            </MapContainer>
+                        </>
+                    }
+
+
                 </div>
 
 
