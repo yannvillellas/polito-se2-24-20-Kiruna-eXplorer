@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./unifiedForms.css";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Container, Row, Col, Button, Form, Modal, Offcanvas, Alert } from "react-bootstrap";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "./link/Link"
@@ -71,6 +71,20 @@ function UnifiedForms(props) {
         }));
     };
     
+    const handleAddLatLongToDocumentModal = (lat, lng) => {
+        console.log("Sono in Unified Form, handleAddLatLongToDocumentModal, ho ricevuto:", lat, lng);
+        setNewDocument((prevDocument) => ({
+            ...prevDocument,
+            lat: lat,
+            lng: lng,
+        }));
+
+    };
+
+    useEffect(() => {
+        console.log("Sono in UnifiedForms, newDocument:", newDocument);
+    }, [newDocument]);
+
 
     const handleNext = () => {
         setIndex((prevIndex) => (prevIndex + 1) % 3);
@@ -170,7 +184,7 @@ function UnifiedForms(props) {
                                 <Row>
                                     <Col >
                                         <ChosenPosition
-                                            handleSetPostition={(lat, lng) => setNewDocument({ ...newDocument, lat, lng })}
+                                            handleAddLatLongToDocumentModal={handleAddLatLongToDocumentModal}
                                         />
                                     </Col>
                                 </Row>

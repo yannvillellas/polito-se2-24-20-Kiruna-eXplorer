@@ -37,7 +37,7 @@ function ChosenPosition(props) {
 
             // I'm not setting the position based on the cetroid of teh area because will be srtange to have a marker in the middle of the map
             // So i'm leaving it on (67.8558, 20.2253) that is in the middle of the city
-            props.handleSetPostition(67.8558, 20.2253);
+            props.handleAddLatLongToDocumentModal(67.8558, 20.2253);
             setManualLat(null);
             setManualLong(null);
         } else if (e.target.value === 'pointToPoint') {
@@ -49,29 +49,19 @@ function ChosenPosition(props) {
         }
     };
 
-    // const handleLatLongFormSubmit = () => {
-    //     if(manualLat === null || manualLong === null){
-    //         alert("Latitude and longitude must be filled and should be numbers");
-    //         return;
-    //     } else if(manualLat < -90 || manualLat > 90 || manualLong < -180 || manualLong > 180){
-    //         alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
-    //         return;
-    //     }
-    //     props.handleSetPostition(manualLat, manualLong);
-    //     setShowLatLongForm(false);
-    // };
-
     const handleLatLongFormSubmit = () => {
-        if (position.lat === null || position.lng === null) {
+        if (manualLat === null || manualLong === null) {
             alert("Latitude and longitude must be filled and should be numbers");
             return;
-        } else if (position.lat < -90 || position.lat > 90 || position.lng < -180 || position.lng > 180) {
+        } else if (manualLat < -90 || manualLat > 90 || manualLong < -180 || manualLong > 180) {
             alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
             return;
         }
-        props.handleSetPostition(position.lat, position.lng);
+        props.handleSetPostition(manualLat, manualLong);
         setShowLatLongForm(false);
     };
+
+
 
     // Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them)
     const handleResetLatLong = async () => {
@@ -84,17 +74,12 @@ function ChosenPosition(props) {
     function LocationMarker() {
         useMapEvents({
             click(e) {
-                const { lat, lng } = e.latlng; // Ottieni latitudine e longitudine dal clic
-                setPosition({ lat, lng }); // Aggiorna lo stato di posizione
-                console.log('position: ', position)
-                props.handleSetPostition(lat, lng); // Passa le coordinate al componente genitore
+                setPosition(e.latlng);
+                props.handleAddLatLongToDocumentModal(e.latlng.lat, e.latlng.lng);
             },
         });
 
-        // Crea il marker solo se `lat` e `lng` sono definiti
-        return position && position.lat !== undefined && position.lng !== undefined ? (
-            <Marker position={[position.lat, position.lng]}></Marker>
-        ) : null;
+        return position ? <Marker position={position}></Marker> : null;
     }
 
 
@@ -104,6 +89,8 @@ function ChosenPosition(props) {
         opacity: 1,
         fillOpacity: 0.1
     };
+
+
 
 
 
@@ -187,24 +174,24 @@ function ChosenPosition(props) {
                     }
 
 
-
-
-
-
-
-
-
-
-
-
-
                     {/**here i put the map */}
                     {selectedOption === 'pointToPoint' && !positionAlreadyChosen &&
                         <>
-                            <MapContainer center={[position.lat !== 0 ? position.lat : 67.8558, position.lng !== 0 ? position.lng : 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
-                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
                                 <LocationMarker />
                             </MapContainer>
+
+                            {/*( // sostituito con props.handleAddLatLongToDocumentModal
+                            <Button variant="primary" onClick={() => {
+                                props.handleSetPostition(position.lat, position.lng)
+                                setPositionAlreadyChosen(true)
+                            }}>
+                                Set
+                            </Button>
+                            */}
                         </>
                     }
 
