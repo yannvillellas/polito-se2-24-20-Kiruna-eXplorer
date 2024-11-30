@@ -56,7 +56,7 @@ function Map(props) {
   };
 
   const geojsonStyle = {
-    color: "white",
+    color: "red",
     weight: 2,
     opacity: 1,
     fillOpacity: 0.1
