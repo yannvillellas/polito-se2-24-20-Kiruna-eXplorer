@@ -305,7 +305,7 @@ function ChosenPosition(props) {
                 <div className="show">
                     {/**Here i put the map for alla municipality */}
                     {selectedOption === 'allMunicipalities' &&
-                        <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
+                        <MapContainer center={[68.2558, 20.1240]} zoom={6} style={{ height: "100%", width: "100%" }}>
                             <LayersControl position="topright">
                                 <LayersControl.BaseLayer checked name="Google Satellite">
                                     <TileLayer
