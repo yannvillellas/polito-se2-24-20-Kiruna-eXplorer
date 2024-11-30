@@ -65,9 +65,9 @@ function ChosenPosition(props) {
 
     // Does not reset the old value of the manualLat and manualLong (happens when you try to change the lat long after you have already inserted them)
     const handleResetLatLong = async () => {
-        props.handleAddLatLongToDocumentModal(null, null); // so that the value is not saved
+        props.handleAddLatLongToDocumentModal(null, null); // so that the even if you cahnge the lat, long if you don't press "save" (under the lat,lng form) the value will not be saved 
 
-
+        // If the user want to change the lat, lng he is not forced to write from zero again
         setPosition({ lat: position.lat, lng: position.lng });
         setShowLatLongForm(true)
     };
