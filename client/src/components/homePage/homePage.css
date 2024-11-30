@@ -12,7 +12,7 @@
 
 .add-document-container {
     position: absolute;
-    bottom: 15%;
+    bottom: 5%;
     right: 20px;
     z-index: 1000; /* Assicura che sia visibile sopra la mappa */
 }

@@ -235,12 +235,15 @@ function Link(props) {
             {props.alone ? (
               <Button
                 onClick={() => props.setOnlyLinkForm(false)}
-                variant="secondary"
+                style={{ backgroundColor: "white", color: "black", border:"2px solid", fontWeight: "bolder"}}
               >
                 Close
               </Button>
             ) : (
-              <Button onClick={() => props.handlePrev()} variant="secondary">
+              <Button 
+                onClick={() => props.handlePrev()}
+                style={{ backgroundColor: "white", color: "black", border:"2px solid", fontWeight: "bolder"}} 
+              >
                 ← Back
               </Button>
             )}
@@ -249,7 +252,7 @@ function Link(props) {
               selectedTypes.length > 0 &&
               doc2 !== "" && (
                 <Button
-                  variant="primary"
+                  style={{ backgroundColor: "#075293", fontWeight: "bolder"}}
                   type="button"
                   onClick={() => setShowConfirmation(true)}
                 >

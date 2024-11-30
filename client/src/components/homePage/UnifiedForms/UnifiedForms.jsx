@@ -110,22 +110,22 @@ function UnifiedForms(props) {
 
     return (
         <>  
-        <div className="btnUnifiedForms">
+        <div className="btn-unified-forms">
             <Button
+                    className=" rounded-circle d-flex align-items-center justify-content-center btn-add-document"
+                    variant="none"
+                    style={{ width: "50px", height: "50px", }}
                     onClick={onBtnSelectAdd}
-                    className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-                    variant="primary"
-                    style={{ width: "50px", height: "50px" }}
                 >
-                    <i className="bi bi-plus" style={{ fontSize: "1.5rem" }}></i>
+                    <i className="bi bi-plus" style={{ fontSize: "2rem" }}></i>
                 </Button>
                 <Button
-                    className="btn-lg rounded-circle d-flex align-items-center justify-content-center"
-                    variant="primary"
+                    className=" rounded-circle d-flex align-items-center justify-content-center btn-add-link"
+                    variant="none"
                     style={{ width: "50px", height: "50px" }}
                     onClick={() => setOnlyLinkForm(true)}
                 >
-                    <i className="bi bi-link-45deg"></i>
+                    <i className="bi bi-link-45deg"  style={{ fontSize: "2rem" }}></i>
             </Button>
         </div>
             
@@ -217,14 +217,14 @@ function UnifiedForms(props) {
                                                 }
                                             }}
                                         >
-                                            Save →
+                                             Save & Close
                                         </Button>
                                     </Col>
                                     <Col className="d-flex justify-content-end">
                                         <Button
                                             variant="primary"
                                             type="button"
-                                            className="btn-modal-save"
+                                            className="btn-modal-link"
                                             onClick={async() => {
                                                 if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
                                                     console.log("sto aggiungendo il doc: ", newDocument)
@@ -236,7 +236,7 @@ function UnifiedForms(props) {
                                                 }
                                             }}
                                         >
-                                            Add link
+                                             Link the Documents
                                         </Button>
                                     </Col>
                                 </Row>
@@ -263,7 +263,7 @@ function UnifiedForms(props) {
 
 
             {/* Modal di conferma */}
-            <Modal show={closeConfirmation} onHide={() => setCloseConfirmation(false)}>
+            <Modal className="modal-close" show={closeConfirmation} onHide={() => setCloseConfirmation(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirm exit</Modal.Title>
                 </Modal.Header>

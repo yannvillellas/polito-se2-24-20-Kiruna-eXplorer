@@ -68,7 +68,7 @@
         .custom-checkbox .form-check-input {
           width: 18px;
           height: 18px;
-          border: 2px solid #007bff; /* Bordo blu */
+          border: 2px solid black; /* Bordo blu */
           border-radius: 3px; /* Angoli leggermente arrotondati */
           background-color: #fff;
           margin-right: 10px;
@@ -88,32 +88,21 @@
   }
 
   .btn-modal {
-    margin-right: 20px;
     margin-top: 20px;
-    display: flex;
-    justify-content: flex-end; /* Allinea i bottoni a destra */
-    gap: 10px; /* Spaziatura tra i bottoni */
+    display: flex; /* Imposta un layout flessibile */
+    justify-content: space-between; /* Allinea i bottoni agli estremi */
+    align-items: center; /* Centra i bottoni verticalmente */
+    padding: 10px; /* Spaziatura per migliorare l'aspetto */
 
-    .btn-modal-action {
-      padding: 10px 20px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: none;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .btn-modal-action:hover {
-      background-color: #007bff;
-      color: white;
-    }
 
     button {
-      padding: 10px 20px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: none;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+      min-width: 120px; /* Imposta una larghezza minima per entrambi i bottoni */
+      height: 40px; /* Imposta un'altezza uniforme */
+      font-size: 16px; /* Dimensione del testo uniforme */
+      border-radius: 5px; /* Bordo arrotondato */
+      padding: 5px 15px; /* Spaziatura interna */
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Effetto ombra */
+  }
 
     button:hover {
       background-color: red; /* Cambia colore al passaggio del mouse */
@@ -121,17 +110,24 @@
       transform: translateY(-2px); /* Effetto di sollevamento */
     }
 
-
+    button:first-child {
+      margin-right: auto; /* Spinge il primo bottone (Back) a sinistra */
   }
 
-  .modal{
+    button:last-child {
+      margin-left: auto; /* Spinge l'ultimo bottone (Submit) a destra */
+  }
+}
 
-    .modal-header {
+
+.modal{
+
+  .modal-header {
       background-color: #f8f9fa;
       border-bottom: 1px solid #ddd;
     }
 
-    .modal-footer {
+  .modal-footer {
       background-color: #f8f9fa;
       border-top: 1px solid #ddd;
       display: flex;
@@ -140,8 +136,19 @@
     }
   }
 
-  .error-messages p {
+.error-messages p {
     margin: 0;
     font-size: 14px;
   }
+}
+
+.toast-container{
+  padding:0;
+  margin: 15% 30%;
+}
+
+.modal-close, .modal-confirm{
+  max-height: 100%;
+  padding-bottom: 45%;
+  backdrop-filter: blur(2px);
 }

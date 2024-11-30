@@ -187,19 +187,7 @@ function AddDocument(props) {
 
                         <Form.Group className="mb-3">
                             <Form.Label>Stakeholders*</Form.Label>
-                            {/* <Select
-                                    options={stakeholdersOptions} // Opzioni definite
-                                    isClearable // Aggiunge una "x" per cancellare la selezione
-                                    placeholder="Select Stakeholders"
-                                    required={true}
-                                    value={stakeholdersOptions.find(opt => opt.value === newDocument.stakeholders)}
-                                    onChange={(selectedOption) =>
-                                        setNewDocument({
-                                            ...newDocument,
-                                            stakeholders: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                /> */}
+                            
                             <div
                                 className="custom-dropdown-trigger"
                                 onClick={() => setShowCheckboxes(!showCheckboxes)}
@@ -214,18 +202,35 @@ function AddDocument(props) {
                             </div>
 
                             {showCheckboxes && (
-                                <div className="checkbox-container">
-                                    {stakeholdersOptions.map((stakeholder) => (
-                                        <Form.Check
-                                            key={stakeholder.value}
-                                            type="checkbox"
-                                            id={`checkbox-${stakeholder.value}`}
-                                            label={stakeholder.label} // Usa "label" per il testo visibile
-                                            checked={selectedStakeholders.some((s) => s.value === stakeholder.value)}
-                                            onChange={() => handleCheckboxChange(stakeholder)}
-                                            className="custom-checkbox"
+                                <div className="stakeholders-container">
+                                    <div className="checkbox-container">
+                                        {stakeholdersOptions.map((stakeholder) => (
+                                            <Form.Check
+                                                key={stakeholder.value}
+                                                type="checkbox"
+                                                id={`checkbox-${stakeholder.value}`}
+                                                label={stakeholder.label} // Usa "label" per il testo visibile
+                                                checked={selectedStakeholders.some((s) => s.value === stakeholder.value)}
+                                                onChange={() => handleCheckboxChange(stakeholder)}
+                                                className="custom-checkbox"
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="add-stakeholder">
+                                        <input 
+                                            placeholder="Add new Stakeholder" 
+                                            className="stakeholder-input" 
                                         />
-                                    ))}
+                                        <Button
+                                            className="stakeholder-add-btn"
+                                            variant="none"
+                                        >
+                                            <i className="bi bi-plus"></i>
+                                        </Button>
+                                    </div>
+
+
+
                                 </div>
                             )}
                         </Form.Group>
@@ -359,17 +364,13 @@ function AddDocument(props) {
 
                         </Form.Group>
                         <Row className="btn-modal justify-content-between align-items-end">
-                            <Col className="d-flex justify-content-start">
-                                <Button variant="secondary" className="btn-modal-close" onClick={() => { }}>
-                                    New Stakeholder
-                                </Button>
-                            </Col>
                             <Col className="d-flex justify-content-end">
                                 <Button
                                     variant="primary"
                                     type="submit"
-                                    className="btn-modal-save"
-                                    onClick={(e) => handleSaveDocument(e)}
+                                    className="btn-modal-link"
+                                    // onClick={(e) => handleSaveDocument(e)}
+                                    onClick={()=>{props.handleNext()}}
                                 >
                                     Next →
                                 </Button>
