@@ -227,6 +227,7 @@ function ChosenPosition(props) {
 
         } else {
             alert("The area is not inside the municipality");
+            layer.remove();
         }
     };
 
