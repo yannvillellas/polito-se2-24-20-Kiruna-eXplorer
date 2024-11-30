@@ -132,22 +132,14 @@ function AddDocument(props) {
             console.log("AddDocument.jsx, hai premuto SAVE ecco tutte le info di newDocument: newDocument:", newDocument);
 
 
-            if (newDocument.lat === null || newDocument.lng === null) {
-                alert("Please select a position on the map");
-                return;
-
-            }
             if (props.index === 1) {
                 if (newDocument.lat === null || newDocument.lng === null) {
                     alert("Please select a valid position on the map.");
                     return;
+                } else if (newDocument.area === null) {
+                    alert("Please select an area on the map");
+                    return;
                 }
-            }
-
-
-            if (newDocument.area === null) {
-                alert("Please select an area on the map");
-                return;
             }
 
             props.handleAddDocumentToModal(newDocument);

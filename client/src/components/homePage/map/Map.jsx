@@ -10,7 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
 
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import kirunaGeoJson from "../../../data/KirunaMunicipality.json";
+
 
 import L from 'leaflet';
 delete L.Icon.Default.prototype._getIconUrl;
@@ -280,14 +280,6 @@ function Map(props) {
             />
           </LayersControl.BaseLayer>
         </LayersControl>
-
-        <GeoJSON data={kirunaGeoJson} style={{
-          color: 'red',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0
-        }}
-        />
 
         <MarkerClusterGroup
           showCoverageOnHover={false}

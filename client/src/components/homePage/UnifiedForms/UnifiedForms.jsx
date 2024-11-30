@@ -65,8 +65,12 @@ function UnifiedForms(props) {
     }
 
     const handleAddDocumentToModal = (document) => {
-        setNewDocument(document);
-    }
+        setNewDocument((prevDocument) => ({
+            ...prevDocument, // Prendi tutti i campi del documento precedente
+            ...document, // Se document ha i campi che coincidono con quelli di prevDocument, sovrascrivi ( mi viene utile per AddDocument, ChosenPosition/ChosenArea e AddOriginalSource)
+        }));
+    };
+    
 
     const handleNext = () => {
         setIndex((prevIndex) => (prevIndex + 1) % 3);
