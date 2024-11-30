@@ -134,6 +134,7 @@ function Map(props) {
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
     setIsPositionToModify(false);
+    setVisibleAreas([]); // Nascondi l'area alla chiusura del modal
   };
 
 
@@ -175,7 +176,7 @@ function Map(props) {
   const handleMarkerClick = async (docs) => {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
-
+    
     await handleGetFiles(docs[0].docId)
 
   };
