@@ -153,42 +153,49 @@ function AddDocument(props) {
             props.handleAddDocumentToModal(newDocument);
             props.handleNext();
         };
-        
+
     }
 
     const handleCheckboxChange = (stakeholder) => {
+        console.log("AddDocument.jsx, hai selezionato lo stakeholder:", stakeholder);
+
         setSelectedStakeholders((prevSelected) => {
             const alreadySelected = prevSelected.some((s) => s.value === stakeholder.value);
-            if (alreadySelected) {
-                return prevSelected.filter((s) => s.value !== stakeholder.value);
-            } else {
-                return [...prevSelected, stakeholder];
-            }
+            const updatedStakeholders = alreadySelected
+                ? prevSelected.filter((s) => s.value !== stakeholder.value)
+                : [...prevSelected, stakeholder];
+
+            // Aggiorna anche il newDocument con gli stakeholders selezionati
+            setNewDocument((prevDocument) => ({
+                ...prevDocument,
+                stakeholders: updatedStakeholders.map((s) => s.value).join(", "), // Concatena i valori selezionati
+            }));
+
+            return updatedStakeholders;
         });
     };
-    
 
-        return (
-            <>
-                <Form className="add-document-form" onSubmit={handleSaveDocument}>
-                    <Row>
-                        <Col md={5}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Title*</Form.Label>
+    return (
+        <>
+            <Form className="add-document-form" onSubmit={handleSaveDocument}>
+                <Row>
+                    <Col md={5}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Title*</Form.Label>
 
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter document name"
-                                    required={true}
-                                    value={newDocument.title} // per avere infup controlalto
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter document name"
+                                required={true}
+                                value={newDocument.title} // per avere infup controlalto
 
-                                    onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
-                                />
-                            </Form.Group>
+                                onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
+                            />
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Stakeholders*</Form.Label>
-                                {/* <Select
+                        <Form.Group className="mb-3">
+                            <Form.Label>Stakeholders*</Form.Label>
+                            {/* <Select
                                     options={stakeholdersOptions} // Opzioni definite
                                     isClearable // Aggiunge una "x" per cancellare la selezione
                                     placeholder="Select Stakeholders"
@@ -201,206 +208,206 @@ function AddDocument(props) {
                                         })
                                     }
                                 /> */}
-                                <div
-                                    className="custom-dropdown-trigger"
-                                    onClick={() => setShowCheckboxes(!showCheckboxes)}
-                                >
-                                    {selectedStakeholders.length > 0 ? (
-                                        `Selected: ${selectedStakeholders.map((s) => s.label).join(", ")}`
-                                    ) : (
-                                        <span className="hint">Select type(s)</span>
-                                    )}
-
-                                    <span className="arrow">&#9662;</span>
-                                </div>
-
-                                {showCheckboxes && (
-                                    <div className="checkbox-container">
-                                        {stakeholdersOptions.map((stakeholder) => (
-                                            <Form.Check
-                                                key={stakeholder.value}
-                                                type="checkbox"
-                                                id={`checkbox-${stakeholder.value}`}
-                                                label={stakeholder.label} // Usa "label" per il testo visibile
-                                                checked={selectedStakeholders.some((s) => s.value === stakeholder.value)}
-                                                onChange={() => handleCheckboxChange(stakeholder)}
-                                                className="custom-checkbox"
-                                            />
-                                        ))}
-                                    </div>
+                            <div
+                                className="custom-dropdown-trigger"
+                                onClick={() => setShowCheckboxes(!showCheckboxes)}
+                            >
+                                {selectedStakeholders.length > 0 ? (
+                                    `Selected: ${selectedStakeholders.map((s) => s.label).join(", ")}`
+                                ) : (
+                                    <span className="hint">Select type(s)</span>
                                 )}
-                            </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Scale*</Form.Label>
+                                <span className="arrow">&#9662;</span>
+                            </div>
 
-                                <Select
-                                    options={scaleOptions} // Opzioni definite
-                                    isClearable // Aggiunge una "x" per cancellare la selezione
-                                    placeholder="Select Scale"
-                                    required={true}
-                                    onChange={(selectedOption) => {
-                                        const scaleValue = selectedOption ? selectedOption.value : "";
+                            {showCheckboxes && (
+                                <div className="checkbox-container">
+                                    {stakeholdersOptions.map((stakeholder) => (
+                                        <Form.Check
+                                            key={stakeholder.value}
+                                            type="checkbox"
+                                            id={`checkbox-${stakeholder.value}`}
+                                            label={stakeholder.label} // Usa "label" per il testo visibile
+                                            checked={selectedStakeholders.some((s) => s.value === stakeholder.value)}
+                                            onChange={() => handleCheckboxChange(stakeholder)}
+                                            className="custom-checkbox"
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </Form.Group>
 
-                                        setIsArchitecturalScale(scaleValue === "Architectural Scale");
+                        <Form.Group className="mb-3">
+                            <Form.Label>Scale*</Form.Label>
 
-                                        isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({ ...newDocument, scale: scaleValue })
+                            <Select
+                                options={scaleOptions} // Opzioni definite
+                                isClearable // Aggiunge una "x" per cancellare la selezione
+                                placeholder="Select Scale"
+                                required={true}
+                                onChange={(selectedOption) => {
+                                    const scaleValue = selectedOption ? selectedOption.value : "";
 
-                                        /*
-                                        if (selectedOption) {
-                                            if (selectedOption.value === "Architectural Scale") {
-                                                setIsArchitecturalScale(true);
-                                            } else {
-                                                // In this way i have always guaranteed that Architectural Scale Format form disappear
-                                                setIsArchitecturalScale(false);
-                                            }
+                                    setIsArchitecturalScale(scaleValue === "Architectural Scale");
+
+                                    isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({ ...newDocument, scale: scaleValue })
+
+                                    /*
+                                    if (selectedOption) {
+                                        if (selectedOption.value === "Architectural Scale") {
+                                            setIsArchitecturalScale(true);
                                         } else {
-                                            // In this way i have always guaranteed that Architectural Scale Format form disappear (case of Selected Option null)
+                                            // In this way i have always guaranteed that Architectural Scale Format form disappear
                                             setIsArchitecturalScale(false);
                                         }
-                                            */
-
+                                    } else {
+                                        // In this way i have always guaranteed that Architectural Scale Format form disappear (case of Selected Option null)
+                                        setIsArchitecturalScale(false);
                                     }
-                                    }
-                                    value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
-                                />
+                                        */
 
-                            </Form.Group>
-                            {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}
-                            {isArchitecturalScale &&
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Architectural Scale Format (x:y)*</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        required={true}
-                                        placeholder="Enter scale in x:y format"
-                                        onChange={(e) => {
-                                            const regex = /^\d+:\d+$/;
-                                            if (regex.test(e.target.value)) {
-                                                setIsArchitecturalScaleFormat(true);
-                                                setNewDocument({ ...newDocument, scale: e.target.value })
-                                            } else {
-                                                setIsArchitecturalScaleFormat(false);
-                                            }
-                                        }}
-                                        isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+                                }
+                                }
+                                value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
+                            />
 
-                                    />
-                                    {/* I'm not setting the value, thevalue will be still tehre untill the comontent is not unmounted (refreshed the page). 
-                                    isArchitecturalScale  is still true untill you unmount the component */}
-                                    <Form.Control.Feedback type="invalid">
-                                        Please enter the scale in "x:y" format (e.g., 1:100).
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                            }
+                        </Form.Group>
+                        {/**There is the bug: if i write a random number and click save cahnges will be saved the last correct value*/}
+                        {isArchitecturalScale &&
                             <Form.Group className="mb-3">
-                                <Form.Label>Issuance Date*</Form.Label>
+                                <Form.Label>Architectural Scale Format (x:y)*</Form.Label>
                                 <Form.Control
                                     type="text"
                                     required={true}
-                                    placeholder="Enter date in yyyy/mm/dd format"
-                                    value={issuanceDate}
-                                    onChange={handleDateChange}
-                                    isInvalid={!isIssuanceDateValid}
+                                    placeholder="Enter scale in x:y format"
+                                    onChange={(e) => {
+                                        const regex = /^\d+:\d+$/;
+                                        if (regex.test(e.target.value)) {
+                                            setIsArchitecturalScaleFormat(true);
+                                            setNewDocument({ ...newDocument, scale: e.target.value })
+                                        } else {
+                                            setIsArchitecturalScaleFormat(false);
+                                        }
+                                    }}
+                                    isInvalid={!isArchitecturalScaleFormat} // Mostra l'errore visivamente
+
                                 />
+                                {/* I'm not setting the value, thevalue will be still tehre untill the comontent is not unmounted (refreshed the page). 
+                                    isArchitecturalScale  is still true untill you unmount the component */}
                                 <Form.Control.Feedback type="invalid">
-                                    Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                                    Please enter the scale in "x:y" format (e.g., 1:100).
                                 </Form.Control.Feedback>
                             </Form.Group>
+                        }
+                        <Form.Group className="mb-3">
+                            <Form.Label>Issuance Date*</Form.Label>
+                            <Form.Control
+                                type="text"
+                                required={true}
+                                placeholder="Enter date in yyyy/mm/dd format"
+                                value={issuanceDate}
+                                onChange={handleDateChange}
+                                isInvalid={!isIssuanceDateValid}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter the date in "yyyy/mm/dd" format. Year is mandatory, month and day are optional.
+                            </Form.Control.Feedback>
+                        </Form.Group>
 
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Type*</Form.Label> {/* sono fixed*/}
-                                <Select
-                                    options={typeOptions}
-                                    isClearable
-                                    placeholder="Select Type"
-                                    required={true}
-                                    onChange={(selectedOption) =>
-                                        setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
-                                    }
-                                    value={typeOptions.find(opt => opt.value === newDocument.type)}
-                                />
-                            </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Type*</Form.Label> {/* sono fixed*/}
+                            <Select
+                                options={typeOptions}
+                                isClearable
+                                placeholder="Select Type"
+                                required={true}
+                                onChange={(selectedOption) =>
+                                    setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
+                                }
+                                value={typeOptions.find(opt => opt.value === newDocument.type)}
+                            />
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Language</Form.Label>
-                                <Select
-                                    options={languageOptions}
-                                    isClearable
-                                    placeholder="Select Language"
-                                    onChange={(selectedOption) =>
-                                        setNewDocument({ ...newDocument, language: selectedOption ? selectedOption.value : "" })
-                                    }
-                                    value={languageOptions.find(opt => opt.value === newDocument.language)}
-                                />
-                            </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Language</Form.Label>
+                            <Select
+                                options={languageOptions}
+                                isClearable
+                                placeholder="Select Language"
+                                onChange={(selectedOption) =>
+                                    setNewDocument({ ...newDocument, language: selectedOption ? selectedOption.value : "" })
+                                }
+                                value={languageOptions.find(opt => opt.value === newDocument.language)}
+                            />
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Pages</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    onChange={(e) => setNewDocument({ ...newDocument, pages: e.target.value })}
-                                    value={newDocument.pages}
-                                />
-                            </Form.Group>
-                        </Col>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pages</Form.Label>
+                            <Form.Control
+                                type="text"
+                                onChange={(e) => setNewDocument({ ...newDocument, pages: e.target.value })}
+                                value={newDocument.pages}
+                            />
+                        </Form.Group>
+                    </Col>
 
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Description*</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={10}
-                                    required={true}
-                                    onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
-                                    value={newDocument.description}
-                                />
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description*</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={10}
+                                required={true}
+                                onChange={(e) => setNewDocument({ ...newDocument, description: e.target.value })}
+                                value={newDocument.description}
+                            />
 
 
-                            </Form.Group>
-                            <Row className="btn-modal justify-content-between align-items-end">
-                                <Col className="d-flex justify-content-start">
-                                    <Button variant="secondary" className="btn-modal-close" onClick={() => { }}>
-                                        New Stakeholder
-                                    </Button>
-                                </Col>
-                                <Col className="d-flex justify-content-end">
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        className="btn-modal-save"
-                                        onClick={(e) => handleSaveDocument(e)}
-                                    >
-                                        Next →
-                                    </Button>
+                        </Form.Group>
+                        <Row className="btn-modal justify-content-between align-items-end">
+                            <Col className="d-flex justify-content-start">
+                                <Button variant="secondary" className="btn-modal-close" onClick={() => { }}>
+                                    New Stakeholder
+                                </Button>
+                            </Col>
+                            <Col className="d-flex justify-content-end">
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    className="btn-modal-save"
+                                    onClick={(e) => handleSaveDocument(e)}
+                                >
+                                    Next →
+                                </Button>
 
-                                </Col>
-                            </Row>
+                            </Col>
+                        </Row>
 
-                            {/*<ChosenPosition
+                        {/*<ChosenPosition
                             handleSetPostition={handleSetPostition}
                         />*/}
 
-                            {/* <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition} />
+                        {/* <ChosenArea handleSetArea={handleSetArea} handleSetPostition={handleSetPostition} />
 
                             <AddOriginalSource handleAddedFiles={handleAddedFiles} /> */}
 
 
-                        </Col>
+                    </Col>
 
-                    </Row>
+                </Row>
 
-                    {/*<Row>
+                {/*<Row>
                     <Col>
                         <Button variant="secondary" onClick={() => props.handleClose()}> Close</Button>
                         <Button variant="primary" type='submit'> Save </Button>
                     </Col>
                 </Row>*/}
 
-                </Form>
-            </>
-        )
-    
+            </Form>
+        </>
+    )
+
 }
 export default AddDocument;
