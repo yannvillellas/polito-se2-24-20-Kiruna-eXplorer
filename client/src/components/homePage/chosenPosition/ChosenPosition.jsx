@@ -337,6 +337,23 @@ function ChosenPosition(props) {
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
+
+                                <LayersControl position="bottomleft">
+                                    <LayersControl.BaseLayer checked name="Google Satellite">
+                                        <TileLayer
+                                            url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                                            attribution='&copy; <a href="https://maps.google.com">Google</a>'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                    <LayersControl.BaseLayer name="OpenStreetMap">
+                                        <TileLayer
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                </LayersControl>
+
+
                                 <LocationMarker />
                             </MapContainer>
                         </>
@@ -411,6 +428,22 @@ function ChosenPosition(props) {
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
+
+                                <LayersControl position="bottomleft">
+                                    <LayersControl.BaseLayer checked name="Google Satellite">
+                                        <TileLayer
+                                            url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                                            attribution='&copy; <a href="https://maps.google.com">Google</a>'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                    <LayersControl.BaseLayer name="OpenStreetMap">
+                                        <TileLayer
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                </LayersControl>
+
                                 <FeatureGroup>
                                     <EditControl
                                         position="topright"
@@ -436,6 +469,23 @@ function ChosenPosition(props) {
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
+
+                                <LayersControl position="bottomleft">
+                                    <LayersControl.BaseLayer checked name="Google Satellite">
+                                        <TileLayer
+                                            url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                                            attribution='&copy; <a href="https://maps.google.com">Google</a>'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                    <LayersControl.BaseLayer name="OpenStreetMap">
+                                        <TileLayer
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                                        />
+                                    </LayersControl.BaseLayer>
+                                </LayersControl>
+
+
                                 <FeatureGroup>
                                     <EditControl
                                         position="topright"
