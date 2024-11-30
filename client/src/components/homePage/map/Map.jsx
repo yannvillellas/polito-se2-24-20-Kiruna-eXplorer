@@ -43,7 +43,7 @@ function Map(props) {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [areas, setAreas] = useState([]);
-  const [visibleAreas, setVisibleAreas] = useState([]);
+  const [visibleArea, setVisibleArea] = useState(null);
   const [areaAssociations, setAreaAssociations] = useState([]);
 
   const onFeatureClick = (e) => {
@@ -134,7 +134,7 @@ function Map(props) {
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
     setIsPositionToModify(false);
-    setVisibleAreas([]); // Nascondi l'area alla chiusura del modal
+    setVisibleArea(null); // Nascondi l'area alla chiusura del modal
   };
 
 
@@ -176,47 +176,23 @@ function Map(props) {
   const handleMarkerClick = async (docs) => {
     setSelectedDoc(docs[0]);
     setShowDocumentModal(true);
-    
+
     await handleGetFiles(docs[0].docId)
 
   };
 
   // da fixare tenendo conto di areeAssociation
   const handleMouseOver = (docId) => {
-    console.log(`Mouseover on docId: ${docId}`);  // Aggiungi un log per monitorare
-    // Imposto la visibilità dell'area tramite areaAssociations
+    console.log(`Mouseover on docId: ${docId}`);
     const areaAssociation = areaAssociations.find((a) => a.docId === docId);
-    if (!areaAssociation) {
-      return;
+    if (areaAssociation && areaAssociation.areaId) {
+      setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
     }
-
-    const areaId = areaAssociation.areaId;
-    if (areaId) {
-      setVisibleAreas((prevState) => {
-        if (prevState.includes(areaId)) {
-          return prevState;
-        } else {
-          return [...prevState, areaId];
-        }
-      });
-    }
-
   };
 
   const handleMouseOut = (docId) => {
-    console.log(`Mouseout on docId: ${docId}`);  // Aggiungi un log per monitorare
-    // rimuovo areaId da visibleAreas
-    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
-    if (!areaAssociation) {
-      return;
-    }
-
-    const areaId = areaAssociation.areaId;
-    if (areaId) {
-      setVisibleAreas((prevState) => {
-        return prevState.filter((a) => a !== areaId);
-      });
-    }
+    console.log(`Mouseout on docId: ${docId}`);
+    setVisibleArea(null); // Rimuove l'area visibile
   };
 
   const handleModifyPosition = async (newLan, newLng) => {
@@ -240,7 +216,7 @@ function Map(props) {
 
   const handleShowAllLinkedDocument = async (docId) => {
 
-    if(!docId) { // Se non è stato selezionato nessun documento
+    if (!docId) { // Se non è stato selezionato nessun documento
       setFilterOn(false);
       return;
     }
@@ -316,9 +292,9 @@ function Map(props) {
         {/**Show all the areas by document: */}
 
         {areas.length > 0 && areas.map((area, index) => {
-          if (visibleAreas.includes(area.areaId) && area.areaType === "polygon") {
+          if (area.areaId === visibleArea && area.areaType === "polygon") {
             try {
-              const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
+              const positions = JSON.parse(area.coordinates)[0];
               return (
                 <Polygon
                   key={index}
@@ -348,9 +324,9 @@ function Map(props) {
 
       {
         !filterOn ?
-        <Button className="btn-municipality" variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
-        :
-        <Button className="btn-municipality" variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
+          <Button className="btn-municipality" variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
+          :
+          <Button className="btn-municipality" variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
       }
 
       <Form className="search-document">
