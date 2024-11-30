@@ -6,6 +6,9 @@ import { Table, Container, Button } from "react-bootstrap";
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
 
+import associationAPI from "../../api/associationAPI";
+
+
 /**
  * 
  * Bugs: 
@@ -19,6 +22,7 @@ import { Row, Col, Form } from "react-bootstrap";
 function DocList() {
   const [documents, setDocuments] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]);
+
 
   const [filters, setFilters] = useState({
     title: "",
@@ -53,8 +57,7 @@ function DocList() {
           (!filters.stakeholder || (doc.stackeholders && doc.stackeholders.includes(filters.stakeholder))) &&
           (!filters.scale || doc.scale === filters.scale) &&
           (!filters.issuanceDate || doc.issuanceDate === filters.issuanceDate) &&
-          (!filters.type || doc.type === filters.type) &&
-          (!filters.connections || (doc.connections && doc.connections.includes(filters.connections)))
+          (!filters.type || doc.type === filters.type)
         );
       });
       setDocuments(filteredDocs);
@@ -70,7 +73,7 @@ function DocList() {
   return (
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
-      
+
       {/* Barra di Filtri */}
       <Row className="g-3 mb-4 align-items-center bg-light p-3 rounded shadow-sm">
         <Col md={3}>
@@ -124,13 +127,7 @@ function DocList() {
             onChange={(option) => handleFilterChange("type", option ? option.value : "")}
           />
         </Col>
-        <Col md={3}>
-          <Form.Control
-            type="text"
-            placeholder="Filter by Connections"
-            onChange={(e) => handleFilterChange("connections", e.target.value)}
-          />
-        </Col>
+
       </Row>
 
       {/* Tabella dei documenti */}
@@ -143,6 +140,69 @@ function DocList() {
 
 function DocumentTable(props) {
   const { documents } = props;
+  const [documentShown, setDocumentShown] = useState(documents);
+  const [filterOn, setFilterOn] = useState(false);
+
+
+  /**
+   *   const handleShowOnlyAllMunicipalityDocument = () => {
+    setFilterOn(true);
+    setDocumentShown(documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
+
+  }
+
+  const handleShowAllLinkedDocument = async (docId) => {
+
+    if (!docId) { // Se non è stato selezionato nessun documento
+      setFilterOn(false);
+      return;
+    }
+
+    setFilterOn(true);
+    console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId.value);
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
+    let docToShow = [];
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        docToShow.push(documents.find(doc => doc.docId === association.doc2));
+      }
+    }
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docToShow);
+    docToShow = documents.filter(doc => docToShow.includes(doc));
+    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
+    setDocumentShown(docToShow);
+  }
+
+   */
+
+  const handleConnectionsClick = (docId) => async () => {
+    console.log("Sono in DocList.jsx, ecco il docId che mi è stato passato:", docId);
+
+    if (!docId) { // Se non è stato selezionato nessun documento
+      setFilterOn(false);
+      return;
+    }
+
+    setFilterOn(true);
+    console.log("Sono in DocList.jsx, ecco il docId che mi è stato passato:", docId.value);
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Sono in DocList.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
+    let docToShow = [];
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        docToShow.push(documents.find(doc => doc.docId === association.doc2));
+      }
+    }
+    console.log("Sono in DocList.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docToShow);
+    docToShow = documents.filter(doc => docToShow.includes(doc));
+    console.log("Sono in DocList.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
+    setDocumentShown(docToShow);
+
+  };
+
+
+
 
   return (
     <Table striped bordered hover className="custom-table shadow-sm">
@@ -163,7 +223,7 @@ function DocumentTable(props) {
       </thead>
       <tbody>
         {documents.map((doc, index) => (
-          <DocumentRow key={index} document={doc} />
+          <DocumentRow key={index} document={doc} handleConnectionsClick={handleConnectionsClick} />
         ))}
       </tbody>
     </Table>);
@@ -172,13 +232,14 @@ function DocumentTable(props) {
 function DocumentRow(props) {
   return (
     <tr >
-      <DocumentData document={props.document} />
+      <DocumentData document={props.document} handleConnectionsClick={props.handleConnectionsClick()} /> {/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
       <DocumentFile document={props.document} />
     </tr>
   );
 }
 function DocumentData(props) {
   const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
+
 
   useEffect(() => {
     const fetchPosition = async () => {
@@ -201,6 +262,8 @@ function DocumentData(props) {
     fetchPosition();
   }, [props.document.docId]); // Dipende da props.document.docId
 
+
+
   return (
     <>
       <td>{props.document.title}</td>
@@ -209,7 +272,17 @@ function DocumentData(props) {
       <td>{props.document.scale}</td>
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
-      <td>{props.document.connections}</td>
+      <td>
+        <Button variant="link" onClick={() => {
+          const docId = props.document.docId;
+          console.log("Sono in DocumentData, sto passare il docId:", docId);
+          props.handleConnectionsClick(docId);
+        }
+        }>
+          <i className="bi bi-link-45deg"></i> {/* Icona "link" di Bootstrap Icons */}
+          {props.document.connections} Connections
+        </Button>
+      </td>
       <td>{props.document.language}</td>
       <td>{props.document.pages}</td>
       {position.lat === "N/A" || position.lng === "N/A" ?
