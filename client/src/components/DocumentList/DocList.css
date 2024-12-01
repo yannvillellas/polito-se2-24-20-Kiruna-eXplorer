@@ -70,4 +70,8 @@
     width: 100%; /* Assicura che la tabella si adatti al contenitore */
     min-width: 1300px; /* Mantiene una larghezza minima per evitare il layout comprimibile */
   }
-}
+  
+  .highlighted-row {
+    background-color: #ffeb3b !important; /* Colore evidenziato */
+  }
+

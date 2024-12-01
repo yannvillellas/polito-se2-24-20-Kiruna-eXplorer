@@ -81,6 +81,14 @@ function UnifiedForms(props) {
 
     };
 
+    const handleSetArea = (area) => {  
+        console.log("Sono in UnifiedForms, handleSetArea, ho ricevuto:", area);
+        setNewDocument((prevDocument) => ({
+            ...prevDocument,
+            area: area,
+        }));
+    };
+
     useEffect(() => {
         console.log("Sono in UnifiedForms, newDocument:", newDocument);
     }, [newDocument]);
@@ -185,6 +193,7 @@ function UnifiedForms(props) {
                                     <Col >
                                         <ChosenPosition
                                             handleAddLatLongToDocumentModal={handleAddLatLongToDocumentModal}
+                                            handleSetArea={handleSetArea}
                                         />
                                     </Col>
                                 </Row>
@@ -267,14 +276,13 @@ function UnifiedForms(props) {
                 <Modal.Header closeButton>
                     <Modal.Title>Confirm exit</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Are you sure to exit without adding a link?</Modal.Body>
+                <Modal.Body>Are you sure to exit without creating the document?</Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setCloseConfirmation(false)}>
                         Cancel
                     </Button>
                     <Button variant="primary" onClick={() => {
-                        handleClose()
-                        props.handleAddDocument(newDocument)
+                        handleClose();
                     }}>
                         Yes, close
                     </Button>
