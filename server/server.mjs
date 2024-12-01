@@ -15,6 +15,9 @@ import { isUrbanPlanner, isValidType, createFolder } from './middleware.mjs';
 import fileUpload from 'express-fileupload'
 import path from "path";
 import fs from "fs";
+import {getStakeholders,addStakeholder} from './src/dao/stakeholdersDAO.mjs'
+import {getScales, addScale} from './src/dao/scaleDAO.mjs'
+import {getDocumentTypes, addDocumentType} from './src/dao/documentTypeDAO.mjs'
 
 const __dirname = path.resolve()
 const app = express();
@@ -150,10 +153,11 @@ app.post('/api/users', [
 //documentAPI
 app.post('/api/documents', isUrbanPlanner, [
     check('title').isString(),
-    check('stakeholders').isString(),
-    check('scale').isString(),
+    //check('stakeholders').isString(),
+    check('scale').isInt(),
+    check('ASvalue').optional(),
     check('issuanceDate').isString(),
-    check('type').isString(),
+    check('type').isInt(),
     check('connections').isInt(),
     check('language').optional().isString(),
     check('pages').optional().isString(),
@@ -162,7 +166,7 @@ app.post('/api/documents', isUrbanPlanner, [
     try{
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(422).json({ errors: errors.array() });
         }
 
         // Here i manage teh first infos of the document
@@ -246,6 +250,68 @@ app.delete('/api/documents', isUrbanPlanner, [], async (req, res) => {
     }
 
 });
+
+
+/**********************  TO TEST ***************************** */
+// documentTypes API
+app.get('/api/documents/types',[], async(req, res) => {
+    try{
+        const documentTypes = await getDocumentTypes();
+        res.status(200).json(documentTypes);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+app.post('/api/documents/types', isUrbanPlanner, [
+    check('type').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const documentTypeId = await addDocumentType(req.body.type);
+    res.status(201).json(documentTypeId);
+});
+// stakeholders API
+app.get('/api/documents/stakeholders',[], async(req, res) => {
+    try{
+        const stakeholders = await getStakeholders();
+        console.log("sh from server:",stakeholders)
+        res.status(200).json(stakeholders);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+app.post('/api/documents/stakeholders', isUrbanPlanner, [
+    check('name').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const stakeholderId = await addStakeholder(req.body.name);
+    res.status(201).json(stakeholderId);
+});
+// scales API
+app.get('/api/documents/scales',[], async(req, res) => {
+    try{
+        const scales = await getScales();
+        res.status(200).json(scales);
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+app.post('/api/documents/scales', isUrbanPlanner, [
+    check('name').isString(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const scaleId = await addScale(req.body.name);
+    res.status(201).json(scaleId);
+});
+/****************************************************************************/
 
 
 //areaAPI

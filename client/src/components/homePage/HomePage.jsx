@@ -18,7 +18,9 @@ import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import UnifiedForms from "./UnifiedForms/UnifiedForms";
 import areaAPI from "../../api/areaAPI";
-
+import documentTypeAPI from "../../api/documentTypeAPI.js";
+import scaleAPI from "../../api/scaleAPI.js";
+import stakeholderAPI from "../../api/stakeholderAPI.js";
 /** BUGS:
  *  
  *
@@ -134,17 +136,25 @@ function HomePage(props) {
                 areaId = handleAddArea({ ...document, docId: docId });
             }
 
+            const shs=await stakeholderAPI.getStakeholders()
+            const scales=await scaleAPI.getScales()
+            const types=await documentTypeAPI.getDocumentTypes()
+
             const stateDocument = {
                 docId: docId,
                 title: document.title,
-                stakeholders: document.stakeholders,
-                scale: document.scale,
+                description: document.description,
+                //stakeholders: document.stakeholders,
+                stakeholders: shs.filter(sh=>document.stakeholders.split(', ').map(s=>parseInt(s,10)).includes(sh.shId)).map(sh=>sh.name).join(', '),
+                //scale: document.scale,
+                scale: scales.find(s=>s.scaleId==document.scale).name,
+                ASvalue: document.ASvalue,
                 issuanceDate: document.issuanceDate,
-                type: document.type,
+                //type: document.type,
+                type: types.find(t=>t.dtId==document.type).type,
                 connections: document.connections,
                 language: document.language,
                 pages: document.pages,
-                description: document.description,
                 lat: document.lat,
                 lng: document.lng,
                 // files:document.files

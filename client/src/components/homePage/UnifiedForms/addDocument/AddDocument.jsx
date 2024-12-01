@@ -1,12 +1,15 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./addDocument.css";
 import React, { useState, useEffect } from "react";
-import { Row, Col, Button, Form } from "react-bootstrap";
-import Select from "react-select";
+import { Row, Col, Button, Form, FormControl, Modal } from "react-bootstrap";
+import Select, {components} from "react-select";
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
 import ChosenArea from "../../chosenArea/ChosenArea";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 import { booleanContains, polygon } from "@turf/turf";
+import stakeholderAPI from "../../../../api/stakeholderAPI"
+import scaleAPI from "../../../../api/scaleAPI"
+import documentTypeAPI from "../../../../api/documentTypeAPI"
 
 /**BUGS:  
  *  Line 112: Architectural Scale Format (x:y) if I leave it empty and press save changes, it saves the old value in the document (you can see it in the console.log)."   
@@ -18,6 +21,7 @@ function AddDocument(props) {
         title: "",
         stakeholders: "",
         scale: "",
+        ASvalue:null,
         issuanceDate: "",
         type: "",
         connections: 0,
@@ -63,7 +67,7 @@ function AddDocument(props) {
     };
 
 
-    const stakeholdersOptions = [
+    /*const stakeholdersOptions = [
         { value: "LKAB", label: "LKAB" },
         { value: "Kiruna kommun", label: "Kiruna kommun" },
         { value: "Kiruna kommun/White Arkitekter", label: "Kiruna kommun/White Arkitekter" },
@@ -82,7 +86,22 @@ function AddDocument(props) {
         { value: "Design document", label: "Design document" },
         { value: "Technical document", label: "Technical document" },
         { value: "Material effect", label: "Material effect" },
-    ];
+    ];*/
+
+    const [stakeholdersOptions, setStakeholdersOptions] = useState ([]);
+    const [scaleOptions, setScaleOptions] = useState ([]);
+    const [typeOptions, setTypeOptions] = useState([])
+    useEffect(()=>{
+        const fetchOptions = async ()=>{
+            const stakeholderList=await stakeholderAPI.getStakeholders()
+            const scaleList=await scaleAPI.getScales()
+            const typeList=await documentTypeAPI.getDocumentTypes()
+            setStakeholdersOptions(stakeholderList.map((s)=>{return {value:parseInt(s.shId,10), label:s.name}}))
+            setScaleOptions(scaleList.map((s)=>{return {value:parseInt(s.scaleId,10), label:s.name}}))
+            setTypeOptions(typeList.map((t)=>{return {value:parseInt(t.dtId,10), label:t.type}}))
+        }
+        fetchOptions();
+    },[])
 
     const languageOptions = [
         { value: "Swedish", label: "Swedish" },
@@ -108,6 +127,107 @@ function AddDocument(props) {
         }
         setIssuanceDate(value);
     };
+
+
+    //const [sh, setSH]= useState([])
+    /*const handleSHchange = (selectedOptions) => {
+        setSH(selectedOptions || []);
+        setNewDocument({...newDocument,stakeholders:selectedOptions.map((option)=>option.value).join(',')}) //// concateno gli id degli stakeholders
+    };*/
+
+
+    const [newOption, setNewOption] = useState("");
+    const [showModalNewOption, setShowModalNewOption] = useState(false)
+    const [typeOfNewOption, setTypeOfNewOption] = useState("")
+    const addNewOption = async () => {
+        //if (newOption.trim() === "") return; // Evita opzioni vuote
+        try {
+            let optionId = null;
+            let newOptionObject=null;
+            switch (typeOfNewOption) {
+                case "stakeholder":
+                    optionId = await stakeholderAPI.addStakeholder(newOption);
+                    newOptionObject = { value: optionId, label: newOption };
+                    setStakeholdersOptions((prevOptions) => [...prevOptions, newOptionObject]);
+                    break;
+                case "document type":
+                    optionId = await documentTypeAPI.addDocumentType(newOption);
+                    newOptionObject = { value: optionId, label: newOption };
+                    setTypeOptions((prevOptions) => [...prevOptions, newOptionObject]);
+                    break;
+                case "scale":
+                    optionId = await scaleAPI.addScale(newOption);
+                    newOptionObject = { value: optionId, label: newOption };
+                    setScaleOptions((prevOptions) => [...prevOptions, newOptionObject]);
+                    break;
+            }
+            setNewOption("");
+        } catch (err) {
+            console.log(err)
+        }
+    };
+    // Componente personalizzato del menu
+    const CustomMenu = (props) => {
+        const { addingField } = props.selectProps; // Estrai il parametro personalizzato
+        return (
+            <components.Menu {...props}>
+                <>
+                    {props.children} {/* Le opzioni esistenti */}
+                    <div style={{ padding: "10px", borderTop: "1px solid #ddd" }}>
+                        <Button
+                            onClick={(e) => {
+                                e.stopPropagation(); // Evita la chiusura del menu
+                                setShowModalNewOption(true);
+                                setTypeOfNewOption(addingField)
+                            }}
+                            style={{
+                                padding: "5px 10px",
+                                background: "#007bff",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "5px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            {props.addingField === "docType" ? "Add new document type" : "Add new scale"}
+                        </Button>
+                    </div>
+                </>
+            </components.Menu>
+        );
+    };
+
+    const customStyles = {
+        /*menu: (provided) => ({
+            ...provided,
+            maxHeight: "150px", // Altezza massima
+            overflowY: "auto" // Abilita lo scroll verticale
+        }),*/
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "150px", // Altezza massima per il menu list
+            overflowY: "auto" // Abilita lo scroll
+        })
+    };
+
+    /*
+    const handleNewStakeholder = async (inputValue) => {
+        const newShId=await stakeholderAPI.addStakeholder(inputValue)
+        const newOption = { value: newShId, label: inputValue };
+        setStakeholdersOptions([...stakeholdersOptions, newOption])
+        setSH((prevSelected) => [...prevSelected, newOption]); // Seleziona automaticamente la nuova opzione
+    };
+    const handleNewScale = async (inputValue) => {
+        const newScaleId=await scaleAPI.addScale(inputValue)
+        const newOption = { value: newScaleId, label: inputValue };
+        setScaleOptions([...scaleOptions, newOption])
+    };
+    const handleNewDocType = async (inputValue) => {
+        const newDtId=await documentTypeAPI.addDocumentType(inputValue)
+        const newOption = { value: newDtId, label: inputValue };
+        setTypeOptions([...typeOptions, newOption])
+    };
+    */
 
     const handleSaveDocument = (e) => {
         e.preventDefault();
@@ -169,6 +289,24 @@ function AddDocument(props) {
 
     return (
         <>
+            <Modal show={showModalNewOption} onHide={() => setShowModalNewOption(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Define new {typeOfNewOption}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Control
+                        type="text"
+                        placeholder={`Enter new ${typeOfNewOption}`}
+                        value={newOption} // per avere infup controlalto
+                        onChange={(e) => setNewOption(e.target.value)}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModalNewOption(false)}>Close</Button>
+                    <Button variant="primary" onClick={() => {setShowModalNewOption(false);addNewOption()}}>Add</Button>
+                </Modal.Footer>
+            </Modal>
+            
             <Form className="add-document-form" onSubmit={handleSaveDocument}>
                 <Row>
                     <Col md={5}>
@@ -216,7 +354,7 @@ function AddDocument(props) {
                                             />
                                         ))}
                                     </div>
-                                    <div className="add-stakeholder">
+                                    {/*<div className="add-stakeholder">
                                         <input 
                                             placeholder="Add new Stakeholder" 
                                             className="stakeholder-input" 
@@ -227,11 +365,12 @@ function AddDocument(props) {
                                         >
                                             <i className="bi bi-plus"></i>
                                         </Button>
+                                    </div>*/}
+                                    <div style={{ padding: "10px", borderTop: "1px solid #ddd" }}>
+                                        <Button onClick={() => { setShowModalNewOption(true); setTypeOfNewOption("stakeholder") }}>Add new stakeholder</Button>
                                     </div>
-
-
-
                                 </div>
+
                             )}
                         </Form.Group>
 
@@ -267,6 +406,8 @@ function AddDocument(props) {
                                 }
                                 }
                                 value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
+                                addingField="scale"
+                                components={{ Menu: CustomMenu }}
                             />
 
                         </Form.Group>
@@ -324,6 +465,9 @@ function AddDocument(props) {
                                     setNewDocument({ ...newDocument, type: selectedOption ? selectedOption.value : "" })
                                 }
                                 value={typeOptions.find(opt => opt.value === newDocument.type)}
+                                components={{ Menu: CustomMenu }}
+                                styles={customStyles}
+                                addingField="document type"
                             />
                         </Form.Group>
 

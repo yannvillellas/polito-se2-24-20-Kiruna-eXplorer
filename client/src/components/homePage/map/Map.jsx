@@ -359,9 +359,11 @@ function Map(props) {
           {selectedDoc ? (
             <>
               {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                <p key={key}>
+                key!="ASvalue" || value!=null? <p key={key}>
                   <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                 </p>
+                  :
+                  ""
               ))}
               <div key={"position"}>
                 <p>
