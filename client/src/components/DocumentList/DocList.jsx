@@ -23,6 +23,7 @@ function DocList() {
   const [allDocuments, setAllDocuments] = useState([]);
   const [allAssociations, setAllAssociations] = useState([]);
   const [allPositions, setAllPositions] = useState([]);
+  const [allFiles, setAllFiles] = useState([]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -39,7 +40,6 @@ function DocList() {
         console.log("Sono in DocList, useEffect, ecco le posizioni:", allPositions);
         setAllPositions(allPositions);
 
-
       } catch (error) {
         console.error("Error fetching documents:", error);
       }
@@ -47,12 +47,19 @@ function DocList() {
     fetchDocuments();
   }, []);
 
+
+  const handleAddFiles =  (docId, files) => {
+    console.log("Adding files to document with id:", docId, files);
+    setAllFiles([...allFiles, { docId, files }]);
+  };
+
+
   return (
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
 
       {/* Tabella dei documenti */}
-      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} />
+      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} handleAddFiles={handleAddFiles} allFiles={allFiles}/>
     </Container>
   );
 }
@@ -69,12 +76,10 @@ function DocumentTable(props) {
   // Altrimenti se viene costruito prima il componente e poi vengono passati i documenti, non si aggiorna
   useEffect(() => {
     setDocumentShown(props.allDocuments);
-    console.log("Sono in DocumentTable, useEffect, ecco i documenti che mi sono stati passati:", props.allDocuments);
   }, [props.allDocuments]);
 
 
   const handleConnectionsClick = async (docId) => {
-    console.log("Sono in DocList.jsx, handleConnectionsClick,ecco il docId che mi è stato passato:", docId);
 
     // Devi mettere === null altriment quando docId = 0 passa dentro l'if
     if (docId === null) {
@@ -83,19 +88,16 @@ function DocumentTable(props) {
       setIsHighlighted(false);
 
       setDocumentShown(props.allDocuments);
-      console.log("Sono in DOcList, handleConnectionsClick, No docId: ", props.allDocuments);
       return;
     }
 
     // Else (docId !== null)
     try {
-      console.log("Sono in DOcList, handleConnectionsClick, ecco  TUTTI i documenti: ", props.allDocuments);
 
       const associations = props.allAssociations.filter(association => association.doc1 === docId || association.doc2 === docId);
 
       /*
       const associations = await associationAPI.getAssociationsByDocId(docId);
-      console.log("Sono in DOcList, handleConnectionsClick, ecco le associazioni:", associations);
       */
 
       // Rendo una lista di id dei documenti associati ( enon tutte le associzioni)
@@ -108,14 +110,12 @@ function DocumentTable(props) {
       });
 
 
-      console.log("Sono in DOcList, handleConnectionsClick, ecco i docIdGetFromAssociations:", docIdGetFromAssociations);
       const documentsFiltered = props.allDocuments.filter(doc => docIdGetFromAssociations.includes(doc.docId));
       const docFromDocId = props.allDocuments.find(doc => doc.docId === docId);
 
       setHighlightedDocId(docId);
       setIsHighlighted(true);
 
-      console.log("Sono in DOcList, handleConnectionsClick, ecco i documenti filtrati:", documentsFiltered);
       setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
 
     } catch (error) {
@@ -123,13 +123,6 @@ function DocumentTable(props) {
     }
 
   };
-
-  useEffect(() => {
-    console.log("Sono in DocumentTable, useEffect, documentShown:", documentShown);
-  }, [documentShown]);
-
-
-
 
 
   return (
@@ -146,9 +139,8 @@ function DocumentTable(props) {
             Connections
             <Button variant="link" onClick={() => {
               handleConnectionsClick(null)
-              console.log("Sono in DocumentTable, ho cliccato su connections, ecco il documetns", props.allDocuments);
             }}>
-              <i class="bi bi-x-circle-fill" style={{ backgroundColor: "white", borderRadius: "50%" }}></i>
+              <i className="bi bi-x-circle-fill" style={{ backgroundColor: "white", borderRadius: "50%" }}></i>
             </Button>
           </th>
           <th>Language</th>
@@ -164,6 +156,8 @@ function DocumentTable(props) {
             isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
             handleConnectionsClick={handleConnectionsClick}
             allPositions={props.allPositions}
+            handleAddFiles={props.handleAddFiles}
+            allFiles={props.allFiles}
           />
         ))}
       </tbody>
@@ -174,8 +168,8 @@ function DocumentRow(props) {
 
   return (
     <tr >
-      <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} allPositions={props.allPositions}/>{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
-      <DocumentFile key={props.index} document={props.document} />
+      <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} allPositions={props.allPositions} />{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
+      <DocumentFile key={props.index} document={props.document} handleAddFiles={props.handleAddFiles} allFiles={props.allFiles}/>
     </tr>
   );
 }
@@ -184,7 +178,7 @@ function DocumentRow(props) {
 function DocumentData(props) {
   const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
 
-  
+
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -208,7 +202,6 @@ function DocumentData(props) {
       <td>{props.document.type}</td>
       <td>
         <Button variant="link" onClick={() => {
-          console.log("Sono in DocumentData, ho cliccato su connections, ecco il document.docId:", props.document.docId);
           props.handleConnectionsClick(props.document.docId)
         }}>
           <i className="bi bi-link-45deg"></i> {props.document.connections}
@@ -232,14 +225,21 @@ function DocumentFile(props) {
         const files = await DocumentAPI.getFiles(props.document.docId);
         if (files) {
           setFiles(Array.from(files));
+          props.handleAddFiles(props.document.docId, files); // altrimenti non sopravvivono al filtro dei documenti
         } else {
           setFiles([]);
+          props.handleAddFiles(props.document.docId, files);
         }
       } catch (error) {
         console.error("Error fetching files:", error);
       }
     };
     fetchFiles();
+  }, [props.document.docId]);
+
+  useEffect(() => {
+    const found = props.allFiles.find(f => f.docId === props.document.docId);
+    setFiles(found ? found.files : []);
   }, [props.document.docId]);
 
   const handleDownload = (file) => {
