@@ -112,13 +112,18 @@ function DocumentTable(props) {
 
       console.log("Sono in DOcList, handleConnectionsClick, ecco i documenti filtrati:", documentsFiltered);
       setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
-      console.log("Sono in DOcList, handleConnectionsClick, ecco i documenti mostrati:", documentShown);
 
     } catch (error) {
       console.error("Error fetching associations:", error);
     }
 
   };
+
+  useEffect(() => {
+    console.log("Sono in DocumentTable, useEffect, documentShown:", documentShown);
+  }, [documentShown]);
+
+
 
 
 
@@ -151,7 +156,7 @@ function DocumentTable(props) {
         {documentShown.map((doc, index) => (
           <DocumentRow key={index}
             document={doc}
-            isHighlighted={highlightedDocId ? highlightedDocId === doc.docId : false}
+            isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
             handleConnectionsClick={handleConnectionsClick}
           />
         ))}

@@ -59,6 +59,11 @@
   background-color: #f9f9f9; /* Sfondo leggero */
 }
 
+.highlighted-row {
+  background-color: #ffeb3b !important; /* Colore evidenziato */
+}
+
+
 /* Scroll orizzontale per schermi sotto i 1300px */
 @media (max-width: 1300px) {
   .table-container {
@@ -71,7 +76,6 @@
     min-width: 1300px; /* Mantiene una larghezza minima per evitare il layout comprimibile */
   }
   
-  .highlighted-row {
-    background-color: #ffeb3b !important; /* Colore evidenziato */
-  }
+
+}
 
