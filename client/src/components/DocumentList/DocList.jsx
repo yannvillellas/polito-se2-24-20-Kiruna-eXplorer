@@ -202,7 +202,7 @@ function DocumentData(props) {
     <>
       <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
       <td>{props.document.description}</td>
-      <td>{props.document.stakeholders}</td>
+      <td>{props.document.stackeholders}</td>
       <td>{props.document.scale}</td>
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
