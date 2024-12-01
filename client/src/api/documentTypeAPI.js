@@ -19,7 +19,7 @@ const addDocumentType = async (type) => {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: { type: type }
+            body: JSON.stringify({ type: type })
         })
         if (!documentTypeId.ok) throw new Error('Failed to add new document type');
         return await documentTypeId.json();

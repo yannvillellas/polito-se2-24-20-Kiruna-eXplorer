@@ -293,8 +293,8 @@ app.post('/api/documents/stakeholders', isUrbanPlanner, [
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-
-    const stakeholderId = await addDocumentType(req.body.name);
+    console.log("aggiungo lo stakeholder: ",req.body.name)
+    const stakeholderId = await addStakeholder(req.body.name);
     res.status(201).json(stakeholderId);
 });
 
@@ -316,7 +316,7 @@ app.post('/api/documents/scales', isUrbanPlanner, [
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const scaleId = await addDocumentType(req.body.name);
+    const scaleId = await addScale(req.body.name);
     res.status(201).json(scaleId);
 });
 

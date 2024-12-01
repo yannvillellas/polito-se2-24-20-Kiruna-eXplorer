@@ -19,7 +19,7 @@ const addScale = async (name) => {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: { name: name }
+            body: JSON.stringify({ name: name })
         })
         if (!scaleId.ok) throw new Error('Failed to add new scale');
         return await scaleId.json();

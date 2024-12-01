@@ -20,7 +20,7 @@ const addStakeholder = async (name) => {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: { name: name }
+            body: JSON.stringify({ name: name }),
         })
         if (!stakeholderId.ok) throw new Error('Failed to add new stakeholders');
         return await stakeholderId.json();
