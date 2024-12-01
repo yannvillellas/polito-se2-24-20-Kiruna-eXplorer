@@ -11,7 +11,8 @@ import Registration from './components/authentication/Registration';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
-// import { DocList, DocSpecificList } from "./components/documentList/DocList";
+import DocList  from "./components/documentList/DocList";
+import DocSpecificList from "./components/documentList/DocSpecificList";
 
 
 function App() {
@@ -129,9 +130,9 @@ function App() {
                 <Route path="*" element={<PageNotFound />} />
                 <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
                 <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
-                {/*<Route path="/documentPage" element={<DocList />} />
+                <Route path="/documentPage" element={<DocList />} />
                 <Route path="/documentPage/:docId" element={<DocSpecificList />} />
-                */}
+                
 
             </Route>
         </Routes>
