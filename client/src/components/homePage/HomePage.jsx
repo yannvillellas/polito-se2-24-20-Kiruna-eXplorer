@@ -139,28 +139,20 @@ function HomePage(props) {
             const shs=await stakeholderAPI.getStakeholders()
             const scales=await scaleAPI.getScales()
             const types=await documentTypeAPI.getDocumentTypes()
-            console.log("gino ", document.stakeholders.split(', ').map(s=>parseInt(s,10)))
-            console.log(shs)
-            console.log(shs.filter(sh=>document.stakeholders.split(', ').map(s=>parseInt(s,10)).includes(sh.shId)))
-            console.log("ciao ",shs.filter(sh=>document.stakeholders.split(', ').map(s=>parseInt(s,10)).includes(sh.shId)).map(sh=>sh.name))
             const stateDocument = {
                 docId: docId,
                 title: document.title,
                 description: document.description,
-                //stakeholders: document.stakeholders,
-                stakeholders: shs.filter(sh=>document.stakeholders.split(', ').map(s=>parseInt(s,10)).includes(sh.shId)).map(sh=>sh.name),
-                //scale: document.scale,
+                stakeholders: shs.filter(sh=>document.stakeholders.split(', ').map(s=>parseInt(s,10)).includes(sh.shId)).map(sh=>sh.name).join(', '),
                 scale: scales.find(s=>s.scaleId==document.scale).name,
                 ASvalue: document.ASvalue,
                 issuanceDate: document.issuanceDate,
-                //type: document.type,
                 type: types.find(t=>t.dtId==document.type).type,
                 connections: document.connections,
                 language: document.language,
                 pages: document.pages,
                 lat: document.lat,
                 lng: document.lng,
-                // files:document.files
                 areaId: areaId,
 
             }
