@@ -1,7 +1,7 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
-import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import MainPage from './components/mainPage/MainPage';
 import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
@@ -11,16 +11,17 @@ import Registration from './components/authentication/Registration';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
-import DocList from "./components/documentList/DocList";
+import { DocList, DocSpecificList } from "./components/documentList/DocList";
+
 
 function App() {
     const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`
     const [authChecked, setAuthChecked] = useState(false);
-    const [loggedIn, setLoggedIn] = useState(false);    
+    const [loggedIn, setLoggedIn] = useState(false);
     const [isUrbanPlanner, setIsUrbanPlanner] = useState(false);
-    
+
     const navigate = useNavigate();
-  
+
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -65,7 +66,7 @@ function App() {
                 const response = await AuthAPI.logOut();
                 if (response) {
                     setLoggedIn(false);
-                    setUser(null);  
+                    setUser(null);
                     setIsUrbanPlanner(false);
 
                     navigate('/mainPage');
@@ -84,12 +85,12 @@ function App() {
             if (newUser) {
                 console.log("Registration successful:");
                 const response = await AuthAPI.logIn(credentials)
-                if(response){
+                if (response) {
                     setUser(newUser)
                     setLoggedIn(true);
                     setIsUrbanPlanner(true);
                     navigate('/homePage');
-                }else{
+                } else {
                     console.log("errore durante il login")
                     navigate('/login')
                 }
@@ -103,7 +104,7 @@ function App() {
         return <div>Loading...</div>;
     }
 
-  return (
+    return (
         <Routes>
             <Route
                 element={
@@ -126,9 +127,10 @@ function App() {
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
-                <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
-                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
+                <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
+                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
                 <Route path="/documentPage" element={<DocList />} />
+                <Route path="/documentPage/:docId" element={<DocSpecificList />} />
 
             </Route>
         </Routes>

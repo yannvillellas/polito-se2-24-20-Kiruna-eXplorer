@@ -1,13 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./DocList.css";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
 import { Table, Container, Button } from "react-bootstrap";
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
-
-import associationAPI from "../../api/associationAPI";
-
 
 /**
  * 
@@ -20,39 +18,54 @@ import associationAPI from "../../api/associationAPI";
 import { Row, Col, Form } from "react-bootstrap";
 
 function DocList() {
+  const [documents, setDocuments] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]);
-  const [allAssociations, setAllAssociations] = useState([]);
-  const [allPositions, setAllPositions] = useState([]);
-  const [allFiles, setAllFiles] = useState([]);
+
+  const [filters, setFilters] = useState({
+    title: "",
+    description: "",
+    stakeholder: "",
+    scale: "",
+    issuanceDate: "",
+    type: "",
+    connections: "",
+  });
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await DocumentAPI.listDocuments();
+      setDocuments(res || []);
+      setAllDocuments(res || []);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const docs = await DocumentAPI.listDocuments();
-        setAllDocuments(docs);
-        console.log("Sono in DocList, useEffect, ecco i documenti:", docs);
-
-        const allAssociations = await associationAPI.getAllAssociations(); // Fetch all associations
-        console.log("Sono in DocList, useEffect, ecco le associazioni:", allAssociations);
-        setAllAssociations(allAssociations);
-
-        const allPositions = await PositionAPI.listPositions();
-        console.log("Sono in DocList, useEffect, ecco le posizioni:", allPositions);
-        setAllPositions(allPositions);
-
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-      }
-    };
     fetchDocuments();
   }, []);
 
+  useEffect(() => {
+    const applyFilters = () => {
+      const filteredDocs = allDocuments.filter((doc) => {
+        return (
+          (!filters.title || doc.title.toLowerCase().includes(filters.title.toLowerCase())) &&
+          (!filters.description || doc.description.toLowerCase().includes(filters.description.toLowerCase())) &&
+          (!filters.stakeholder || (doc.stackeholders && doc.stackeholders.includes(filters.stakeholder))) &&
+          (!filters.scale || doc.scale === filters.scale) &&
+          (!filters.issuanceDate || doc.issuanceDate === filters.issuanceDate) &&
+          (!filters.type || doc.type === filters.type)
+        );
+      });
+      setDocuments(filteredDocs);
+    };
 
-  const handleAddFiles = (docId, files) => {
-    console.log("Adding files to document with id:", docId, files);
-    setAllFiles([...allFiles, { docId, files }]);
+    applyFilters();
+  }, [filters, allDocuments]);
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
 
   return (
     <Container fluid className="mt-3">
@@ -114,10 +127,8 @@ function DocList() {
 
       </Row>
 
-
-
       {/* Tabella dei documenti */}
-      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} handleAddFiles={handleAddFiles} allFiles={allFiles} />
+      <DocumentTable documents={documents} />
     </Container>
   );
 }
@@ -125,63 +136,7 @@ function DocList() {
 
 
 function DocumentTable(props) {
-  const [documentShown, setDocumentShown] = useState([]);
-
-  // Mi serve per fare l'highlight della riga:
-  const [highlightedDocId, setHighlightedDocId] = useState(null);
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  // Altrimenti se viene costruito prima il componente e poi vengono passati i documenti, non si aggiorna
-  useEffect(() => {
-    setDocumentShown(props.allDocuments);
-  }, [props.allDocuments]);
-
-
-  const handleConnectionsClick = async (docId) => {
-
-    // Devi mettere === null altriment quando docId = 0 passa dentro l'if
-    if (docId === null) {
-
-      setHighlightedDocId(null);
-      setIsHighlighted(false);
-
-      setDocumentShown(props.allDocuments);
-      return;
-    }
-
-    // Else (docId !== null)
-    try {
-
-      const associations = props.allAssociations.filter(association => association.doc1 === docId || association.doc2 === docId);
-
-      /*
-      const associations = await associationAPI.getAssociationsByDocId(docId);
-      */
-
-      // Rendo una lista di id dei documenti associati ( enon tutte le associzioni)
-      const docIdGetFromAssociations = associations.map(association => {
-        if (association.doc1 === docId) {
-          return association.doc2;
-        } else if (association.doc2 === docId) {
-          return association.doc1;
-        }
-      });
-
-
-      const documentsFiltered = props.allDocuments.filter(doc => docIdGetFromAssociations.includes(doc.docId));
-      const docFromDocId = props.allDocuments.find(doc => doc.docId === docId);
-
-      setHighlightedDocId(docId);
-      setIsHighlighted(true);
-
-      setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
-
-    } catch (error) {
-      console.error("Error fetching associations:", error);
-    }
-
-  };
-
+  const { documents } = props;
 
   return (
     <Table striped bordered hover className="custom-table shadow-sm">
@@ -193,14 +148,7 @@ function DocumentTable(props) {
           <th>Scale</th>
           <th>Issuance Date</th>
           <th>Type</th>
-          <th>
-            Connections
-            <Button variant="link" onClick={() => {
-              handleConnectionsClick(null)
-            }}>
-              <i className="bi bi-x-circle-fill" style={{ backgroundColor: "white", borderRadius: "50%" }}></i>
-            </Button>
-          </th>
+          <th>Connections</th>
           <th>Language</th>
           <th>Pages</th>
           <th>(lat, lng)</th>
@@ -208,67 +156,65 @@ function DocumentTable(props) {
         </tr>
       </thead>
       <tbody>
-        {documentShown.map((doc, index) => (
-          <DocumentRow key={index}
-            document={doc}
-            isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
-            handleConnectionsClick={handleConnectionsClick}
-            allPositions={props.allPositions}
-            handleAddFiles={props.handleAddFiles}
-            allFiles={props.allFiles}
-          />
+        {documents.map((doc, index) => (
+          <DocumentRow key={index} document={doc} />
         ))}
       </tbody>
     </Table>);
 }
 
 function DocumentRow(props) {
-
   return (
     <tr >
-      <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} allPositions={props.allPositions} />{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
-      <DocumentFile key={props.index} document={props.document} handleAddFiles={props.handleAddFiles} allFiles={props.allFiles} />
+      <DocumentData document={props.document} />
+      <DocumentFile document={props.document} />
     </tr>
   );
 }
-
-
 function DocumentData(props) {
   const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
-
 
   useEffect(() => {
     const fetchPosition = async () => {
       try {
-        const docPos = props.allPositions.find((pos) => pos.docId === props.document.docId);
-        setPosition(docPos ? { lat: docPos.latitude, lng: docPos.longitude } : { lat: "N/A", lng: "N/A" });
+        const pos = await PositionAPI.listPositions();
+
+        // Trova la posizione del documento basandosi sul docId di props.document
+        const docPos = pos.find((p) => p.docId === props.document.docId);
+
+        if (docPos) {
+          setPosition({ lat: docPos.latitude, lng: docPos.longitude });
+        } else {
+          setPosition({ lat: "N/A", lng: "N/A" });
+        }
       } catch (error) {
         console.error("Error fetching position:", error);
       }
     };
-    fetchPosition();
-  }, [props.document.docId]);
 
+    fetchPosition();
+  }, [props.document.docId]); // Dipende da props.document.docId
 
   return (
     <>
-      <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
+      <td>{props.document.title}</td>
       <td>{props.document.description}</td>
       <td>{props.document.stackeholders}</td>
       <td>{props.document.scale}</td>
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
       <td>
-        <Button variant="link" onClick={() => {
-          props.handleConnectionsClick(props.document.docId)
-        }}>
-          <i className="bi bi-link-45deg"></i> {props.document.connections}
-        </Button>
+        <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+          {props.document.connections}
+        </Link>
       </td>
       <td>{props.document.language}</td>
       <td>{props.document.pages}</td>
-      <td>{position.lat !== "N/A" && position.lng !== "N/A" ? `${position.lat}, ${position.lng}` : "N/A"}</td>
-
+      {position.lat === "N/A" || position.lng === "N/A" ?
+        <td>N/A</td>
+        :
+        <td>{`${parseFloat(position.lat).toFixed(4)}, ${parseFloat(position.lng).toFixed(4)} `}</td>
+      }
     </>
   );
 }
@@ -283,21 +229,14 @@ function DocumentFile(props) {
         const files = await DocumentAPI.getFiles(props.document.docId);
         if (files) {
           setFiles(Array.from(files));
-          props.handleAddFiles(props.document.docId, files); // altrimenti non sopravvivono al filtro dei documenti
         } else {
           setFiles([]);
-          props.handleAddFiles(props.document.docId, files);
         }
       } catch (error) {
         console.error("Error fetching files:", error);
       }
     };
     fetchFiles();
-  }, [props.document.docId]);
-
-  useEffect(() => {
-    const found = props.allFiles.find(f => f.docId === props.document.docId);
-    setFiles(found ? found.files : []);
   }, [props.document.docId]);
 
   const handleDownload = (file) => {
