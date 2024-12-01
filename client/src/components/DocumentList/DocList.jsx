@@ -22,7 +22,7 @@ import { Row, Col, Form } from "react-bootstrap";
 function DocList() {
   const [allDocuments, setAllDocuments] = useState([]);
   const [allAssociations, setAllAssociations] = useState([]);
-
+  const [allPositions, setAllPositions] = useState([]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -34,6 +34,11 @@ function DocList() {
         const allAssociations = await associationAPI.getAllAssociations(); // Fetch all associations
         console.log("Sono in DocList, useEffect, ecco le associazioni:", allAssociations);
         setAllAssociations(allAssociations);
+
+        const allPositions = await PositionAPI.listPositions();
+        console.log("Sono in DocList, useEffect, ecco le posizioni:", allPositions);
+        setAllPositions(allPositions);
+
 
       } catch (error) {
         console.error("Error fetching documents:", error);
@@ -47,7 +52,7 @@ function DocList() {
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
 
       {/* Tabella dei documenti */}
-      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} />
+      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} />
     </Container>
   );
 }
@@ -158,6 +163,7 @@ function DocumentTable(props) {
             document={doc}
             isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
             handleConnectionsClick={handleConnectionsClick}
+            allPositions={props.allPositions}
           />
         ))}
       </tbody>
@@ -168,7 +174,7 @@ function DocumentRow(props) {
 
   return (
     <tr >
-      <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} />{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
+      <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} allPositions={props.allPositions}/>{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
       <DocumentFile key={props.index} document={props.document} />
     </tr>
   );
@@ -178,11 +184,11 @@ function DocumentRow(props) {
 function DocumentData(props) {
   const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
 
+  
   useEffect(() => {
     const fetchPosition = async () => {
       try {
-        const positions = await PositionAPI.listPositions();
-        const docPos = positions.find((pos) => pos.docId === props.document.docId);
+        const docPos = props.allPositions.find((pos) => pos.docId === props.document.docId);
         setPosition(docPos ? { lat: docPos.latitude, lng: docPos.longitude } : { lat: "N/A", lng: "N/A" });
       } catch (error) {
         console.error("Error fetching position:", error);
@@ -190,6 +196,7 @@ function DocumentData(props) {
     };
     fetchPosition();
   }, [props.document.docId]);
+
 
   return (
     <>
