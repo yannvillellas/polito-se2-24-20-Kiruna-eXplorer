@@ -48,7 +48,7 @@ function DocList() {
   }, []);
 
 
-  const handleAddFiles =  (docId, files) => {
+  const handleAddFiles = (docId, files) => {
     console.log("Adding files to document with id:", docId, files);
     setAllFiles([...allFiles, { docId, files }]);
   };
@@ -58,8 +58,66 @@ function DocList() {
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
 
+      {/* Barra di Filtri */}
+      <Row className="g-3 mb-4 align-items-center bg-light p-3 rounded shadow-sm">
+        <Col md={3}>
+          <Form.Control
+            type="text"
+            placeholder="Filter by Title"
+            onChange={(e) => handleFilterChange("title", e.target.value)}
+          />
+        </Col>
+        <Col md={3}>
+          <Form.Control
+            type="text"
+            placeholder="Filter by Description"
+            onChange={(e) => handleFilterChange("description", e.target.value)}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.stackeholders))]
+              .filter(Boolean)
+              .map((s) => ({ value: s, label: s }))}
+            placeholder="Filter by Stakeholder"
+            isClearable
+            onChange={(option) => handleFilterChange("stakeholder", option ? option.value : "")}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.scale))]
+              .filter(Boolean)
+              .map((scale) => ({ value: scale, label: scale }))}
+            placeholder="Filter by Scale"
+            isClearable
+            onChange={(option) => handleFilterChange("scale", option ? option.value : "")}
+          />
+        </Col>
+        <Col md={3}>
+          <Form.Control
+            type="date"
+            placeholder="Filter by Issuance Date"
+            onChange={(e) => handleFilterChange("issuanceDate", e.target.value)}
+          />
+        </Col>
+        <Col md={3}>
+          <Select
+            options={[...new Set(allDocuments.map((doc) => doc.type))]
+              .filter(Boolean)
+              .map((type) => ({ value: type, label: type }))}
+            placeholder="Filter by Type"
+            isClearable
+            onChange={(option) => handleFilterChange("type", option ? option.value : "")}
+          />
+        </Col>
+
+      </Row>
+
+
+
       {/* Tabella dei documenti */}
-      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} handleAddFiles={handleAddFiles} allFiles={allFiles}/>
+      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} allPositions={allPositions} handleAddFiles={handleAddFiles} allFiles={allFiles} />
     </Container>
   );
 }
@@ -169,7 +227,7 @@ function DocumentRow(props) {
   return (
     <tr >
       <DocumentData key={props.index} document={props.document} isHighlighted={props.isHighlighted} handleConnectionsClick={props.handleConnectionsClick} allPositions={props.allPositions} />{/* <------------------------------------ Qui ho aggiunto handleConnectionsClick ma sembra sia qui il problema */}
-      <DocumentFile key={props.index} document={props.document} handleAddFiles={props.handleAddFiles} allFiles={props.allFiles}/>
+      <DocumentFile key={props.index} document={props.document} handleAddFiles={props.handleAddFiles} allFiles={props.allFiles} />
     </tr>
   );
 }
