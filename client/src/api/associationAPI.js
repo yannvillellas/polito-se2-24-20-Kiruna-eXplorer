@@ -27,8 +27,9 @@ const createAssociation = async (association) => {
  * Fetch all associations from the server.
  * @returns {Array} List of all associations.
  */
-/*
+
 export const getAllAssociations = async () => {
+  console.log("Sono in associationAPI, ho ricevuto la richiwsra di getAllAssociations");
   try {
     const response = await fetch(SERVER_URL, { method: 'GET' });
     if (!response.ok) throw new Error('Failed to fetch associations');
@@ -37,7 +38,7 @@ export const getAllAssociations = async () => {
     console.error("Error fetching associations:", error);
     throw error;
   }
-};*/
+};
 
 /**
  * Fetch available link types for associations.
@@ -72,6 +73,6 @@ const getAssociationsByDocId = async (docId) => {
 
 
 
-const associationAPI={ createAssociation/*, getAllAssociations*/, getLinkTypes, getAssociationsByDocId };
+const associationAPI={ createAssociation, getAllAssociations, getLinkTypes, getAssociationsByDocId };
 
 export default associationAPI;

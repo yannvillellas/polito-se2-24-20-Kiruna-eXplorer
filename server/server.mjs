@@ -10,7 +10,7 @@ import { listDocuments, addDocument, deleteDocument } from './src/dao/documentDA
 import { listPositions, addPosition, updatePosition } from './src/dao/positionDAO.mjs';
 import { getLinksType } from './src/dao/linkTypeDAO.mjs';
 import { addArea, listAreas, listAreaAssociations } from './src/dao/areaDAO.mjs';
-import { getAssociations, insertAssociation, deleteAssociation, UpdateAssociation, CheckAssociation } from './src/dao/associationDAO.mjs';
+import { getAssociations, insertAssociation, deleteAssociation, UpdateAssociation, CheckAssociation, getAllAssociations } from './src/dao/associationDAO.mjs';
 import { isUrbanPlanner, isValidType, createFolder } from './middleware.mjs';
 import fileUpload from 'express-fileupload'
 import path from "path";
@@ -367,6 +367,17 @@ app.put('/api/positions/:docId', isUrbanPlanner, [
 
 
 //associationsAPI
+app.get('/api/associations', [], async (req, res) => {
+    try {
+        const associations = await getAllAssociations();
+        console.log("Sono in server, /api/associations, ho recuperato tutte le associazioni:",associations);
+        res.status(200).json(associations);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 app.post('/api/associations', isUrbanPlanner, isValidType, [
     check('doc1').notEmpty().isNumeric(),
     check('doc2').notEmpty().isNumeric(),

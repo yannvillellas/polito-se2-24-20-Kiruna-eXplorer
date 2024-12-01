@@ -21,25 +21,20 @@ import { Row, Col, Form } from "react-bootstrap";
 
 function DocList() {
   const [allDocuments, setAllDocuments] = useState([]);
-  const [filteredDocs, setFilteredDocs] = useState([]);
+  const [allAssociations, setAllAssociations] = useState([]);
 
-
-  const [filters, setFilters] = useState({
-    title: "",
-    description: "",
-    stakeholder: "",
-    scale: "",
-    issuanceDate: "",
-    type: "",
-    connections: "",
-  });
 
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
         const docs = await DocumentAPI.listDocuments();
         setAllDocuments(docs);
-        console.log("Sono in DocList, ecco i documenti:", docs);
+        console.log("Sono in DocList, useEffect, ecco i documenti:", docs);
+
+        const allAssociations = await associationAPI.getAllAssociations(); // Fetch all associations
+        console.log("Sono in DocList, useEffect, ecco le associazioni:", allAssociations);
+        setAllAssociations(allAssociations);
+
       } catch (error) {
         console.error("Error fetching documents:", error);
       }
@@ -52,7 +47,7 @@ function DocList() {
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
 
       {/* Tabella dei documenti */}
-      <DocumentTable allDocuments={allDocuments} />
+      <DocumentTable allDocuments={allDocuments} allAssociations={allAssociations} />
     </Container>
   );
 }
@@ -90,8 +85,15 @@ function DocumentTable(props) {
     // Else (docId !== null)
     try {
       console.log("Sono in DOcList, handleConnectionsClick, ecco  TUTTI i documenti: ", props.allDocuments);
+
+      const associations = props.allAssociations.filter(association => association.doc1 === docId || association.doc2 === docId);
+
+      /*
       const associations = await associationAPI.getAssociationsByDocId(docId);
       console.log("Sono in DOcList, handleConnectionsClick, ecco le associazioni:", associations);
+      */
+
+      // Rendo una lista di id dei documenti associati ( enon tutte le associzioni)
       const docIdGetFromAssociations = associations.map(association => {
         if (association.doc1 === docId) {
           return association.doc2;
@@ -99,6 +101,7 @@ function DocumentTable(props) {
           return association.doc1;
         }
       });
+
 
       console.log("Sono in DOcList, handleConnectionsClick, ecco i docIdGetFromAssociations:", docIdGetFromAssociations);
       const documentsFiltered = props.allDocuments.filter(doc => docIdGetFromAssociations.includes(doc.docId));
@@ -148,7 +151,7 @@ function DocumentTable(props) {
         {documentShown.map((doc, index) => (
           <DocumentRow key={index}
             document={doc}
-            isHighlighted={ highlightedDocId ? highlightedDocId === doc.docId : false }
+            isHighlighted={highlightedDocId ? highlightedDocId === doc.docId : false}
             handleConnectionsClick={handleConnectionsClick}
           />
         ))}
@@ -185,24 +188,24 @@ function DocumentData(props) {
 
   return (
     <>
-        <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
-        <td>{props.document.description}</td>
-        <td>{props.document.stakeholders}</td>
-        <td>{props.document.scale}</td>
-        <td>{props.document.issuanceDate}</td>
-        <td>{props.document.type}</td>
-        <td>
-          <Button variant="link" onClick={() => {
-            console.log("Sono in DocumentData, ho cliccato su connections, ecco il document.docId:", props.document.docId);
-            props.handleConnectionsClick(props.document.docId)
-          }}>
-            <i className="bi bi-link-45deg"></i> {props.document.connections}
-          </Button>
-        </td>
-        <td>{props.document.language}</td>
-        <td>{props.document.pages}</td>
-        <td>{position.lat !== "N/A" && position.lng !== "N/A" ? `${position.lat}, ${position.lng}` : "N/A"}</td>
-      
+      <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
+      <td>{props.document.description}</td>
+      <td>{props.document.stakeholders}</td>
+      <td>{props.document.scale}</td>
+      <td>{props.document.issuanceDate}</td>
+      <td>{props.document.type}</td>
+      <td>
+        <Button variant="link" onClick={() => {
+          console.log("Sono in DocumentData, ho cliccato su connections, ecco il document.docId:", props.document.docId);
+          props.handleConnectionsClick(props.document.docId)
+        }}>
+          <i className="bi bi-link-45deg"></i> {props.document.connections}
+        </Button>
+      </td>
+      <td>{props.document.language}</td>
+      <td>{props.document.pages}</td>
+      <td>{position.lat !== "N/A" && position.lng !== "N/A" ? `${position.lat}, ${position.lng}` : "N/A"}</td>
+
     </>
   );
 }

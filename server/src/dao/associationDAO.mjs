@@ -2,6 +2,27 @@ import { db } from "../database/db.mjs"
 import Association from "../models/association.mjs"
 import { getTypeIdByType } from "./linkTypeDAO.mjs"
 
+
+
+export const getAllAssociations = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM Association';
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                const result = rows.map(row => new Association(row.aId, row.doc1, row.doc2, row.typeId));
+                resolve(result);
+            }
+        });
+    });
+};
+
+
+
+
+
+
 //get association for a specific docId
 export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
