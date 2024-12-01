@@ -27,3 +27,7 @@ header h1 {
     border-color: #ddd;
   }
   
+
+  .highlighted-row {
+    background-color: #ffeb3b !important; /* Colore evidenziato */
+  }
