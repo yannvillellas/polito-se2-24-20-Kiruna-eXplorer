@@ -148,7 +148,7 @@ function DocumentTable(props) {
               handleConnectionsClick(null)
               console.log("Sono in DocumentTable, ho cliccato su connections, ecco il documetns", props.allDocuments);
             }}>
-              <i className="bi bi-x-circle"></i>
+              <i class="bi bi-x-circle-fill" style={{ backgroundColor: "white", borderRadius: "50%" }}></i>
             </Button>
           </th>
           <th>Language</th>
