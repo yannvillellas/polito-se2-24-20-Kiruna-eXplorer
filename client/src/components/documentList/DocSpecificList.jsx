@@ -33,6 +33,31 @@ function DocSpecificList() {
     return (
         <>
             <h2>Dettagli del documento con ID: {docId}</h2>
+
+            <Table striped bordered hover className="custom-table shadow-sm">
+                <thead style={{ backgroundColor: "#007bff", color: "white" }}>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Stakeholders</th>
+                        <th>Scale</th>
+                        <th>Issuance Date</th>
+                        <th>Type</th>
+                        <th>Connections</th>
+                        <th>Language</th>
+                        <th>Pages</th>
+                        <th>(lat, lng)</th>
+                        <th>Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {/*documents.map((doc, index) => (
+                        <DocumentRow key={index} document={doc} />
+                    ))*/}
+                </tbody>
+            </Table>;
+
+
         </>
     );
 };

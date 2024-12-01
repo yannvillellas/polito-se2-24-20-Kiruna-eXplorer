@@ -204,9 +204,17 @@ function DocumentData(props) {
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
       <td>
-        <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
-          {props.document.connections}
-        </Link>
+        {props.document.connections !== 0 &&
+
+          <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+            {props.document.connections}
+          </Link>
+
+        } 
+
+        {props.document.connections === 0 && <p>0</p>}
+
+
       </td>
       <td>{props.document.language}</td>
       <td>{props.document.pages}</td>
