@@ -369,8 +369,7 @@ function AddDocument(props) {
                                     variant="primary"
                                     type="submit"
                                     className="btn-modal-link"
-                                    // onClick={(e) => handleSaveDocument(e)}
-                                    onClick={()=>{props.handleNext()}}
+                                    onClick={(e) => handleSaveDocument(e)}
                                 >
                                     Next →
                                 </Button>
