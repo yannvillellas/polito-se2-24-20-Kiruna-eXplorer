@@ -6,6 +6,7 @@ const getStakeholders = async () => {
             method: 'GET',
         })
         if (!stakeholders.ok) throw new Error('Failed to fetch stakeholders');
+        console.log("sh from server: ",stakeholders)
         return await stakeholders.json();
     } catch (error) {
         console.error("Error fetching stakeholders:", error);
