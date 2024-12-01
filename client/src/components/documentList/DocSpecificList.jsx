@@ -56,7 +56,8 @@ function DocSpecificList() {
         };
 
         fetchDocuments();
-    }, []);
+
+    }, [docIdInt]);
 
 
     return (
