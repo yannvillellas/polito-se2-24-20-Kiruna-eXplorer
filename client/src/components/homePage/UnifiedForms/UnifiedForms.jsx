@@ -23,6 +23,7 @@ function UnifiedForms(props) {
         title: "",
         stakeholders: "",
         scale: "",
+        ASvalue:null,
         issuanceDate: "",
         type: "",
         connections: 0,

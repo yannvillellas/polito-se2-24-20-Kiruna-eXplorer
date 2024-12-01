@@ -25,7 +25,7 @@ const addDocument = async (document) => {
       body: JSON.stringify({
         
         title: document.title, stakeholders: document.stakeholders, 
-        scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
+        scale: document.scale, ASvalue:document.ASvalue, issuanceDate: document.issuanceDate, type: document.type, 
         connections: document.connections, language: document.language, pages: `${document.pages}`, 
         description: document.description,
       }),

@@ -18,6 +18,9 @@ import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import UnifiedForms from "./UnifiedForms/UnifiedForms";
 import areaAPI from "../../api/areaAPI";
+import documentTypeAPI from "../../api/documentTypeAPI.js";
+import scaleAPI from "../../api/scaleAPI.js";
+import stakeholderAPI from "../../api/stakeholderAPI.js";
 
 /** BUGS:
  *  
@@ -137,10 +140,14 @@ function HomePage(props) {
             const stateDocument = {
                 docId: docId,
                 title: document.title,
-                stakeholders: document.stakeholders,
-                scale: document.scale,
+                //stakeholders: document.stakeholders,
+                stkeholders: await stakeholderAPI.getStakeholders().filter(sh=>document.stakeholders.split(', ').includes(sh.shId)).map(sh=>sh.name),
+                //scale: document.scale,
+                scale: await scaleAPI.getScales().find(s=>sId==document.scale).name,
+                ASvalue: document.ASvalue,
                 issuanceDate: document.issuanceDate,
-                type: document.type,
+                //type: document.type,
+                type: await documentTypeAPI.getDocumentTypes().find(t=>t.typeId==document.type).type,
                 connections: document.connections,
                 language: document.language,
                 pages: document.pages,
