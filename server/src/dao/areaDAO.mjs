@@ -11,8 +11,23 @@ export const addArea = (docId, areaType, coordinates) => {
                 reject(err);
             } else {
                 if (row) {
-                    // Se c'è già l'area restituisco l'id
-                    resolve(row.areaId);
+ 
+                    // Ed aggiungi row.areaId a AreaAssociation
+                    db.run("INSERT INTO AreaAssociation (areaId, docId) VALUES (?, ?)",
+                        [
+                            row.areaId,
+                            docId
+                        ],
+                        function (err) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(row.areaId);
+                            }
+                        }
+                    );
+
+
                 } else {
                     // Altrimenti inserisco l'area
                     db.run("INSERT INTO Area (areaType, coordinates) VALUES (?, ?)",

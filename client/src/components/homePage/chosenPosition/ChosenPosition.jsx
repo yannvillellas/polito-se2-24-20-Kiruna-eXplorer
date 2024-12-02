@@ -236,8 +236,13 @@ function ChosenPosition(props) {
         console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
         setSelectedAreaId((prevId) => (prevId === area.areaId ? null : area.areaId)); // Cambia colore solo all'area cliccata
 
-        console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
-        props.handleSetArea(area);
+        const shape ={
+            id: area.areaId,
+            type: area.areaType,
+            latlngs: area.coordinates,
+        }
+        console.log("Sono in ChosenPosition.jsx, Area selected: ", shape);
+        props.handleSetArea(shape);
 
         // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
         const latlngs = JSON.parse(area.coordinates)[0];

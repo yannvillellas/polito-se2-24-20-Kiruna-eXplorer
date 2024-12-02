@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form, FormControl, Modal } from "react-bootstrap";
 import Select, {components} from "react-select";
 import ChosenPosition from "../../chosenPosition/ChosenPosition";
-import ChosenArea from "../../chosenArea/ChosenArea";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 import { booleanContains, polygon } from "@turf/turf";
 import stakeholderAPI from "../../../../api/stakeholderAPI"
