@@ -221,7 +221,8 @@ function UnifiedForms(props) {
                                                     console.log("sto aggiungendo il doc: ", newDocument)
                                                     await props.handleAddDocument(newDocument);
                                                     console.log("ho finito: ")
-                                                    handleNext();
+                                                    //handleNext();
+                                                    handleClose()
                                                 }else{
                                                     alert("Please select a position")
                                                 }
