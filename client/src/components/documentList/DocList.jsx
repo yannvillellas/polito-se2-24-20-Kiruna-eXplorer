@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
 import { Table, Container, Button } from "react-bootstrap";
+import { Form, Card } from 'react-bootstrap';
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
 
@@ -15,113 +16,166 @@ import PositionAPI from "../../api/positionAPI";
  * 
  */
 
-import { Row, Col, Form } from "react-bootstrap";
-
 function DocList() {
   const [documents, setDocuments] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]);
 
-  const [filters, setFilters] = useState({
-    title: "",
-    description: "",
-    stakeholder: "",
-    scale: "",
-    issuanceDate: "",
-    type: "",
-    connections: "",
-  });
+  const titleOptions = documents.map((doc) => ({
+    value: doc.docId,
+    label: doc.title,
+  }));
 
+  const stakeholderOptions = documents.map((doc) => ({
+    value: doc.docId,
+    label: doc.stackeholders,
+  }));
+
+  const scaleOptions = documents.map((doc) => ({
+    value: doc.docId,
+    label: doc.scale,
+  }));
+
+  const typeOptions = documents.map((doc) => ({
+    value: doc.docId,
+    label: doc.type,
+  }));
+
+  const languageOptions = documents.map((doc) => ({
+    value: doc.docId,
+    label: doc.language,
+  }));
+
+
+
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [allPositions, setAllPositions] = useState([]);
+
+  // for some reasons sometimes documents is empty (if i use it in DocList)
   const fetchDocuments = async () => {
     try {
       const res = await DocumentAPI.listDocuments();
+      const pos = await PositionAPI.listPositions();
+      // console.log("Sono in DocList.jsx, ricevo dal db i documenti: ", res);
       setDocuments(res || []);
       setAllDocuments(res || []);
+
+      setAllPositions(pos || []);
+
     } catch (error) {
       console.error("Error fetching documents:", error);
     }
   };
 
+  // Fetch documents on component mount
   useEffect(() => {
     fetchDocuments();
   }, []);
 
+  /*
+  // Polling: and then update the document after 5 sec
   useEffect(() => {
-    const applyFilters = () => {
-      const filteredDocs = allDocuments.filter((doc) => {
-        return (
-          (!filters.title || doc.title.toLowerCase().includes(filters.title.toLowerCase())) &&
-          (!filters.description || doc.description.toLowerCase().includes(filters.description.toLowerCase())) &&
-          (!filters.stakeholder || (doc.stackeholders && doc.stackeholders.includes(filters.stakeholder))) &&
-          (!filters.scale || doc.scale === filters.scale) &&
-          (!filters.type || doc.type === filters.type)
-        );
-      });
-      setDocuments(filteredDocs);
-    };
+    const intervalId = setInterval(async () => {
+      try {
+        const res = await DocumentAPI.listDocuments();
 
-    applyFilters();
-  }, [filters, allDocuments]);
+        if (!selectedDocument) {
+          // Aggiorna sia la lista completa sia i documenti mostrati
+          setAllDocuments(res || []);
+          setDocuments(res || []);
+        } else {
+          // Aggiorna solo la lista completa per evitare sovrascritture
+          setAllDocuments(res || []);
+          console.log("Polling: Document list updated in background.");
+        }
+      } catch (error) {
+        console.error("Error during polling:", error);
+      }
+    }, 5000);
 
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    return () => clearInterval(intervalId);
+  }, [selectedDocument]);
+  */
+
+  // Gestione del cambio selezione nel Select
+  const handleSelectChange = (selectedOption) => {
+    if (selectedOption) {
+      setSelectedDocument(selectedOption);
+      setDocuments(allDocuments.filter((doc) => doc.docId === selectedOption.value));
+    } else {
+      setSelectedDocument(null);
+      setDocuments(allDocuments); // Ripristina solo quando non c'è selezione
+    }
   };
+
 
   return (
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
+      <Card className="mb-4">
+        <Card.Body>
+          <Form.Group>
+            <Form.Label>Select Document Title</Form.Label>
+            <Select
+              options={titleOptions}
+              isClearable
+              placeholder="Select a document title"
+              required
+              value={selectedDocument}
+              onChange={handleSelectChange}
+            />
+          </Form.Group>
 
-      {/* Barra di Filtri */}
-      <Row className="g-3 mb-4 align-items-center bg-light p-3 rounded shadow-sm">
-        <Col md={3}>
-          <Form.Control
-            type="text"
-            placeholder="Filter by Title"
-            onChange={(e) => handleFilterChange("title", e.target.value)}
-          />
-        </Col>
-        <Col md={3}>
-          <Form.Control
-            type="text"
-            placeholder="Filter by Description"
-            onChange={(e) => handleFilterChange("description", e.target.value)}
-          />
-        </Col>
-        <Col md={3}>
-          <Select
-            options={[...new Set(allDocuments.map((doc) => doc.stackeholders))]
-              .filter(Boolean)
-              .map((s) => ({ value: s, label: s }))}
-            placeholder="Filter by Stakeholder"
-            isClearable
-            onChange={(option) => handleFilterChange("stakeholder", option ? option.value : "")}
-          />
-        </Col>
-        <Col md={3}>
-          <Select
-            options={[...new Set(allDocuments.map((doc) => doc.scale))]
-              .filter(Boolean)
-              .map((scale) => ({ value: scale, label: scale }))}
-            placeholder="Filter by Scale"
-            isClearable
-            onChange={(option) => handleFilterChange("scale", option ? option.value : "")}
-          />
-        </Col>
+          <Form.Group>
+            <Form.Label>Select Stakeholder</Form.Label>
+            <Select
+              options={stakeholderOptions}
+              isClearable
+              placeholder="Select a stakeholder"
+              required
+              value={selectedDocument}
+              onChange={handleSelectChange}
+            />
+          </Form.Group>
 
-        <Col md={3}>
-          <Select
-            options={[...new Set(allDocuments.map((doc) => doc.type))]
-              .filter(Boolean)
-              .map((type) => ({ value: type, label: type }))}
-            placeholder="Filter by Type"
-            isClearable
-            onChange={(option) => handleFilterChange("type", option ? option.value : "")}
-          />
-        </Col>
+          <Form.Group>
+            <Form.Label>Select Scale</Form.Label>
+            <Select
+              options={scaleOptions}
+              isClearable
+              placeholder="Select a scale"
+              required
+              value={selectedDocument}
+              onChange={handleSelectChange}
+            />
+          </Form.Group>
 
-      </Row>
-
+          <Form.Group>
+            <Form.Label>Select Type</Form.Label>
+            <Select
+              options={typeOptions}
+              isClearable
+              placeholder="Select a type"
+              required
+              value={selectedDocument}
+              onChange={handleSelectChange}
+            />
+          </Form.Group>
+    
+          <Form.Group>
+            <Form.Label>Select Language</Form.Label>
+            <Select
+              options={languageOptions}
+              isClearable
+              placeholder="Select a language"
+              required
+              value={selectedDocument}
+              onChange={handleSelectChange}
+            />
+          </Form.Group>
+        </Card.Body>
+      </Card>
       {/* Tabella dei documenti */}
-      <DocumentTable documents={documents} />
+      <DocumentTable documents={documents} allPositions={allPositions}/>
     </Container>
   );
 }
@@ -132,34 +186,39 @@ function DocumentTable(props) {
   const { documents } = props;
 
   return (
-    <Table striped bordered hover className="custom-table shadow-sm">
-      <thead style={{ backgroundColor: "#007bff", color: "white" }}>
-        <tr>
-          <th>Title</th>
-          <th>Description</th>
-          <th>Stakeholders</th>
-          <th>Scale</th>
-          <th>Issuance Date</th>
-          <th>Type</th>
-          <th>Connections</th>
-          <th>Language</th>
-          <th>Pages</th>
-          <th>(lat, lng)</th>
-          <th>Files</th>
-        </tr>
-      </thead>
-      <tbody>
-        {documents.map((doc, index) => (
-          <DocumentRow key={index} document={doc} />
-        ))}
-      </tbody>
-    </Table>);
+    <Container fluid>
+      <div className="custom-table-wrapper">
+        <Table striped bordered hover className="custom-table shadow-sm">
+          <thead style={{ backgroundColor: "#007bff", color: "white" }}>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Stakeholders</th>
+              <th>Scale</th>
+              <th>Issuance Date</th>
+              <th>Type</th>
+              <th>Connections</th>
+              <th>Language</th>
+              <th>Pages</th>
+              <th>(lat, lng)</th>
+              <th>Files</th>
+            </tr>
+          </thead>
+          <tbody>
+            {documents.map((doc, index) => (
+              <DocumentRow key={index} document={doc} allPositions={props.allPositions}/>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </Container>
+  );
 }
 
 function DocumentRow(props) {
   return (
     <tr >
-      <DocumentData document={props.document} />
+      <DocumentData document={props.document} allPositions={props.allPositions}/>
       <DocumentFile document={props.document} />
     </tr>
   );
@@ -170,7 +229,8 @@ function DocumentData(props) {
   useEffect(() => {
     const fetchPosition = async () => {
       try {
-        const pos = await PositionAPI.listPositions();
+        // const pos = await PositionAPI.listPositions();
+        const pos = props.allPositions;
 
         // Trova la posizione del documento basandosi sul docId di props.document
         const docPos = pos.find((p) => p.docId === props.document.docId);
@@ -203,7 +263,7 @@ function DocumentData(props) {
             {props.document.connections}
           </Link>
 
-        } 
+        }
 
         {props.document.connections === 0 && <p>0</p>}
 
@@ -228,6 +288,7 @@ function DocumentFile(props) {
     const fetchFiles = async () => {
       try {
         const files = await DocumentAPI.getFiles(props.document.docId);
+        console.log("DocumentFile, hot preso i file di docId: ", props.document.docId, files)
         if (files) {
           setFiles(Array.from(files));
         } else {

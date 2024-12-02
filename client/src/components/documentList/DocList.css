@@ -3,5 +3,10 @@
   background-color: #ffeb3b !important; /* Colore evidenziato */
 }
 
-
+.custom-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* L'altezza è impostata al 100% della viewport */
+  overflow-y: auto;
+}
 
