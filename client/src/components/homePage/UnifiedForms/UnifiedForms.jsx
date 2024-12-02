@@ -238,7 +238,6 @@ function UnifiedForms(props) {
                                             onClick={async() => {
                                                 if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
                                                     console.log("sto aggiungendo il doc: ", newDocument)
-                                                    await props.handleAddDocument(newDocument);
                                                     console.log("ho finito: ")
                                                     handleNext();
                                                 }else{
