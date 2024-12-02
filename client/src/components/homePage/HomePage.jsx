@@ -165,6 +165,7 @@ function HomePage(props) {
             
             // adding files to the document
             if (document.files.length > 0) {
+                console.log("file ",document.files)
                 handleUpload({ ...document, docId: docId });
             }
 

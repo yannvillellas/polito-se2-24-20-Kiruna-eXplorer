@@ -29,4 +29,8 @@
     cursor: pointer;
     padding: 0;
   }
+
+  .btn-upload{
+    margin-right: 10px;
+  }
   

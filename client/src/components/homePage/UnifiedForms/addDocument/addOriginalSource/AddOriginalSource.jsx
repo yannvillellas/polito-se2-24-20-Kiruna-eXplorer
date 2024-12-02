@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./addOriginalSource.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
 import { FaTrashAlt } from "react-icons/fa"; // Importa l'icona del cestino
 
@@ -10,6 +10,13 @@ import { FaTrashAlt } from "react-icons/fa"; // Importa l'icona del cestino
 
 function AddOriginalSource(props){
     const [files, setFiles] = useState([]);
+
+    const fileInputRef = useRef(null);
+
+    const handleButtonClick = () => {
+      // Simula il clic sull'input file nascosto
+      fileInputRef.current.click();
+  };
 
 
     const handleFileChange = (e) => {
@@ -28,11 +35,20 @@ function AddOriginalSource(props){
     <>
         <Form.Group controlId="formFileSm" className="mt-3">
             <Form.Label>Select here the file in input </Form.Label>
+            {/* Bottone personalizzato */}
+            <div>
+              <Button onClick={handleButtonClick} className="btn-upload btn btn-primary">
+                Upload files
+              </Button>
+              {files?.length>0? `${files.length} file(s) selected` : ""}
+            </div>
             <Form.Control 
                 type="file" 
                 size="sm" 
                 onChange={handleFileChange} 
                 multiple // So multiple files can be selected
+                ref={fileInputRef}
+                style={{ display: "none" }}
             />
         </Form.Group>
 

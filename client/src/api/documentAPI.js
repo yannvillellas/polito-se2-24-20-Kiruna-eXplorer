@@ -70,6 +70,7 @@ const addFiles = async(docId, files) =>{
             method:'POST',
             credentials: 'include',
             body: files,
+            headers:{}
         })
         if (!response.ok) throw new Error('Failed to upload files');
         return
