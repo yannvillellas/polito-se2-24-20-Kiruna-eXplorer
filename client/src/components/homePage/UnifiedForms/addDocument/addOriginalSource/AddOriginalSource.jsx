@@ -32,6 +32,7 @@ function AddOriginalSource(props){
         console.log(selectedFiles)
         setFiles(selectedFiles); // Save the selected files in the state
         props.handleAddedFiles(selectedFiles);
+        e.target.value = null;  //to avoid problems when you delete and re-upload the same files
     };
 
     const handleFileRemove = (index) => {
@@ -39,7 +40,7 @@ function AddOriginalSource(props){
         const updatedFiles = files.filter((_, i) => i !== index);
         console.log(updatedFiles)
         setFiles(updatedFiles);
-        props.handleAddedFiles(files);
+        props.handleAddedFiles(updatedFiles);
     };
 
     return (
