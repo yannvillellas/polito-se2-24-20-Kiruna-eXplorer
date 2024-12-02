@@ -133,7 +133,7 @@ function HomePage(props) {
 
             let areaId = null;
             if (document.area) {
-                areaId = handleAddArea({ ...document, docId: docId });
+                areaId = await handleAddArea({ ...document, docId: docId });
             }
 
             const shs=await stakeholderAPI.getStakeholders()

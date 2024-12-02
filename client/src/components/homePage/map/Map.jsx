@@ -128,9 +128,6 @@ function Map(props) {
 
 
 
-
-
-
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
     setIsPositionToModify(false);
@@ -230,7 +227,7 @@ function Map(props) {
       if (association.doc1 === docId) {
         //docToShow.push(documents.find(doc => doc.docId === association.doc2));
         docIdToShow.push(association.doc2)
-      }else{
+      } else {
         docIdToShow.push(association.doc1)
       }
     }
@@ -263,6 +260,8 @@ function Map(props) {
 
         <MarkerClusterGroup
           showCoverageOnHover={false}
+          spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
+          zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
           {!filterOn && documents.map((doc, index) => (
             <Marker
@@ -362,7 +361,7 @@ function Map(props) {
           {selectedDoc ? (
             <>
               {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                key!="ASvalue" || value!=null? <p key={key}>
+                key != "ASvalue" || value != null ? <p key={key}>
                   <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                 </p>
                   :
