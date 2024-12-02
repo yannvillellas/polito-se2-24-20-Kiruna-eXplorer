@@ -13,23 +13,34 @@ function AddOriginalSource(props){
 
     const fileInputRef = useRef(null);
 
+    useEffect(()=>{ 
+      console.log("ho cambiato i file in ", files)
+    },[files])
+
     const handleButtonClick = () => {
       // Simula il clic sull'input file nascosto
+      console.log("click")
       fileInputRef.current.click();
+      console.log("ho cliccato il form")
   };
 
 
     const handleFileChange = (e) => {
+        console.log("proa")
         const selectedFiles = Array.from(e.target.files); // Convert the FileList object to an Array
+        console.log("sono nel file change")
+        console.log(selectedFiles)
         setFiles(selectedFiles); // Save the selected files in the state
         props.handleAddedFiles(selectedFiles);
     };
 
     const handleFileRemove = (index) => {
+        console.log(files)
         const updatedFiles = files.filter((_, i) => i !== index);
+        console.log(updatedFiles)
         setFiles(updatedFiles);
         props.handleAddedFiles(files);
-      };
+    };
 
     return (
     <>
