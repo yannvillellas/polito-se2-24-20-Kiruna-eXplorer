@@ -53,7 +53,6 @@ function DocList() {
           (!filters.description || doc.description.toLowerCase().includes(filters.description.toLowerCase())) &&
           (!filters.stakeholder || (doc.stackeholders && doc.stackeholders.includes(filters.stakeholder))) &&
           (!filters.scale || doc.scale === filters.scale) &&
-          (!filters.issuanceDate || doc.issuanceDate === filters.issuanceDate) &&
           (!filters.type || doc.type === filters.type)
         );
       });
@@ -107,13 +106,7 @@ function DocList() {
             onChange={(option) => handleFilterChange("scale", option ? option.value : "")}
           />
         </Col>
-        <Col md={3}>
-          <Form.Control
-            type="date"
-            placeholder="Filter by Issuance Date"
-            onChange={(e) => handleFilterChange("issuanceDate", e.target.value)}
-          />
-        </Col>
+
         <Col md={3}>
           <Select
             options={[...new Set(allDocuments.map((doc) => doc.type))]
