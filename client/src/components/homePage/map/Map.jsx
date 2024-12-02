@@ -4,7 +4,7 @@ import { useEffect, useState, useNavigate } from "react";
 import { Container, Modal, Button, Form } from "react-bootstrap";
 import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
-import ChosenPosition from "../chosenPosition/ChosenPosition";
+import ChosenPositionMap from "./ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
 
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
@@ -45,6 +45,14 @@ function Map(props) {
   const [areas, setAreas] = useState([]);
   const [visibleArea, setVisibleArea] = useState(null);
   const [areaAssociations, setAreaAssociations] = useState([]);
+
+
+  // Gestisco la modifica della posizione
+  const [newLan, setNewLan] = useState(null);
+  const [newLng, setNewLng] = useState(null);
+
+
+
 
   const onFeatureClick = (e) => {
     // Ottieni il layer (poligono, multipoligono, ecc.)
@@ -193,17 +201,30 @@ function Map(props) {
   };
 
   const handleModifyPosition = async (newLan, newLng) => {
-
+    console.log("Sono in handleModifyPosition, ecco i parametri:", newLan, newLng);
     if (newLan === null || newLng === null) {
       alert("Latitude and longitude must be filled and should be numbers");
       return;
     } else if (newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180) {
       alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
       return;
-    }
-    await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
+    } 
+
+    console.log("Sono in handleModifyPosition, ecco i parametri:", selectedDoc.docId, newLan, newLng);
+    const res = await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
     closeDocumentModal();
   };
+
+  const handleSavePosition = async (newLan, newLng) => {
+    setNewLan(newLan);
+    setNewLng(newLng);
+  };
+
+
+
+
+
+
 
   const handleShowOnlyAllMunicipalityDocument = () => {
     setFilterOn(true);
@@ -371,10 +392,30 @@ function Map(props) {
                 <p>
                   <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
                 </p>
-                {props.isUrbanPlanner && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
+                {props.isUrbanPlanner && !isPositionToModify && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
                   Reposition
                 </Button>}
-                {isPositionToModify && <ChosenPosition handleSetPostition={handleModifyPosition} />}
+
+                {props.isUrbanPlanner && isPositionToModify && <Button variant="primary" onClick={() => {
+                  handleModifyPosition(newLan, newLng);
+                  setIsPositionToModify(false)
+                }}>
+                  Save position
+                </Button>}
+                {props.isUrbanPlanner && isPositionToModify && <Button variant="primary" onClick={() => {
+                  setNewLan(null);
+                  setNewLng(null);
+                  setIsPositionToModify(false);
+                }}>
+                  Cancel 
+                </Button>}
+
+                {props.isUrbanPlanner && isPositionToModify && <ChosenPositionMap handleSavePosition={handleSavePosition} />}
+
+
+
+
+
               </div>
               <div className="download-buttons-container">
                 {files ? files.map((f, index) => (
