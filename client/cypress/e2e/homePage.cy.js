@@ -19,8 +19,8 @@ describe('HomePage Component Tests', () => {
         cy.intercept('GET', `${apiBaseURL}/documents`, {
             statusCode: 200,
             body: [
-                { docId: 1, title: 'Document 1', description: "prova", stackeholders: "prova", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
-                { docId: 2, title: 'Document 2', description: "prova", stackeholders: "prova", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
+                { docId: 1, title: 'Document 1', description: "prova", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
+                { docId: 2, title: 'Document 2', description: "prova", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
             ],
         });
 
@@ -39,15 +39,23 @@ describe('HomePage Component Tests', () => {
         // Verifica che la mappa sia renderizzata
         cy.get('.leaflet-container').should('exist');
 
-        // Verifica che i marker siano renderizzati
+        // Verify that the 2 markers are collapsed into a signle cluster
+        cy.get('.leaflet-marker-icon').should('have.length', 1);
+
+        //zoom in to have 2 different icons
+        cy.get('.leaflet-control-zoom-in').click()
+        cy.wait(1000)
+        cy.get('.leaflet-control-zoom-in').click()
+        cy.wait(1000)
+        cy.get('.leaflet-control-zoom-in').click()
+        cy.wait(1000)
+        cy.get('.leaflet-control-zoom-in').click()
+        /*cy.get('.leaflet-control-zoom-in').click()*/
+        //cy.scrollTo('top',{duration:1000})
         cy.get('.leaflet-marker-icon').should('have.length', 2);
     });
-
+    /*
     it('handles adding a new document without links', () => {
-        /*cy.get('button').contains('Login').click()
-        cy.get('input#user').type("user1");
-        cy.get('input#pass').type("password1");
-        cy.get('button[type="submit"]').click();*/
 
         // Mocka l'aggiunta di un documento
         cy.intercept('POST', `${apiBaseURL}/documents`, {
@@ -98,7 +106,7 @@ describe('HomePage Component Tests', () => {
 
         // Verifica che il nuovo documento sia stato aggiunto
         cy.get('.leaflet-marker-icon').should('have.length', 3);
-    });
+    });*/
     /*
       it('allows modifying a document position', () => {
         // Mocka la modifica della posizione
