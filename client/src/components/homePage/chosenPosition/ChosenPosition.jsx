@@ -491,21 +491,6 @@ function ChosenPosition(props) {
                                 </LayersControl>
 
 
-                                <FeatureGroup>
-                                    <EditControl
-                                        position="topright"
-                                        onCreated={onCreated}
-                                        draw={{
-                                            rectangle: false,
-                                            polygon: false,
-                                            circle: false,
-                                            circleMarker: false,
-                                            polyline: false,
-                                            marker: false,
-                                        }}
-                                    />
-                                </FeatureGroup>
-
                                 {/**Show all the areas by document: */}
                                 {areas.length > 0 && areas.map((area, index) => {
                                     if (area.areaType === "polygon") {
