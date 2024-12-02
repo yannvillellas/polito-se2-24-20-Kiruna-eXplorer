@@ -236,7 +236,7 @@ function ChosenPosition(props) {
         console.log("Sono in ChosenPosition.jsx, Area selected: ", area);
         setSelectedAreaId((prevId) => (prevId === area.areaId ? null : area.areaId)); // Cambia colore solo all'area cliccata
 
-        const shape ={
+        const shape = {
             id: area.areaId,
             type: area.areaType,
             latlngs: area.coordinates,
@@ -463,6 +463,12 @@ function ChosenPosition(props) {
                                         }}
                                     />
                                 </FeatureGroup>
+
+
+                                <GeoJSON
+                                    data={geojsonData}
+                                    style={geojsonStyle}
+                                />
 
                             </MapContainer>
                         </>
