@@ -222,18 +222,21 @@ function Map(props) {
     }
 
     setFilterOn(true);
-    console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId.value);
+    //console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId);
     let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
-    console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
-    let docToShow = [];
+    //console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
+    let docIdToShow = [];
     for (let association of assciationToShow) {
       if (association.doc1 === docId) {
-        docToShow.push(documents.find(doc => doc.docId === association.doc2));
+        //docToShow.push(documents.find(doc => doc.docId === association.doc2));
+        docIdToShow.push(association.doc2)
+      }else{
+        docIdToShow.push(association.doc1)
       }
     }
-    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docToShow);
-    docToShow = documents.filter(doc => docToShow.includes(doc));
-    console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
+    //console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docIdToShow);
+    const docToShow = documents.filter(doc => docIdToShow.includes(doc.docId));
+    //console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
     setDocumentShown(docToShow);
   }
 

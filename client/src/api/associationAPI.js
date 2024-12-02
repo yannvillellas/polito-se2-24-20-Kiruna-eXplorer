@@ -61,9 +61,9 @@ const getLinkTypes = async () => {
 // Get Association by docId:
 const getAssociationsByDocId = async (docId) => {
   try {
-    console.log("Sono in associationAPI ho ricevuto docId:", docId);
+    //console.log("Sono in associationAPI ho ricevuto docId:", docId);
     const response = await fetch(`${SERVER_URL}/${docId}`, { method: 'GET' });
-    console.log("Sono in associationAPI, getAssociationsByDocId, ho ricevuto la risposta di getAssociationsByDocId", response);
+    //console.log("Sono in associationAPI, getAssociationsByDocId, ho ricevuto la risposta di getAssociationsByDocId", response);
     if (!response.ok) throw new Error('Failed to fetch associations');
     return await response.json();
   } catch (error) {
