@@ -49,11 +49,12 @@ export const listDocuments = () => {
 
 export const addDocument = (document) => {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO Document (title, description, scale, issuanceDate, type, connections, language, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+        db.run("INSERT INTO Document (title, description, scale,ASvalue, issuanceDate, type, connections, language, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
             [
                 document.title, 
                 document.description, 
                 document.scale, 
+                document.ASvalue,
                 document.issuanceDate, 
                 document.type, 
                 document.connections, 

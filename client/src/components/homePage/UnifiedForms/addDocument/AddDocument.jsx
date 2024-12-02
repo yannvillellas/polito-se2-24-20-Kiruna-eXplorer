@@ -383,11 +383,12 @@ function AddDocument(props) {
                                 placeholder="Select Scale"
                                 required={true}
                                 onChange={(selectedOption) => {
-                                    const scaleValue = selectedOption ? selectedOption.value : "";
+                                    const scaleLabel = selectedOption ? selectedOption.label : "";
 
-                                    setIsArchitecturalScale(scaleValue === "Architectural Scale");
+                                    setIsArchitecturalScale(scaleLabel === "Architectural Scale");
+                                    setNewDocument({ ...newDocument, scale: selectedOption.value })
 
-                                    isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({ ...newDocument, scale: scaleValue })
+                                    /*isArchitecturalScale ? setNewDocument({ ...newDocument, scale: "" }) : setNewDocument({ ...newDocument, scale: scaleValue })*/
 
                                     /*
                                     if (selectedOption) {
@@ -405,7 +406,8 @@ function AddDocument(props) {
 
                                 }
                                 }
-                                value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}
+                                /*value={isArchitecturalScale ? scaleOptions.find(opt => opt.value = "Architectural Scale") : scaleOptions.find(opt => opt.value === newDocument.scale)}*/
+                                value={scaleOptions.find(opt=>opt.value===newDocument.scale)}
                                 addingField="scale"
                                 components={{ Menu: CustomMenu }}
                             />
@@ -423,7 +425,7 @@ function AddDocument(props) {
                                         const regex = /^\d+:\d+$/;
                                         if (regex.test(e.target.value)) {
                                             setIsArchitecturalScaleFormat(true);
-                                            setNewDocument({ ...newDocument, scale: e.target.value })
+                                            setNewDocument({ ...newDocument, ASvalue: e.target.value })
                                         } else {
                                             setIsArchitecturalScaleFormat(false);
                                         }
