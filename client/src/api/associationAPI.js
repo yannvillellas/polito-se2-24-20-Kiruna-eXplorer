@@ -31,7 +31,8 @@ const createAssociation = async (association) => {
 export const getAllAssociations = async () => {
   console.log("Sono in associationAPI, ho ricevuto la richiwsra di getAllAssociations");
   try {
-    const response = await fetch(SERVER_URL, { method: 'GET' });
+    const response = await fetch(SERVER_URL, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+    console.log("Sono in associationAPI, getAllAssociations, ho ricevuto la risposta di getAllAssociations", response);
     if (!response.ok) throw new Error('Failed to fetch associations');
     return await response.json();
   } catch (error) {
@@ -46,7 +47,9 @@ export const getAllAssociations = async () => {
  */
 const getLinkTypes = async () => {
   try {
-    const response = await fetch(`http://localhost:3001/api/linkTypes`, { method: 'GET' });
+    console.log("Sono in associationAPI, getLinkTypes, ho ricevuto la richiesta di getLinkTypes");  
+    const response = await fetch(`http://localhost:3001/api/linkTypes`, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+    console.log("Sono in associationAPI, getLinkTypes, ho ricevuto la risposta di getLinkTypes", response);
     if (!response.ok) throw new Error('Failed to fetch link types');
     return await response.json();
   } catch (error) {
@@ -59,7 +62,8 @@ const getLinkTypes = async () => {
 const getAssociationsByDocId = async (docId) => {
   try {
     console.log("Sono in associationAPI ho ricevuto docId:", docId);
-    const response = await fetch(`${SERVER_URL}/${docId}`, { method: 'GET' });
+    const response = await fetch(`${SERVER_URL}/${docId}`, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+    console.log("Sono in associationAPI, getAssociationsByDocId, ho ricevuto la risposta di getAssociationsByDocId", response);
     if (!response.ok) throw new Error('Failed to fetch associations');
     return await response.json();
   } catch (error) {
@@ -67,9 +71,6 @@ const getAssociationsByDocId = async (docId) => {
     throw error;
   }
 };
-
-
-
 
 
 

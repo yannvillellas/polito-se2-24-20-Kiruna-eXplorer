@@ -2,11 +2,15 @@ const SERVER_URL = 'http://localhost:3001/api/documents/'
 
 const listDocuments = async () => {
     try {
-        const documents = await fetch(SERVER_URL, {
+        console.log('sono in documentAPI, listDocuments, ho ricevuto la richiesta di listDocuments');
+        const response = await fetch(SERVER_URL, {
             method: 'GET',
             credentials: 'include'
         })
-        .then(response => response.json())
+        
+        if (!response.ok) throw new Error('Failed to fetch documents');
+        const documents = await response.json();
+        console.log('sono in documentAPI, listDocuments, ho ricevuto la risposta di listDocuments', documents);
 
         return documents;
     } catch (err) {
@@ -40,7 +44,6 @@ const addDocument = async (document) => {
         return documentId;
     }
 
-    return null;
 }
 
 const deleteDocument = async (docId) => {
