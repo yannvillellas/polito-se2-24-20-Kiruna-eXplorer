@@ -2,6 +2,27 @@ import { db } from "../database/db.mjs"
 import Association from "../models/association.mjs"
 import { getTypeIdByType } from "./linkTypeDAO.mjs"
 
+
+
+export const getAllAssociations = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM Association';
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                const result = rows.map(row => new Association(row.aId, row.doc1, row.doc2, row.typeId));
+                resolve(result);
+            }
+        });
+    });
+};
+
+
+
+
+
+
 //get association for a specific docId
 export const getAssociations = (docId) => {
     return new Promise((resolve, reject) => {
@@ -23,7 +44,6 @@ export const insertAssociation = (association) => {
     return new Promise(async (resolve, reject) => {
         try {
             const typeId = await getTypeIdByType(association.type);
-            console.log("sono in associationDAO: ho ritornato typeId", typeId);
             // It should add +1 to the field connections where docId = docId1 or docId = docId2
             db.run('UPDATE Document SET connections = connections + 1 WHERE docId = ? OR docId = ?', [parseInt(association.doc1, 10), parseInt(association.doc2, 10)], function (err) {
                 if (err) {
@@ -81,3 +101,37 @@ export const UpdateAssociation = (association) => {
         }
     });
 };
+
+
+/* to test */
+export const CheckAssociation = (association)=>{
+    return new Promise((resolve, reject) => {
+        const executeAsyncLogic = async () => {
+            try {
+                const typeId = await getTypeIdByType(association.type);
+                const sql = 'SELECT * FROM Association WHERE (doc1=? OR doc1=?) AND (doc2=? OR doc2=?) AND typeId=?';
+                
+                db.all(sql, [
+                    parseInt(association.doc1, 10),
+                    parseInt(association.doc2, 10),
+                    parseInt(association.doc1, 10),
+                    parseInt(association.doc2, 10),
+                    parseInt(typeId, 10)
+                ], (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    } else {
+                        console.log(rows);
+                        resolve(rows); // Se `rows` è undefined, l'associazione non esiste
+                    }
+                });
+            } catch (err) {
+                reject(err);
+            }
+        };
+
+        // Chiama la logica asincrona
+        executeAsyncLogic();
+    });
+}

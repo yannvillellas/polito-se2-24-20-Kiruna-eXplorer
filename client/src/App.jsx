@@ -1,27 +1,28 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
-import { Routes, Route, Outlet, Navigate, useNavigate  } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
+import MainPage from './components/mainPage/MainPage';
 import HomePage from './components/homePage/HomePage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
-import Map from './components/map/Map';
-import Login from './components/login/Login';
-import Registration from './components/login/Registration';
-import Link from './components/link/Link';
+import Map from './components/homePage/map/Map';
+import Login from './components/authentication/Login';
+import Registration from './components/authentication/Registration';
 import Header from './components/header/Header';
 import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
-import DocList from "./components/DocumentList/DocList";
-import SearchDocuments from "./components/searchDocuments/SearchDocuments";
+import DocList  from "./components/documentList/DocList";
+import DocSpecificList from "./components/documentList/DocSpecificList";
+
 
 function App() {
     const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`
     const [authChecked, setAuthChecked] = useState(false);
-    const [loggedIn, setLoggedIn] = useState(false);    
+    const [loggedIn, setLoggedIn] = useState(false);
     const [isUrbanPlanner, setIsUrbanPlanner] = useState(false);
-    
+
     const navigate = useNavigate();
-  
+
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -66,13 +67,13 @@ function App() {
                 const response = await AuthAPI.logOut();
                 if (response) {
                     setLoggedIn(false);
-                    setUser(null);  
+                    setUser(null);
                     setIsUrbanPlanner(false);
 
-                    navigate('/login');
+                    navigate('/mainPage');
                 }
             } else {
-                navigate('/login');
+                navigate('/mainPage');
             }
         } catch (err) {
             console.error("Logout error:", err.message);
@@ -85,12 +86,12 @@ function App() {
             if (newUser) {
                 console.log("Registration successful:");
                 const response = await AuthAPI.logIn(credentials)
-                if(response){
+                if (response) {
                     setUser(newUser)
                     setLoggedIn(true);
                     setIsUrbanPlanner(true);
                     navigate('/homePage');
-                }else{
+                } else {
                     console.log("errore durante il login")
                     navigate('/login')
                 }
@@ -104,9 +105,8 @@ function App() {
         return <div>Loading...</div>;
     }
 
-  return (
+    return (
         <Routes>
-            {/* Layout with Header */}
             <Route
                 element={
                     <>
@@ -119,12 +119,8 @@ function App() {
                     </>
                 }
             >
-                {/* Routes */}
-                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/login'} />} />
-                {/*<Route
-                    path="/homePage"
-                    element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}/>}
-                />*/}
+
+                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/mainPage'} />} />
                 <Route
                     path="/login"
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
@@ -132,10 +128,12 @@ function App() {
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
                 <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
-                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner}/>}/>
+                <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
+                <Route path='/homePage' element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
                 <Route path="/documentPage" element={<DocList />} />
-                {/*<Route path="/search" element={<SearchDocuments />} />*/}
-                {/*<Route path='/link' element={<Link />} /> {/* Add the Link component route */}
+                <Route path="/documentPage/:docId" element={<DocSpecificList />} />
+                
+
             </Route>
         </Routes>
     );

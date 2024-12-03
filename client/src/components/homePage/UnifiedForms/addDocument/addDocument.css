@@ -1,0 +1,222 @@
+.add-document-form {
+    background-color: white !important; /* Sfondo bianco */
+    padding: 20px; /* Padding interno */
+    border-radius: 10px; /* Bordi arrotondati */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Effetto ombra */
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    justify-content: space-between;
+
+    .custom-dropdown-trigger {
+        padding: 10px;
+        border: 2px solid black;
+        
+        background-color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+        width: 100%;
+        text-align: left;
+        font-size: 16px;
+        color: #000;
+        position: relative;
+
+        .hint {
+          color: #808080; 
+        }
+        .arrow {
+          margin-left: auto;
+          font-size: 14px;
+          color: #000;
+          transform: rotate(0);
+          transition: transform 0.2s ease-in-out;
+        }
+
+      }
+      
+      .custom-dropdown-trigger:hover {
+          border-color: black; /* Cambia colore al passaggio del mouse */
+          background-color: #f9f9f9;
+      }
+      
+      .stakeholders-container{
+          margin-top: 10px;
+          padding: 10px;
+          padding-left: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+          max-height: 200px; /* Altezza massima per lo scroll */
+          overflow-y: auto; /* Aggiungi scroll verticale */
+          
+
+        .checkbox-container {
+            margin-left: 0;
+            padding-left: 0;
+
+            .custom-checkbox .form-check-input {
+              width: 18px;
+              height: 18px;
+              border-radius: 3px; /* Angoli leggermente arrotondati */
+              background-color: #fff;
+
+            }
+    
+            .custom-checkbox .form-check-input:checked {
+              background-color: #007bff; /* Sfondo blu quando selezionato */
+              border-color: #0056b3;
+            }
+    
+            .custom-checkbox .form-check-label {
+              font-size: 14px;
+              color: #000;
+            }
+          }
+          .add-stakeholder {
+            display: flex;
+            align-items: center; /* Centra verticalmente input e bottone */
+            justify-content: flex-start; /* Allinea input e bottone a sinistra */
+            gap: 10px; /* Spaziatura tra input e bottone */
+            width: 100%; /* Assicura che il contenitore si adatti al layout */
+            margin-top: 20px;
+
+            .stakeholder-input {
+                flex: 1; /* Occupa tutto lo spazio disponibile */
+                height: 40px; /* Altezza uniforme */
+                padding: 5px 10px;
+                border: 2px solid black; /* Bordo grigio */
+                border-radius: 5px; /* Angoli arrotondati */
+                box-sizing: border-box; /* Includi padding e bordo nella larghezza totale */
+                min-width: 60%; /* Larghezza minima */
+                margin-top: 13px;
+            }
+            
+            .stakeholder-add-btn {
+                display: flex;
+                align-items: center; /* Centra verticalmente l'icona */
+                justify-content: center; /* Centra orizzontalmente l'icona */
+                height: 40px; /* Stessa altezza dell'input */
+                width: 40px; /* Altezza e larghezza uniforme */
+                border-radius: 5px; /* Angoli arrotondati */
+                background-color: #009E0F; /* Colore verde */
+                transition: background-color 0.3s ease, transform 0.2s ease; /* Animazioni per hover */
+                cursor: pointer;
+            }
+            
+            .stakeholder-add-btn:hover {
+                background-color: #007b0d; /* Colore verde più scuro al passaggio del mouse */
+                transform: translateY(-2px); /* Effetto di sollevamento */
+            }
+            
+            .stakeholder-add-btn i {
+                font-size: 1.8rem; /* Dimensione icona */
+                color: white; /* Colore icona */
+            }
+        }
+        
+        
+      } 
+}
+
+.add-document-form input,
+.add-document-form textarea,
+.add-document-form select {
+    border: 2px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 8px;           /* Spazio interno */
+    margin-bottom: 15px;    /* Distanza tra elementi */
+    outline: none;          /* Rimuove bordo blu standard */
+    box-shadow: none;       /* Rimuove ombre predefinite */
+    transition: border-color 0.3s ease; /* Transizione per il focus */
+    width: 100%;            /* Larghezza massima */
+    box-sizing: border-box; /* Include padding nella larghezza */
+}
+
+.add-document-form input:focus,
+.add-document-form textarea:focus,
+.add-document-form select:focus {
+    border-color: #000; /* Cambia bordo al focus */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Aggiunge un'ombra nera al focus */
+}
+
+.add-document-form button:hover,
+.add-document-form .btn:hover {
+    transform: none !important;
+    transition: none !important;
+}
+
+.add-document-form .form-group {
+    border: 1px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 10px;          /* Spazio interno */
+    margin-bottom: 20px;    /* Distanza tra gruppi */
+    background-color: #f9f9f9; /* Sfondo chiaro */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.add-document-form .form-group:hover {
+    border-color: #000;        /* Mantiene il bordo nero */
+    background-color: #f0f0f0; /* Sfondo leggermente più scuro */
+}
+
+.col-md-5,
+.col-md-6 {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    max-height: max-content;
+}
+
+.col-md-6 .btn-modal {
+    display: flex;
+    height: 50%;
+}
+
+.btn-modal .btn-modal-close,
+.btn-modal .btn-modal-link,
+.btn-modal .btn-modal-save {
+    border: 2px solid #000; /* Bordo nero */
+    border-radius: 5px;     /* Angoli arrotondati */
+    padding: 10px 20px;     /* Spazio interno */
+    font-weight: bold;      /* Testo in grassetto */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra inferiore */
+}
+
+.btn-modal .btn-modal-close {
+    background-color: #f9f9f9; /* Sfondo chiaro */
+    color: #000;              /* Testo nero */
+}
+
+.btn-modal .btn-modal-link {
+    background-color: #9EC5F7; /* Sfondo chiaro */
+    color: #000;              /* Testo nero */
+}
+
+.btn-modal .btn-modal-save {
+    background-color: #003E7C; /* Azzurro */
+    color: #fff;               /* Testo bianco */
+}
+
+.btn-modal .btn-modal-close:hover {
+    background-color: #333;    /* Sfondo scuro */
+    color: #fff;               /* Testo bianco */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+}
+
+.btn-modal .btn-modal-save:hover {
+    background-color: #7BAFEE; /* Azzurro più scuro */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+}
+
+.css-b62m3t-container {
+    border: 2px solid #000;     /* Bordo nero */
+    background-color: #f9f9f9; /* Sfondo chiaro */
+}
+
+.css-b62m3t-container:hover {
+    border-color: #333; /* Cambia il bordo al passaggio del mouse */
+}
+

@@ -1,16 +1,16 @@
-import Document from '../models/document.mjs'
 const SERVER_URL = 'http://localhost:3001/api/documents/'
 
 const listDocuments = async () => {
     try {
-        const documents = await fetch(SERVER_URL, {
+        console.log('sono in documentAPI, listDocuments, ho ricevuto la richiesta di listDocuments');
+        const response = await fetch(SERVER_URL, {
             method: 'GET',
             credentials: 'include'
         })
-
-        .then(response => response.json())
-        //console.log("Sono in documentAPI.js, ho ricevuto dal db i documenti: ",documents);
-        //console.log("le api tornano: ", documents)
+        
+        if (!response.ok) throw new Error('Failed to fetch documents');
+        const documents = await response.json();
+        console.log('sono in documentAPI, listDocuments, ho ricevuto la risposta di listDocuments', documents);
 
         return documents;
     } catch (err) {
@@ -18,11 +18,9 @@ const listDocuments = async () => {
     }
 }
 
-
-
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
-    console.log("sono in documentAPI.js: sto aggiungendo:", document);
+    console.log('sono in documentAPI ',document);
     const response = await fetch(`${SERVER_URL}`, {
 
       method: 'POST',
@@ -31,7 +29,7 @@ const addDocument = async (document) => {
       body: JSON.stringify({
         
         title: document.title, stakeholders: document.stakeholders, 
-        scale: document.scale, issuanceDate: document.issuanceDate, type: document.type, 
+        scale: document.scale, ASvalue:document.ASvalue, issuanceDate: document.issuanceDate, type: document.type, 
         connections: document.connections, language: document.language, pages: `${document.pages}`, 
         description: document.description,
       }),
@@ -46,12 +44,10 @@ const addDocument = async (document) => {
         return documentId;
     }
 
-    return null;
 }
 
 const deleteDocument = async (docId) => {
     try {
-        console.log("in API elimino: ", docId)
         const response = await fetch(SERVER_URL, {
             method: 'DELETE',
             credentials: 'include',
@@ -70,12 +66,11 @@ const deleteDocument = async (docId) => {
 
 const addFiles = async(docId, files) =>{
     try{
-       /* console.log(docId)
-        console.log(files);*/
-        const response= await fetch(`http://localhost:3001/api/upload/${docId}`,{
+        const response= await fetch(`${SERVER_URL}${docId}/files`,{
             method:'POST',
             credentials: 'include',
             body: files,
+            headers:{}
         })
         if (!response.ok) throw new Error('Failed to upload files');
         return
@@ -87,13 +82,12 @@ const addFiles = async(docId, files) =>{
 
 const getFiles = async(docId) =>{
     try {
-        const response = await fetch(`http://localhost:3001/api/files/${docId}`, {
+        const response = await fetch(`${SERVER_URL}${docId}/files`, {
             method: 'GET',
             //credentials: 'include'
         })
         if(response.ok){
             const filesJson = await response.json();
-            console.log("le api sono ok")
             return filesJson;
         }else{
             throw new Error('Error loading files');

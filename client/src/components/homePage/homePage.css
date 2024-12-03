@@ -12,7 +12,23 @@
 
 .add-document-container {
     position: absolute;
-    bottom: 20px;
+    bottom: 5%;
     right: 20px;
     z-index: 1000; /* Assicura che sia visibile sopra la mappa */
 }
+
+
+@media (max-width: 650px) {
+    .add-document-container {
+        bottom: 200px;
+        right: 20px; 
+        z-index: 1000;
+    }
+    .container-fluid {
+        height: 100vh; 
+        position: relative; 
+    }
+    
+    
+}
+

@@ -1,0 +1,154 @@
+.add-link-form{
+  display: flex;
+  align-items: center;
+  min-height: 30vh;
+  margin-top: 20px;
+  font-size: 20px;
+  
+  .rows{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+
+    .name-label{
+      font-weight: bolder;
+      width: 30%;
+      text-align: center;
+    }
+
+    .select{
+      width: 50px;
+    }
+
+    .col-link{
+      .custom-dropdown-trigger {
+        padding: 10px;
+        border: 1px solid black;
+        
+        background-color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+        width: 100%;
+        text-align: left;
+        font-size: 16px;
+        color: #000;
+        position: relative;
+
+        .hint {
+          color: #808080; 
+        }
+        .arrow {
+          margin-left: auto;
+          font-size: 14px;
+          color: #000;
+          transform: rotate(0);
+          transition: transform 0.2s ease-in-out;
+        }
+
+      }
+      
+      .custom-dropdown-trigger:hover {
+          border-color: black; /* Cambia colore al passaggio del mouse */
+          background-color: #f9f9f9;
+      }
+      
+      .checkbox-container {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        max-height: 200px; /* Altezza massima per lo scroll */
+        overflow-y: auto; /* Aggiungi scroll verticale */
+
+        .custom-checkbox .form-check-input {
+          width: 18px;
+          height: 18px;
+          border: 2px solid black; /* Bordo blu */
+          border-radius: 3px; /* Angoli leggermente arrotondati */
+          background-color: #fff;
+          margin-right: 10px;
+        }
+
+        .custom-checkbox .form-check-input:checked {
+          background-color: #007bff; /* Sfondo blu quando selezionato */
+          border-color: #0056b3;
+        }
+
+        .custom-checkbox .form-check-label {
+          font-size: 14px;
+          color: #000;
+        }
+      }    
+    }
+  }
+
+  .btn-modal {
+    margin-top: 20px;
+    display: flex; /* Imposta un layout flessibile */
+    justify-content: space-between; /* Allinea i bottoni agli estremi */
+    align-items: center; /* Centra i bottoni verticalmente */
+    padding: 10px; /* Spaziatura per migliorare l'aspetto */
+
+
+    button {
+      min-width: 120px; /* Imposta una larghezza minima per entrambi i bottoni */
+      height: 40px; /* Imposta un'altezza uniforme */
+      font-size: 16px; /* Dimensione del testo uniforme */
+      border-radius: 5px; /* Bordo arrotondato */
+      padding: 5px 15px; /* Spaziatura interna */
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Effetto ombra */
+  }
+
+    button:hover {
+      background-color: red; /* Cambia colore al passaggio del mouse */
+      color: #fff;
+      transform: translateY(-2px); /* Effetto di sollevamento */
+    }
+
+    button:first-child {
+      margin-right: auto; /* Spinge il primo bottone (Back) a sinistra */
+  }
+
+    button:last-child {
+      margin-left: auto; /* Spinge l'ultimo bottone (Submit) a destra */
+  }
+}
+
+
+.modal{
+
+  .modal-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+    }
+
+  .modal-footer {
+      background-color: #f8f9fa;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px; /* Spaziatura tra i bottoni nel footer */
+    }
+  }
+
+.error-messages p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.toast-container{
+  padding:0;
+  margin: 15% 30%;
+}
+
+.modal-close, .modal-confirm{
+  max-height: 100%;
+  padding-bottom: 45%;
+  backdrop-filter: blur(2px);
+}

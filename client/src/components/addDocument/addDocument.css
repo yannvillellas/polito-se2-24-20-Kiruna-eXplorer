@@ -1,9 +1,0 @@
-.add-document-form {
-    background-color: white !important; /* Assicura uno sfondo bianco */
-}
-
-.add-document-form button:hover,
-.add-document-form .btn:hover {
-    transform: none !important;
-    transition: none !important;
-}
