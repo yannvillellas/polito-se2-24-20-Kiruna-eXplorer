@@ -62,7 +62,7 @@ function DocSpecificList() {
 
     return (
         <>
-            <h2>Dettagli del documento con ID: {docIdInt}</h2>
+            {/*<h2>Dettagli del documento con ID: {docIdInt}</h2>*/}
 
             <Table striped bordered hover className="custom-table shadow-sm">
                 <thead style={{ backgroundColor: "#007bff", color: "white" }}>
