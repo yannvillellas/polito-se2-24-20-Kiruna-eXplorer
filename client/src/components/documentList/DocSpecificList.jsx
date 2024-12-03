@@ -144,8 +144,13 @@ function DocumentData(props) {
             </td>
             <td>{props.document.language}</td>
             <td>{props.document.pages}</td>
-            <td>{position.lat !== "N/A" && position.lng !== "N/A" ? `${position.lat}, ${position.lng}` : "N/A"}</td>
-
+            <td>
+                {position.lat === "N/A" || position.lng === "N/A" ?
+                    <td>N/A</td>
+                    :
+                    <td>{`${parseFloat(position.lat).toFixed(4)}, ${parseFloat(position.lng).toFixed(4)} `}</td>
+                }
+            </td>
         </>
     );
 }
