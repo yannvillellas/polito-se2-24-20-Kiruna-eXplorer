@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Step 4: Install dependencies
-RUN npm install --production
+RUN npm install
 
 # Step 5: Copy all application files (including src directory)
 COPY . .
