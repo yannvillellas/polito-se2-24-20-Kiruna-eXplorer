@@ -113,7 +113,7 @@ function AddDocument(props) {
     const [isArchitecturalScaleFormat, setIsArchitecturalScaleFormat] = useState(false);
 
     const [issuanceDate, setIssuanceDate] = useState("");
-    const [isIssuanceDateValid, setIsIssuanceDateValid] = useState(true);
+    const [isIssuanceDateValid, setIsIssuanceDateValid] = useState(false);
 
     const handleDateChange = (e) => {
         const value = e.target.value;
