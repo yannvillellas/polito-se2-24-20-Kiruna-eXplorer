@@ -112,7 +112,7 @@ function DocList() {
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
       {/* Tabella dei documenti */}
-      <DocumentTable documents={documents} allPositions={allPositions}/>
+      <DocumentTable documents={documents} allPositions={allPositions} />
     </Container>
   );
 }
@@ -143,7 +143,7 @@ function DocumentTable(props) {
           </thead>
           <tbody>
             {documents.map((doc, index) => (
-              <DocumentRow key={index} document={doc} allPositions={props.allPositions}/>
+              <DocumentRow key={index} document={doc} allPositions={props.allPositions} />
             ))}
           </tbody>
         </Table>
@@ -155,7 +155,7 @@ function DocumentTable(props) {
 function DocumentRow(props) {
   return (
     <tr >
-      <DocumentData document={props.document} allPositions={props.allPositions}/>
+      <DocumentData document={props.document} allPositions={props.allPositions} />
       <DocumentFile document={props.document} />
     </tr>
   );
@@ -190,7 +190,9 @@ function DocumentData(props) {
       <td>{props.document.title}</td>
       <td>{props.document.description}</td>
       <td>{props.document.stackeholders}</td>
-      <td>{props.document.scale}</td>
+      <td>
+        {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
+      </td>
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
       <td>
