@@ -4,12 +4,13 @@
 }
 
 
-.custom-table-wrapper {
+/*.custom-table-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* L'altezza del contenitore occupa l'intera finestra */
-  overflow-y: auto; /* Permette lo scroll verticale se necessario */
-}
+  height: 100vh;
+  overflow-y: auto;
+  border: 2px solid #ddd
+}*/
 
 .table {
   flex-grow: 1; /* La tabella si espande per occupare lo spazio disponibile */
@@ -18,22 +19,34 @@
 }
 
 /**/
-.custom-table-wrapper {
+.custom-table-wrapper-main {
   position: relative;
-  max-height: calc(100vh - 220px); /* Adatta alla viewport meno un margine */
-  overflow: hidden; /* Nasconde lo scroll esterno */
-  border: 1px solid #ddd; /* Opzionale: bordo intorno */
+  max-height: calc(100vh - 250px); 
+  overflow: hidden;
+  border: 2px solid #ddd;
 }
 
-.table-scroll {
-  max-height: calc(100vh - 220px); /* Adatta alla viewport meno un margine */
+.table-scroll-main {
+  max-height: calc(100vh - 250px); /* Adatta alla viewport meno un margine */
+  overflow-y: auto; /* Abilita lo scroll verticale */
+}
+
+.custom-table-wrapper-secondary {
+  position: relative;
+  max-height: calc(100vh - 80px); 
+  overflow: hidden;
+  border: 2px solid #ddd;
+}
+
+.table-scroll-secondary {
+  max-height: calc(100vh - 80px); /* Adatta alla viewport meno un margine */
   overflow-y: auto; /* Abilita lo scroll verticale */
 }
 
 .custom-table thead th {
   position: sticky;
   top: 0; /* Fissa l'header in alto */
-  z-index: 2; /* Mantiene l'header sopra il corpo */
+  z-index: 0; /* Mantiene l'header sopra il corpo */
 }
 
 .filters{

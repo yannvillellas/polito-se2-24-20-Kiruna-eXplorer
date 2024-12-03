@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./DocList.css";
+import "./DocList.css"
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
@@ -77,7 +77,7 @@ function DocList() {
       // console.log("Sono in DocList.jsx, ricevo dal db i documenti: ", res);
       setDocuments(res || []);
       setAllDocuments(res || []);
-      //console.log(res)
+      console.log(res)
 
       setAllPositions(pos || []);
 
@@ -212,11 +212,11 @@ function DocList() {
 
 function DocumentTable(props) {
   const { documents } = props;
-
+  console.log(documents)
   return (
     <Container fluid >
-      <div className="custom-table-wrapper">
-      <div className="table-scroll">
+      <div className="custom-table-wrapper-main">
+      <div className="table-scroll-main">
         <Table striped bordered hover className="custom-table shadow-sm">
           <thead style={{ backgroundColor: "#007bff", color: "white" }}>
             <tr>
@@ -246,6 +246,7 @@ function DocumentTable(props) {
 }
 
 function DocumentRow(props) {
+  console.log(props.document.title)
   return (
     <tr >
       <DocumentData document={props.document} allPositions={props.allPositions} />

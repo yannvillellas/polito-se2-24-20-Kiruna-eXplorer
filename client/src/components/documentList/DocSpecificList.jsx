@@ -6,7 +6,7 @@ import { Table, Container, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
-import "./DocSpecificList.css"
+
 
 import associationAPI from "../../api/associationAPI";
 
@@ -65,8 +65,8 @@ function DocSpecificList() {
     return (
         <>
             {/*<h2>Dettagli del documento con ID: {docIdInt}</h2>*/}
-            <div className="custom-table-wrapper">
-            <div className="table-scroll">
+            <div className="custom-table-wrapper-secondary">
+            <div className="table-scroll-secondary">
             <Table striped bordered hover className="custom-table shadow-sm">
                 <thead style={{ backgroundColor: "#007bff", color: "white" }}>
                     <tr>
