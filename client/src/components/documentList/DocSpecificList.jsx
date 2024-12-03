@@ -3,6 +3,7 @@ import "./DocList.css";
 import React, { useEffect, useState } from "react";
 import DocumentAPI from "../../api/documentAPI";
 import { Table, Container, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
 
@@ -136,11 +137,21 @@ function DocumentData(props) {
             <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
             <td>{props.document.description}</td>
             <td>{props.document.stackeholders}</td>
-            <td>{props.document.scale}</td>
+            <td>
+                {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
+            </td>
             <td>{props.document.issuanceDate}</td>
             <td>{props.document.type}</td>
             <td>
-                {props.document.connections}
+                {props.document.connections !== 0 &&
+
+                    <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+                        {props.document.connections}
+                    </Link>
+
+                }
+
+                {props.document.connections === 0 && <p>0</p>}
             </td>
             <td>{props.document.language}</td>
             <td>{props.document.pages}</td>
