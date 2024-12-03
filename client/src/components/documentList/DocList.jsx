@@ -111,6 +111,7 @@ function DocList() {
   return (
     <Container fluid className="mt-3">
       <h1 className="mb-4">"Kiruna's Document Library"</h1>
+      {/*}
       <Card className="mb-4">
         <Card.Body>
           <Form.Group>
@@ -174,6 +175,7 @@ function DocList() {
           </Form.Group>
         </Card.Body>
       </Card>
+      */}
       {/* Tabella dei documenti */}
       <DocumentTable documents={documents} allPositions={allPositions}/>
     </Container>
