@@ -3,10 +3,14 @@ import "./DocList.css";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
-import { Table, Container, Button } from "react-bootstrap";
+import { Table, Container, Button, Row,Col } from "react-bootstrap";
 import { Form, Card } from 'react-bootstrap';
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
+
+import stakeholderAPI from "../../api/stakeholderAPI"
+import scaleAPI from "../../api/scaleAPI"
+import documentTypeAPI from "../../api/documentTypeAPI"
 
 /**
  * 
@@ -20,7 +24,7 @@ function DocList() {
   const [documents, setDocuments] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]);
 
-  const titleOptions = documents.map((doc) => ({
+  /*const titleOptions = documents.map((doc) => ({
     value: doc.docId,
     label: doc.title,
   }));
@@ -28,9 +32,24 @@ function DocList() {
   const stakeholderOptions = documents.map((doc) => ({
     value: doc.docId,
     label: doc.stackeholders,
-  }));
+  }));*/
 
-  const scaleOptions = documents.map((doc) => ({
+  const [stakeholdersOptions, setStakeholdersOptions] = useState([]);
+  const [scaleOptions, setScaleOptions] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([])
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const stakeholderList = await stakeholderAPI.getStakeholders()
+      const scaleList = await scaleAPI.getScales()
+      const typeList = await documentTypeAPI.getDocumentTypes()
+      setStakeholdersOptions(stakeholderList.map((s) => { return { value: s.name, label: s.name } }))
+      setScaleOptions(scaleList.map((s) => { return { value: s.name, label: s.name } }))
+      setTypeOptions(typeList.map((t) => { return { value: t.type, label: t.type } }))
+    }
+    fetchOptions();
+  }, [])
+
+  /*const scaleOptions = documents.map((doc) => ({
     value: doc.docId,
     label: doc.scale,
   }));
@@ -43,7 +62,7 @@ function DocList() {
   const languageOptions = documents.map((doc) => ({
     value: doc.docId,
     label: doc.language,
-  }));
+  }));*/
 
 
 
@@ -58,6 +77,7 @@ function DocList() {
       // console.log("Sono in DocList.jsx, ricevo dal db i documenti: ", res);
       setDocuments(res || []);
       setAllDocuments(res || []);
+      //console.log(res)
 
       setAllPositions(pos || []);
 
@@ -107,13 +127,84 @@ function DocList() {
     }
   };
 
+  const [searchedTitle, setSearchedTitle] = useState("")
 
   return (
-    <Container fluid className="mt-3">
-      <h1 className="mb-4">"Kiruna's Document Library"</h1>
-      {/* Tabella dei documenti */}
-      <DocumentTable documents={documents} allPositions={allPositions} />
-    </Container>
+    <>
+      <Row className="filters">
+        <Col>
+        <Form.Group>
+          <Form.Label>Search by title</Form.Label>
+          <Form.Control
+            type="text"
+            className="border-dark border-2"
+            value={searchedTitle}
+            onChange={(e) => {
+              setSearchedTitle(e.target.value)
+              console.log(e.target.value)
+              setDocuments(() => allDocuments.filter(doc => doc.title.toLowerCase().includes(e.target.value.toLowerCase())))
+            }}
+          />
+        </Form.Group>
+        </Col>
+        <Col>
+        <Form.Group>
+          <Form.Label>Search by stakeholder</Form.Label>
+          <Select
+            options={stakeholdersOptions}
+            isClearable
+            placeholder="Select stakeholder"
+            onChange={(selectedOption) =>{
+              if (selectedOption) {
+                setDocuments(()=>allDocuments.filter((doc)=>doc.stackeholders.includes(selectedOption.value)))
+              } else {
+                setDocuments(allDocuments);
+              }
+            }}
+          />
+        </Form.Group>
+        </Col>
+        <Col>
+        <Form.Group>
+          <Form.Label>Search by type</Form.Label>
+          <Select
+            options={typeOptions}
+            isClearable
+            placeholder="Select type of document"
+            onChange={(selectedOption) =>{
+              if (selectedOption) {
+                setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
+              } else {
+                setDocuments(allDocuments);
+              }
+            }}
+          />
+        </Form.Group>
+        </Col>
+        <Col>
+        <Form.Group>
+          <Form.Label>Search by type</Form.Label>
+          <Select
+            options={scaleOptions}
+            isClearable
+            placeholder="Select scale of document"
+            onChange={(selectedOption) =>{
+              if (selectedOption) {
+                setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
+              } else {
+                setDocuments(allDocuments);
+              }
+            }}
+          />
+        </Form.Group>
+        </Col>
+      </Row>
+      <Container fluid className="mt-3">
+        <h1 className="mb-4">"Kiruna's Document Library"</h1>
+        {/* Tabella dei documenti */}
+        <DocumentTable documents={documents} allPositions={allPositions} />
+      </Container>
+    </>
   );
 }
 
@@ -123,8 +214,9 @@ function DocumentTable(props) {
   const { documents } = props;
 
   return (
-    <Container fluid>
+    <Container fluid >
       <div className="custom-table-wrapper">
+      <div className="table-scroll">
         <Table striped bordered hover className="custom-table shadow-sm">
           <thead style={{ backgroundColor: "#007bff", color: "white" }}>
             <tr>
@@ -147,6 +239,7 @@ function DocumentTable(props) {
             ))}
           </tbody>
         </Table>
+      </div>
       </div>
     </Container>
   );
@@ -188,7 +281,7 @@ function DocumentData(props) {
     } else {
       setTruncatedDescription(description);
     }
-  }, [isCompact, props.document.description]); 
+  }, [isCompact, props.document.description]);
 
   useEffect(() => {
     console.log("Is compact?", isCompact);
