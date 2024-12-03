@@ -3,10 +3,16 @@
   background-color: #ffeb3b !important; /* Colore evidenziato */
 }
 
+
 .custom-table-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* L'altezza è impostata al 100% della viewport */
-  overflow-y: auto;
+  height: 100vh; /* L'altezza del contenitore occupa l'intera finestra */
+  overflow-y: auto; /* Permette lo scroll verticale se necessario */
 }
 
+.table {
+  flex-grow: 1; /* La tabella si espande per occupare lo spazio disponibile */
+  overflow-y: auto; /* Abilita lo scroll all'interno della tabella */
+  min-height: 50vh; /* Imposta un'altezza minima per garantire la visibilità */
+}

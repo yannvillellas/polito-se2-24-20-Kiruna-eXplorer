@@ -163,6 +163,37 @@ function DocumentRow(props) {
 function DocumentData(props) {
   const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
 
+
+  const [isCompact, setIsCompact] = useState(false);
+  const [truncatedDescription, setTruncatedDescription] = useState(props.document.description ? props.document.description.split(" ").slice(0, 3).join(" ") + "..." : "");
+
+  // Effetto per tracciare la larghezza della finestra
+  useEffect(() => {
+    const handleResize = () => {
+      setIsCompact(window.innerWidth < 1790); // Cambia la soglia secondo necessità
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Imposta lo stato iniziale
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const description = props.document.description;
+    if (isCompact && description) {
+      setTruncatedDescription(description.split(" ").slice(0, 3).join(" ") + "...");
+    } else {
+      setTruncatedDescription(description);
+    }
+  }, [isCompact, props.document.description]); 
+
+  useEffect(() => {
+    console.log("Is compact?", isCompact);
+  }, [isCompact]);
+
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -188,7 +219,7 @@ function DocumentData(props) {
   return (
     <>
       <td>{props.document.title}</td>
-      <td>{props.document.description}</td>
+      <td>{truncatedDescription}</td>
       <td>{props.document.stackeholders}</td>
       <td>
         {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
