@@ -258,8 +258,21 @@ function DocumentData(props) {
 
 
   const [isCompact, setIsCompact] = useState(false);
-  const [truncatedDescription, setTruncatedDescription] = useState(props.document.description ? props.document.description.split(" ").slice(0, 3).join(" ") + "..." : "");
+  //const [truncatedDescription, setTruncatedDescription] = useState(props.document.description ? props.document.description.split(" ").slice(0, 3).join(" ") + "..." : "");
 
+  // Stato per tracciare se la descrizione è espansa
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Troncamento della descrizione
+  const truncatedDescription = props.document.description
+    ? (props.document.description.split(" ").length>10? props.document.description.split(" ").slice(0, 10).join(" ") + "..." : props.document.description)
+    : "";
+
+  // Descrizione mostrata in base allo stato `isExpanded`
+  const displayedDescription = isExpanded
+    ? props.document.description
+    : truncatedDescription;
+  
   // Effetto per tracciare la larghezza della finestra
   useEffect(() => {
     const handleResize = () => {
@@ -274,7 +287,7 @@ function DocumentData(props) {
     };
   }, []);
 
-  useEffect(() => {
+  /*useEffect(() => {
     const description = props.document.description;
     if (isCompact && description) {
       setTruncatedDescription(description.split(" ").slice(0, 3).join(" ") + "...");
@@ -285,7 +298,7 @@ function DocumentData(props) {
 
   useEffect(() => {
     console.log("Is compact?", isCompact);
-  }, [isCompact]);
+  }, [isCompact]);*/
 
   useEffect(() => {
     const fetchPosition = async () => {
@@ -312,7 +325,14 @@ function DocumentData(props) {
   return (
     <>
       <td>{props.document.title}</td>
-      <td>{truncatedDescription}</td>
+      <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
+        {displayedDescription}
+        {props.document.description.split(" ").length > 10 && (
+          <span style={{ color: "blue", textDecoration: "underline" }}>
+            {isExpanded ? " Mostra meno" : " Mostra di più"}
+          </span>
+        )}
+      </td>
       <td>{props.document.stackeholders}</td>
       <td>
         {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
