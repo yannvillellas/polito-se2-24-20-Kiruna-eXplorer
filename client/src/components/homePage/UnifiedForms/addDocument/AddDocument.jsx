@@ -188,7 +188,7 @@ function AddDocument(props) {
                                 cursor: "pointer"
                             }}
                         >
-                            {props.addingField === "docType" ? "Add new document type" : "Add new scale"}
+                            {addingField === "document type" ? "Add new document type" : "Add new scale"}
                         </Button>
                     </div>
                 </>
@@ -288,7 +288,7 @@ function AddDocument(props) {
 
     return (
         <>
-            <Modal show={showModalNewOption} onHide={() => setShowModalNewOption(false)}>
+            <Modal show={showModalNewOption} onHide={() => {setShowModalNewOption(false); setNewOption("")}}>
                 <Modal.Header closeButton>
                     <Modal.Title>Define new {typeOfNewOption}</Modal.Title>
                 </Modal.Header>
@@ -301,7 +301,7 @@ function AddDocument(props) {
                     />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModalNewOption(false)}>Close</Button>
+                    <Button variant="secondary" onClick={() => {setShowModalNewOption(false); setNewOption("")}}>Close</Button>
                     <Button variant="primary" onClick={() => {setShowModalNewOption(false);addNewOption()}}>Add</Button>
                 </Modal.Footer>
             </Modal>
