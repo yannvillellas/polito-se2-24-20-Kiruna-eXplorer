@@ -131,6 +131,7 @@ function DocList() {
 
   return (
     <>
+      <h2 className="mb-4">"Kiruna's Document Library"</h2>
       <Row className="filters">
         <Col>
         <Form.Group>
@@ -199,8 +200,7 @@ function DocList() {
         </Form.Group>
         </Col>
       </Row>
-      <Container fluid className="mt-3">
-        <h1 className="mb-4">"Kiruna's Document Library"</h1>
+      <Container fluid >
         {/* Tabella dei documenti */}
         <DocumentTable documents={documents} allPositions={allPositions} />
       </Container>
@@ -330,7 +330,7 @@ function DocumentData(props) {
         {displayedDescription}
         {props.document.description.split(" ").length > 10 && (
           <span style={{ color: "blue", textDecoration: "underline" }}>
-            {isExpanded ? " Mostra meno" : " Mostra di più"}
+            {isExpanded ? " Reduce" : " Show all"}
           </span>
         )}
       </td>

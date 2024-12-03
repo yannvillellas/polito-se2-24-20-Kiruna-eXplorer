@@ -66,34 +66,34 @@ function DocSpecificList() {
         <>
             {/*<h2>Dettagli del documento con ID: {docIdInt}</h2>*/}
             <div className="custom-table-wrapper-secondary">
-            <div className="table-scroll-secondary">
-            <Table striped bordered hover className="custom-table shadow-sm">
-                <thead style={{ backgroundColor: "#007bff", color: "white" }}>
-                    <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Stakeholders</th>
-                        <th>Scale</th>
-                        <th>Issuance Date</th>
-                        <th>Type</th>
-                        <th>Connections</th>
-                        <th>Language</th>
-                        <th>Pages</th>
-                        <th>(lat, lng)</th>
-                        <th>Files</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {documentShown.map((doc, index) => (
-                        <DocumentRow key={index}
-                            document={doc}
-                            isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
-                            allPositions={allPositions}
-                        />
-                    ))}
-                </tbody>
-            </Table>;
-            </div>
+                <div className="table-scroll-secondary">
+                    <Table striped bordered hover className="custom-table shadow-sm">
+                        <thead style={{ backgroundColor: "#007bff", color: "white" }}>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Stakeholders</th>
+                                <th>Scale</th>
+                                <th>Issuance Date</th>
+                                <th>Type</th>
+                                <th>Connections</th>
+                                <th>Language</th>
+                                <th>Pages</th>
+                                <th>(lat, lng)</th>
+                                <th>Files</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {documentShown.map((doc, index) => (
+                                <DocumentRow key={index}
+                                    document={doc}
+                                    isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
+                                    allPositions={allPositions}
+                                />
+                            ))}
+                        </tbody>
+                    </Table>;
+                </div>
             </div>
 
 
@@ -122,6 +122,18 @@ function DocumentRow(props) {
 function DocumentData(props) {
     const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
 
+    // Stato per tracciare se la descrizione è espansa
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    // Troncamento della descrizione
+    const truncatedDescription = props.document.description
+        ? (props.document.description.split(" ").length > 10 ? props.document.description.split(" ").slice(0, 10).join(" ") + "..." : props.document.description)
+        : "";
+
+    // Descrizione mostrata in base allo stato `isExpanded`
+    const displayedDescription = isExpanded
+        ? props.document.description
+        : truncatedDescription;
 
     useEffect(() => {
         const fetchPosition = async () => {
@@ -139,7 +151,14 @@ function DocumentData(props) {
     return (
         <>
             <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
-            <td>{props.document.description}</td>
+            <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
+                {displayedDescription}
+                {props.document.description.split(" ").length > 10 && (
+                    <span style={{ color: "blue", textDecoration: "underline" }}>
+                        {isExpanded ? "Reduce" : " Show all "}
+                    </span>
+                )}
+            </td>
             <td>{props.document.stackeholders}</td>
             <td>
                 {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
