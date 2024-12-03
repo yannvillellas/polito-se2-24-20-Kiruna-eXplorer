@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import associationAPI from "../../../../api/associationAPI";
 import { Modal, Row, Col, Form, Button } from "react-bootstrap";
-import "./link.css";
+import "./Link.css";
 import Select from "react-select";
 
 function Link(props) {

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Step 4: Install dependencies
-RUN npm install
+RUN npm install --timeout=600000
 
 # Step 5: Copy the application files
 COPY . .
