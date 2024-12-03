@@ -9,12 +9,13 @@ function Header(props) {
     <div className="header-wrapper">
       <div className="container-fluid">
         <div className="header-left">
-          <img
-            src={logo}
-            alt="Kiruna-Express Logo"
-            className="logo-img"
-            onClick={() => navigate('/mainPage')}
-          />
+          <Link to="/mainPage">
+            <img
+              src={logo}
+              alt="Kiruna-Express Logo"
+              className="logo-img"
+              />
+          </Link>
           <span className="separator">|</span>
           <nav className="header-center">
             <ul>

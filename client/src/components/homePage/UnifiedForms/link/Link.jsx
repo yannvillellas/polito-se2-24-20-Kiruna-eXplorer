@@ -167,7 +167,7 @@ function Link(props) {
               Link Type
             </Form.Label>
             <Col sm="8" className="col-link">
-              <div
+              <button
                 className="custom-dropdown-trigger"
                 onClick={() => setShowCheckboxes(!showCheckboxes)}
               >
@@ -177,7 +177,7 @@ function Link(props) {
                   <span className="hint">Select type(s)</span>
                 )}
                 <span className="arrow">&#9662;</span>
-              </div>
+              </button>
 
               {showCheckboxes && (
                 <div className="checkbox-container">

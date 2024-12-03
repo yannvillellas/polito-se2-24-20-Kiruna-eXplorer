@@ -325,7 +325,7 @@ function AddDocument(props) {
                         <Form.Group className="mb-3">
                             <Form.Label>Stakeholders*</Form.Label>
                             
-                            <div
+                            <button
                                 className="custom-dropdown-trigger"
                                 onClick={() => setShowCheckboxes(!showCheckboxes)}
                             >
@@ -336,8 +336,7 @@ function AddDocument(props) {
                                 )}
 
                                 <span className="arrow">&#9662;</span>
-                            </div>
-
+                            </button>
                             {showCheckboxes && (
                                 <div className="stakeholders-container">
                                     <div className="checkbox-container">
