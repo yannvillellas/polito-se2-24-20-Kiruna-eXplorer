@@ -157,7 +157,7 @@ function Link(props) {
                   }}
                 />
               ) : (
-                <Form.Label>{props.title}</Form.Label>
+                <Form.Label  style={{border:"2px solid", width: "100%", padding:"8px 5px"}}>{props.title}</Form.Label>
               )}
             </Col>
           </Form.Group>

@@ -10,6 +10,7 @@ import {TiDocumentAdd} from "react-icons/ti"
 import link from "../../../asset/link.svg"
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addDocument/addOriginalSource/AddOriginalSource";
+import { Tooltip, OverlayTrigger } from "react-bootstrap"; // Importa Tooltip e OverlayTrigger
 
 
 
@@ -90,6 +91,13 @@ function UnifiedForms(props) {
         }));
     };
 
+    const renderTooltip = (message) => (props) => (
+        <Tooltip id="button-tooltip" {...props}>
+          {message}
+        </Tooltip>
+      );
+      
+
     useEffect(() => {
         console.log("Sono in UnifiedForms, newDocument:", newDocument);
     }, [newDocument]);
@@ -120,22 +128,34 @@ function UnifiedForms(props) {
     return (
         <>  
         <div className="btn-unified-forms">
-            <Button
-                    className=" rounded-circle d-flex align-items-center justify-content-center btn-add-document"
-                    variant="none"
-                    style={{ width: "50px", height: "50px", }}
-                    onClick={onBtnSelectAdd}
-                >
-                    <i className="bi bi-plus" style={{ fontSize: "2rem" }}></i>
-                </Button>
+            <OverlayTrigger
+                placement="top" // Posizione del tooltip rispetto al bottone
+                delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
+                overlay={renderTooltip("Add new Document")}
+            >
                 <Button
-                    className=" rounded-circle d-flex align-items-center justify-content-center btn-add-link"
-                    variant="none"
-                    style={{ width: "50px", height: "50px" }}
-                    onClick={() => setOnlyLinkForm(true)}
-                >
-                    <i className="bi bi-link-45deg"  style={{ fontSize: "2rem" }}></i>
-            </Button>
+                        className=" rounded-circle d-flex align-items-center justify-content-center btn-add-document"
+                        variant="none"
+                        style={{ width: "50px", height: "50px", }}
+                        onClick={onBtnSelectAdd}
+                    >
+                        <i className="bi bi-plus" style={{ fontSize: "2rem" }}></i>
+                </Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+                placement="top" // Posizione del tooltip rispetto al bottone
+                delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
+                overlay={renderTooltip("Insert new Association")}
+            >
+                <Button
+                        className=" rounded-circle d-flex align-items-center justify-content-center btn-add-link"
+                        variant="none"
+                        style={{ width: "50px", height: "50px" }}
+                        onClick={() => setOnlyLinkForm(true)}
+                    >
+                        <i className="bi bi-link-45deg"  style={{ fontSize: "2rem" }}></i>
+                </Button>
+            </OverlayTrigger>
         </div>
             
 
