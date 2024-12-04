@@ -43,7 +43,9 @@ describe("scaleDAO Tests", () => {
 
   describe("addScale", () => {
     test("should add a new scale and return its ID", async () => {
-      db.run.mockImplementation((sql, params, callback) => callback(null, { lastID: 123 }));
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 123 }, null);
+      });
 
       const result = await addScale("1:300");
       expect(result).toBe(123);

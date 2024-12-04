@@ -42,7 +42,9 @@ describe("stakeholdersDAO Tests", () => {
 
   describe("addStakeholder", () => {
     test("should add a new stakeholder and return its ID", async () => {
-      db.run.mockImplementation((sql, params, callback) => callback(null, { lastID: 123 }));
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 123 }, null);
+      });
 
       const result = await addStakeholder("Stakeholder3");
       expect(result).toBe(123);

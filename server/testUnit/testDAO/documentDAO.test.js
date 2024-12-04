@@ -36,13 +36,12 @@ describe("documentDAO Tests", () => {
       const result = await listDocuments();
       expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(Document);
-      expect(result[0].stakeholders).toBe("Stakeholder1");
+      expect(result[0].stackeholders).toBe("Stakeholder1");
       expect(db.all).toHaveBeenCalledTimes(2);
     });
 
     test("should return an empty array if no documents exist", async () => {
       db.all.mockImplementationOnce((sql, params, callback) => callback(null, []));
-
       const result = await listDocuments();
       expect(result).toEqual([]);
       expect(db.all).toHaveBeenCalledTimes(1);
@@ -82,9 +81,11 @@ describe("documentDAO Tests", () => {
 
   describe("addDocument", () => {
     test("should add a new document and stakeholders, returning its ID", async () => {
-      db.run
-        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 1 })) // Insert document
-        .mockImplementationOnce((sql, params, callback) => callback(null)); // Insert stakeholders
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 1 }, null);
+      });
+
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
 
       const newDocument = {
         title: "title1",
@@ -123,9 +124,11 @@ describe("documentDAO Tests", () => {
     });
 
     test("should reject on stakeholders insertion error", async () => {
-      db.run
-        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 1 })) // Insert document
-        .mockImplementationOnce((sql, params, callback) => callback(new Error("Stakeholder insert error"), null)); // Insert stakeholders
+      
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 1 }, null);
+      });
+      db.run.mockImplementationOnce((sql, params, callback) => callback(new Error("Stakeholder insert error"), null)); // Insert stakeholders
 
       const newDocument = {
         title: "title1",
@@ -140,7 +143,7 @@ describe("documentDAO Tests", () => {
       };
 
       await expect(addDocument(newDocument)).rejects.toThrow("Stakeholder insert error");
-      expect(db.run).toHaveBeenCalledTimes(2);
+      expect(db.run).toHaveBeenCalledTimes(3);  //because we have 2 stakeholders--> 1 call for the document and 1 call for each stakeholder
     });
   });
 

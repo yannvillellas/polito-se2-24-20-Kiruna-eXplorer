@@ -42,7 +42,9 @@ describe("documentTypeDAO Tests", () => {
 
   describe("addDocumentType", () => {
     test("should add a new document type and return its ID", async () => {
-      db.run.mockImplementation((sql, params, callback) => callback(null, { lastID: 123 }));
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 123 }, null);
+      });
 
       const result = await addDocumentType("NewType");
       expect(result).toBe(123);

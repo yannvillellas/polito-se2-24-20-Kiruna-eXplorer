@@ -23,10 +23,12 @@ describe("areaDAO Tests", () => {
     });
 
     test("should insert a new area and resolve with its ID", async () => {
-      db.get.mockImplementation((sql, params, callback) => callback(null, null));
-      db.run
-        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 456 })) // Insert Area
-        .mockImplementationOnce((sql, params, callback) => callback(null)); // Insert AreaAssociation
+      db.get.mockImplementationOnce((sql, params, callback) => callback(null, null));
+      
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 456 }, null);
+      });
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null)); // Insert AreaAssociation
 
       const result = await addArea(1, "type1", "coordinates");
       expect(result).toBe(456);
@@ -61,9 +63,11 @@ describe("areaDAO Tests", () => {
 
     test("should reject on database error during AreaAssociation insertion for new area", async () => {
       db.get.mockImplementation((sql, params, callback) => callback(null, null));
-      db.run
-        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 456 })) // Insert Area
-        .mockImplementationOnce((sql, params, callback) => callback(new Error("Association error"), null)); // Insert AreaAssociation
+      
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+        callback.call({ lastID: 456}, null);
+      });
+      db.run.mockImplementationOnce((sql, params, callback) => callback(new Error("Association error"), null)); // Insert AreaAssociation
 
       await expect(addArea(1, "type1", "coordinates")).rejects.toThrow("Association error");
       expect(db.get).toHaveBeenCalledTimes(1);

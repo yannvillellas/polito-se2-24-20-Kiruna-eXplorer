@@ -66,9 +66,10 @@ describe("associationDAO Tests", () => {
   describe("insertAssociation", () => {
     test("should insert an association and return its ID", async () => {
       getTypeIdByType.mockResolvedValue(42);
-      db.run
-        .mockImplementationOnce((sql, params, callback) => callback(null)) // Update connections
-        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 123 })); // Insert association
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null)) // Update connections
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+          callback.call({ lastID: 123 }, null);
+        });
 
       const association = { doc1: 101, doc2: 102, type: "LinkType" };
 
