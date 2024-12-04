@@ -127,7 +127,7 @@ describe('POST /api/documents', () => {
     expect(response.status).toBe(201);
   });
 
-  it('should return 400 when the document has validation errors', async () => {
+  it('should return 422 when the document has validation errors', async () => {
     const document = {
       docId: 1,
       title: 'titolo1',
@@ -156,10 +156,10 @@ describe('POST /api/documents', () => {
 
     const response = await request(app).post('/api/documents').send(document);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
   });
 
-  it('should return 400 for missing parameters', async () => {
+  it('should return 422 for missing parameters', async () => {
     const document = {
       docId: 1,
       title: 'titolo1',
@@ -188,7 +188,7 @@ describe('POST /api/documents', () => {
 
     const response = await request(app).post('/api/documents').send(document);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
 
   });
 
