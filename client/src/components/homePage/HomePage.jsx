@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import PropTypes from 'prop-types';
 
-import Map from './map/Map.jsx'
-import "leaflet/dist/leaflet.css";
-
+import Map from './map/Map.jsx';
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
 import UnifiedForms from "./UnifiedForms/UnifiedForms";
@@ -14,11 +12,6 @@ import areaAPI from "../../api/areaAPI";
 import documentTypeAPI from "../../api/documentTypeAPI.js";
 import scaleAPI from "../../api/scaleAPI.js";
 import stakeholderAPI from "../../api/stakeholderAPI.js";
-/** BUGS:
- *  
- *
- *
- */
 
 
 function HomePage(props) {
