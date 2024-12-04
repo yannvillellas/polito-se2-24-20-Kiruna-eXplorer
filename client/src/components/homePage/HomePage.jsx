@@ -1,18 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./homePage.css";
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
+import PropTypes from 'prop-types';
 
 import Map from './map/Map.jsx'
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
 
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
@@ -29,11 +22,7 @@ import stakeholderAPI from "../../api/stakeholderAPI.js";
 
 
 function HomePage(props) {
-
-    const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState(props.isLoggedIn ? true : true); // da modificare
-    const [isUrbanPlanner, setIsUrbanPlanner] = useState(props.role === 'urbanPlanner' ? true : false);
-
+    const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
     const [documents, setDocuments] = useState([]); // if is here will be easier for tehe shenzen diagram; position is different for the map and for shenzen diagram so will be managed in their componetns
     const [errorMsg, setErrorMsg] = useState([]);
 
@@ -41,25 +30,26 @@ function HomePage(props) {
         const fetchDocuments = async () => {
             try {
                 const documents = await DocumentAPI.listDocuments();
-
                 const positions = await PositionAPI.listPositions();
-                documents.forEach(document => {
-                    const position = positions.find(position => position.docId === document.docId);
-                    if (position) {
-                        document.lat = position.latitude;
-                        document.lng = position.longitude;
-                    }
-                });
-
-                setDocuments(documents);
-
-
+                const updatedDocuments = updateDocumentsWithPositions(documents, positions);
+                setDocuments(updatedDocuments);
             } catch (error) {
                 console.error("Error fetching documents:", error);
             }
         }
         fetchDocuments();
     }, []);
+
+    const updateDocumentsWithPositions = (documents, positions) => {
+        return documents.map(document => {
+            const position = positions.find(position => position.docId === document.docId);
+            if (position) {
+                document.lat = position.latitude;
+                document.lng = position.longitude;
+            }
+            return document;
+        });
+    };
 
 
     const handleUpload = async (document) => {
@@ -78,28 +68,6 @@ function HomePage(props) {
 
     const handleAddArea = async (document) => {
         try {
-            /**
-             *         
-             * if (layerType === "polygon") {
-                    shape = {
-                        id: Date.now(),
-                        type: layerType,
-                        latlngs: JSON.stringify(layer.getLatLngs()),
-                    };
-                } else if (layerType === "circle") {
-                    shape = {
-                        id: Date.now(),
-                        type: layerType,
-                        center: JSON.stringify(layer.getLatLng()),
-                        radius: JSON.stringify(layer.getRadius()),
-                    };
-                } else if (layerType === "circlemarker") {
-                    shape = {
-                        id: Date.now(),
-                        type: layerType,
-                        center: JSON.stringify(layer.getLatLng()),
-                    };
-             */
             console.log("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
             const areaId = await areaAPI.addArea(document.docId, document.area);
             console.log("Sono in Homepage.jsx, handleAddArea, ho ricevuto dalle API areaId:", areaId);
@@ -125,11 +93,6 @@ function HomePage(props) {
             console.log("sono in handleAddDocument2")
             await PositionAPI.addPosition(position);
             console.log("sono in handleAddDocument3")
-
-            // Here i check if there are files to upload (and so i not create folders if there are no files)
-            /*if(document.files && document.files.length > 0){
-                // await handleUpload(docId, document.files);
-            }*/
 
             let areaId = null;
             if (document.area) {
@@ -176,6 +139,10 @@ function HomePage(props) {
         }
     }
 
+    const handleCloseError = (error) => {
+        setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error));
+    };
+
     const handleModifyPosition = async (docId, lat, lng) => {
         try {
             await PositionAPI.modifyPosition(docId, lat, lng);
@@ -205,7 +172,7 @@ function HomePage(props) {
                 {errorMsg.map((error) => (
                     <Toast
                         key={errorMsg.indexOf(error)}
-                        onClose={() => setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error))}
+                        onClose={() => handleCloseError(error)}
                     >
                         <Toast.Header closeButton>
                             <strong className="me-auto">Errore</strong>
@@ -230,5 +197,8 @@ function HomePage(props) {
         </Container>
     );
 }
+HomePage.propTypes = {
+    role: PropTypes.string.isRequired
+};
 
 export default HomePage;
