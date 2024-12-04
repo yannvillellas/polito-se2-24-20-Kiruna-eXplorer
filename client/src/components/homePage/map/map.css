@@ -5,6 +5,12 @@
   padding: 0;
 }
 
+.leaflet-control-zoom{
+  display: none;
+}
+
+
+
 .map-wrapper {
   position: relative;
   width: 100%;
@@ -57,7 +63,7 @@
 
 .btn-municipality{
   position: absolute;
-  bottom: 15%;
+  bottom: 5%;
   left: 20px;
   z-index: 1000; /* Assicura che sia visibile sopra la mappa */
 }

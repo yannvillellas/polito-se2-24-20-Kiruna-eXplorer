@@ -1,141 +1,196 @@
-import { test, expect, jest } from "@jest/globals"
-import sqlite3 from 'sqlite3';
-const { Database } = sqlite3.verbose();
-
-import { getAssociations, insertAssociation, deleteAssociation, UpdateAssociation } from "../../src/dao/associationDAO.mjs";
-//import { getTypeIdByType } from "../../src/dao/LinkTypeDAO.mjs";
+import { test, expect, jest, describe, beforeEach } from "@jest/globals";
+import {
+  getAllAssociations,
+  getAssociations,
+  insertAssociation,
+  deleteAssociation,
+  UpdateAssociation,
+  CheckAssociation,
+} from "../../src/dao/associationDAO.mjs";
+import { db } from "../../src/database/db.mjs";
 import Association from "../../src/models/association.mjs";
-import { getTypeIdByType } from "../../src/dao/LinkTypeDAO.mjs";
-import * as LinkTypeDAO from "../../src/dao/LinkTypeDAO.mjs";
+import { getTypeIdByType } from "../../src/dao/linkTypeDAO.mjs";
 
-describe("Association DAO Tests", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-        jest.resetAllMocks();
+jest.mock("../../src/database/db.mjs");
+jest.mock("../../src/dao/linkTypeDAO.mjs");
+
+describe("associationDAO Tests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  describe("getAllAssociations", () => {
+    test("should return all associations", async () => {
+      const mockRows = [
+        { aId: 1, doc1: 101, doc2: 102, typeId: 5 },
+        { aId: 2, doc1: 103, doc2: 104, typeId: 6 },
+      ];
+      db.all.mockImplementation((sql, params, callback) => callback(null, mockRows));
+
+      const result = await getAllAssociations();
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBeInstanceOf(Association);
+      expect(result[0].doc1).toBe(101);
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
 
-    describe("getAssociations", () => {
-        
-        test("should return a list of Association instances", async () => {
-            const mockRows = [
-                { aId: 1, doc1: 1, doc2: 2, typeId: 1 },
-                { aId: 2, doc1: 2, doc2: 3, typeId: 2 }
-            ];
+    test("should reject on database error", async () => {
+      db.all.mockImplementation((sql, params, callback) => callback(new Error("DB error"), null));
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, mockRows); // Simula il recupero di righe dal database
-            });
+      await expect(getAllAssociations()).rejects.toThrow("DB error");
+      expect(db.all).toHaveBeenCalledTimes(1);
+    });
+  });
 
-            const result = await getAssociations(1);
-            expect(result).toHaveLength(2);
-            expect(result[0]).toBeInstanceOf(Association); // Controlla che il risultato sia un'istanza di Association
-            expect(result[0].doc1).toBe(1);
-            expect(result[1].doc1).toBe(2);
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-        
+  describe("getAssociations", () => {
+    test("should return associations for a given docId", async () => {
+      const mockRows = [{ aId: 1, doc1: 101, doc2: 102, typeId: 5 }];
+      db.all.mockImplementation((sql, params, callback) => callback(null, mockRows));
 
-        test("should return an empty array if no associations exist", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, []); // Simula il recupero di un array vuoto
-            });
-
-            const result = await getAssociations(1);
-            expect(result).toHaveLength(0);
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simula un errore nel database
-            });
-
-            await expect(getAssociations(1)).rejects.toThrow("Database error");
-        });
+      const result = await getAssociations(101);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(Association);
+      expect(result[0].doc1).toBe(101);
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
 
-    
-    describe("insertAssociation", () => {
-        test("should correctly add an association to the database (no error) ", async () => {
-            const validAssociation = {
-                doc1: 1,
-                doc2: 2,
-                type: "direct consequence"
-            };
+    test("should reject on database error", async () => {
+      db.all.mockImplementation((sql, params, callback) => callback(new Error("DB error"), null));
 
-            const typeId = await getTypeIdByType(validAssociation.type);
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simula l'aggiornamento di una riga nel database
-            });
-
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, [{ typeId: 1 }]); // Simula il recupero di un typeId dal database
-            });
-
-            const result = await insertAssociation(validAssociation).catch((err) => console.log(err)); // cannt use expect because of this.lastId
-            expect(Database.prototype.run).toHaveBeenCalledTimes(2);
-            
-        })
+      await expect(getAssociations(101)).rejects.toThrow("DB error");
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
-    
+  });
 
-    describe("deleteAssociation", () => {
-        test("should correctly delete an association from the database (no error) ", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simula la cancellazione di una riga dal database
-            });
-
-            await deleteAssociation(1);
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
+  describe("insertAssociation", () => {
+    test("should insert an association and return its ID", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null)) // Update connections
+      db.run.mockImplementationOnce(function (sql, params, callback) {
+          callback.call({ lastID: 123 }, null);
         });
 
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error")); // Simula un errore nel database
-            });
+      const association = { doc1: 101, doc2: 102, type: "LinkType" };
 
-            await expect(deleteAssociation(1)).rejects.toThrow("Database error");
-        });
+      const result = await insertAssociation(association);
+      expect(result).toBe(123);
+      expect(getTypeIdByType).toHaveBeenCalledWith("LinkType");
+      expect(db.run).toHaveBeenCalledTimes(2);
     });
 
-    describe("UpdateAssociation", () => {
-        test("should correctly update an association in the database (no error) ", async () => {
-            const validAssociation = {
-                doc1: 1,
-                doc2: 2,
-                type: "direct consequence"
-            };
+    test("should reject if type ID is not found", async () => {
+      getTypeIdByType.mockRejectedValue(new Error("Type not found"));
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simula l'aggiornamento di una riga nel database
-            });
+      const association = { doc1: 101, doc2: 102, type: "InvalidType" };
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, [{ typeId: 1 }]); // Simula il recupero di un typeId dal database
-            });
-
-            await UpdateAssociation(validAssociation);
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on database error", async () => {
-            const invalidAssociation = {
-                aId: 1,
-                doc1: 1,
-                doc2: 2,
-                type: "direct consequence"
-            };
-
-            const typeId = await getTypeIdByType(invalidAssociation.type);
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error")); // Simula un errore nel database
-            });
-
-            await expect(UpdateAssociation(invalidAssociation)).rejects.toThrow("Database error");
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
+      await expect(insertAssociation(association)).rejects.toThrow("Type not found");
+      expect(getTypeIdByType).toHaveBeenCalledTimes(1);
     });
 
+    test("should reject on database error during connection update", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.run.mockImplementation((sql, params, callback) => callback(new Error("Update error")));
+
+      const association = { doc1: 101, doc2: 102, type: "LinkType" };
+
+      await expect(insertAssociation(association)).rejects.toThrow("Update error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject on database error during association insert", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.run
+        .mockImplementationOnce((sql, params, callback) => callback(null)) // Update connections
+        .mockImplementationOnce((sql, params, callback) => callback(new Error("Insert error"))); // Insert association
+
+      const association = { doc1: 101, doc2: 102, type: "LinkType" };
+
+      await expect(insertAssociation(association)).rejects.toThrow("Insert error");
+      expect(db.run).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("deleteAssociation", () => {
+    test("should delete an association successfully", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(null));
+
+      await expect(deleteAssociation(1)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject on database error", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(new Error("Delete error")));
+
+      await expect(deleteAssociation(1)).rejects.toThrow("Delete error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("UpdateAssociation", () => {
+    test("should update an association successfully", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.run.mockImplementation((sql, params, callback) => callback(null));
+
+      const association = { aId: 1, doc1: 101, doc2: 102, type: "LinkType" };
+
+      await expect(UpdateAssociation(association)).resolves.toBeUndefined();
+      expect(getTypeIdByType).toHaveBeenCalledWith("LinkType");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject if type ID is not found", async () => {
+      getTypeIdByType.mockRejectedValue(new Error("Type not found"));
+
+      const association = { aId: 1, doc1: 101, doc2: 102, type: "InvalidType" };
+
+      await expect(UpdateAssociation(association)).rejects.toThrow("Type not found");
+      expect(getTypeIdByType).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject on database error during update", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.run.mockImplementation((sql, params, callback) => callback(new Error("Update error")));
+
+      const association = { aId: 1, doc1: 101, doc2: 102, type: "LinkType" };
+
+      await expect(UpdateAssociation(association)).rejects.toThrow("Update error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("CheckAssociation", () => {
+    test("should return rows if association exists", async () => {
+      const mockRows = [{ aId: 1, doc1: 101, doc2: 102, typeId: 42 }];
+      getTypeIdByType.mockResolvedValue(42);
+      db.all.mockImplementation((sql, params, callback) => callback(null, mockRows));
+
+      const association = { doc1: 101, doc2: 102, type: "LinkType" };
+
+      const result = await CheckAssociation(association);
+      expect(result).toEqual(mockRows);
+      expect(getTypeIdByType).toHaveBeenCalledWith("LinkType");
+      expect(db.all).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject on database error", async () => {
+      getTypeIdByType.mockResolvedValue(42);
+      db.all.mockImplementation((sql, params, callback) => callback(new Error("DB error"), null));
+
+      const association = { doc1: 101, doc2: 102, type: "LinkType" };
+
+      await expect(CheckAssociation(association)).rejects.toThrow("DB error");
+      expect(getTypeIdByType).toHaveBeenCalledWith("LinkType");
+      expect(db.all).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject if type ID is not found", async () => {
+      getTypeIdByType.mockRejectedValue(new Error("Type not found"));
+
+      const association = { doc1: 101, doc2: 102, type: "InvalidType" };
+
+      await expect(CheckAssociation(association)).rejects.toThrow("Type not found");
+      expect(getTypeIdByType).toHaveBeenCalledTimes(1);
+    });
+  });
 });

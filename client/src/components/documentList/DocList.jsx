@@ -127,7 +127,30 @@ function DocList() {
     }
   };
 
-  const [searchedTitle, setSearchedTitle] = useState("")
+  //const [searchedTitle, setSearchedTitle] = useState("")
+
+  const [searchedTitle, setSearchedTitle] = useState("");
+  const [selectedStakeholder, setSelectedStakeholder] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedScale, setSelectedScale] = useState(null);
+
+  const applyFilters = () => {
+    const filteredDocuments = allDocuments.filter((doc) => {
+      const matchesTitle = doc.title.toLowerCase().includes(searchedTitle.toLowerCase());
+      const matchesStakeholder = selectedStakeholder ? doc.stackeholders.includes(selectedStakeholder.value) : true;
+      const matchesType = selectedType ? doc.type.includes(selectedType.value) : true;
+      const matchesScale = selectedScale ? doc.scale.includes(selectedScale.value) : true;
+
+      return matchesTitle && matchesStakeholder && matchesType && matchesScale;
+    });
+
+    setDocuments(filteredDocuments);
+  };
+
+  // Effetto per aggiornare i documenti ogni volta che cambia un filtro
+  useEffect(() => {
+    applyFilters();
+  }, [searchedTitle, selectedStakeholder, selectedType, selectedScale]);
 
   return (
     <>
@@ -140,11 +163,12 @@ function DocList() {
             type="text"
             className="border-dark border-2"
             value={searchedTitle}
-            onChange={(e) => {
+            /*onChange={(e) => {
               setSearchedTitle(e.target.value)
               console.log(e.target.value)
               setDocuments(() => allDocuments.filter(doc => doc.title.toLowerCase().includes(e.target.value.toLowerCase())))
-            }}
+            }}*/
+            onChange={(e) => setSearchedTitle(e.target.value)}
           />
         </Form.Group>
         </Col>
@@ -155,13 +179,14 @@ function DocList() {
             options={stakeholdersOptions}
             isClearable
             placeholder="Select stakeholder"
-            onChange={(selectedOption) =>{
+            /*onChange={(selectedOption) =>{
               if (selectedOption) {
                 setDocuments(()=>allDocuments.filter((doc)=>doc.stackeholders.includes(selectedOption.value)))
               } else {
                 setDocuments(allDocuments);
               }
-            }}
+            }}*/
+            onChange={setSelectedStakeholder}
           />
         </Form.Group>
         </Col>
@@ -172,30 +197,32 @@ function DocList() {
             options={typeOptions}
             isClearable
             placeholder="Select type of document"
-            onChange={(selectedOption) =>{
+            /*onChange={(selectedOption) =>{
               if (selectedOption) {
                 setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
               } else {
                 setDocuments(allDocuments);
               }
-            }}
+            }}*/
+            onChange={setSelectedType}
           />
         </Form.Group>
         </Col>
         <Col>
         <Form.Group>
-          <Form.Label>Search by type</Form.Label>
+          <Form.Label>Search by scale</Form.Label>
           <Select
             options={scaleOptions}
             isClearable
             placeholder="Select scale of document"
-            onChange={(selectedOption) =>{
+            /*onChange={(selectedOption) =>{
               if (selectedOption) {
                 setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
               } else {
                 setDocuments(allDocuments);
               }
-            }}
+            }}*/
+            onChange={setSelectedScale}
           />
         </Form.Group>
         </Col>

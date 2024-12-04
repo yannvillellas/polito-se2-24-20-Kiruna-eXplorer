@@ -262,7 +262,7 @@ function ChosenPosition(props) {
                 <Form.Group className="radio-group">
                     <Form.Check
                         type="radio"
-                        label="All municipalities"
+                        label="All municipality"
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="allMunicipalities" // value for this specific choice
                         checked={selectedOption === 'allMunicipalities'} // if the selectedOption is equal to this value then the radio button will be checked
