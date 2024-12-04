@@ -39,7 +39,7 @@ function Link(props) {
         const types = await associationAPI.getLinkTypes();
         setLinkTypes(types);
       } catch (error) {
-        console.error("Failed to fetch documents:", error);
+        console.error("Failed to fetch link types:", error);
       }
     };
     fetchLinkTypes();
