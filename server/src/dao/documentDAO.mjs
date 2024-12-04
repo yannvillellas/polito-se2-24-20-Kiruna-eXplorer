@@ -12,7 +12,8 @@ export const listDocuments = () => {
                 console.log("primo errore ", err)
                 reject(err);
             } else {
-                if(drows){
+                if(drows.length>0){
+                    console.log("non devo stare qua")
                     //join docId with stakeholders name
                     db.all("SELECT ds.docId, s.name from Stakeholder s, DocStakeholders ds WHERE s.shId=ds.shId",[],(err,srows)=>{
                         if(err){
