@@ -6,6 +6,9 @@ import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPositionMap from "./ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
+import { GiGreekTemple } from "react-icons/gi";
+import { Tooltip, OverlayTrigger } from "react-bootstrap"; // Importa Tooltip e OverlayTrigger
+
 
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
 
@@ -77,6 +80,11 @@ function Map(props) {
     });
   };
 
+  const renderTooltip = (props) => (
+    <Tooltip id="button-tooltip" {...props}>
+      Show all municipality documents
+    </Tooltip>
+  );
 
 
 
@@ -264,7 +272,7 @@ function Map(props) {
 
     <Container fluid className="map-container">
       <MapContainer center={[67.8558, 20.2253]} zoom={12} >
-        <LayersControl position="topright">
+        <LayersControl position="topleft">
           <LayersControl.BaseLayer checked name="Google Satellite">
             <TileLayer
               url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
@@ -345,16 +353,107 @@ function Map(props) {
 
       </MapContainer>
 
+      {/* {
+        !filterOn ? (
+          <Button
+            className="btn-municipality"
+            variant="light"
+            onClick={handleShowOnlyAllMunicipalityDocument}
+            style={{
+              backgroundColor: "white",
+              border: "1px solid black",
+              borderRadius: "50%", // Per fare il bottone circolare
+              width: "50px",
+              height: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0",
+            }}
+          >
+            <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
+          </Button>
+        ) : (
+          <Button
+            className="btn-municipality"
+            variant="light"
+            onClick={() => setFilterOn(false)}
+            style={{
+              backgroundColor: "white",
+              border: "1px solid black",
+              borderRadius: "50%",
+              width: "50px",
+              height: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0",
+            }}
+          >
+            <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
+          </Button>
+        )
+      } */}
+
       {
-        !filterOn ?
-          <Button className="btn-municipality" variant="primary" onClick={handleShowOnlyAllMunicipalityDocument}>Show all municipality documents</Button>
-          :
-          <Button className="btn-municipality" variant="primary" onClick={() => setFilterOn(false)}>Show all documents</Button>
+        !filterOn ? (
+          <OverlayTrigger
+            placement="top" // Posizione del tooltip rispetto al bottone
+            delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
+            overlay={renderTooltip}
+          >
+            <Button
+              className="btn-municipality"
+              variant="light"
+              onClick={handleShowOnlyAllMunicipalityDocument}
+              style={{
+                backgroundColor: "white",
+                border: "1px solid black",
+                borderRadius: "50%",
+                width: "50px",
+                height: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0",
+              }}
+            >
+              <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
+            </Button>
+          </OverlayTrigger>
+        ) : (
+          <OverlayTrigger
+            placement="top"
+            delay={{ show: 500, hide: 0 }}
+            overlay={renderTooltip}
+          >
+            <Button
+              className="btn-municipality"
+              variant="light"
+              onClick={() => setFilterOn(false)}
+              style={{
+                backgroundColor: "white",
+                border: "1px solid black",
+                borderRadius: "50%",
+                width: "50px",
+                height: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0",
+              }}
+            >
+              <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
+            </Button>
+          </OverlayTrigger>
+        )
       }
+
+
 
       <Form className="search-document">
         <Form.Group className="mb-3">
-          <Form.Label>Choose a document so all linked-document will be shown</Form.Label>
+          <Form.Label style={{color: "white"}}>Choose a document so all linked-document will be shown</Form.Label>
           <Select
             options={documents.map((doc) => {
               return { value: doc.docId, label: doc.title }
