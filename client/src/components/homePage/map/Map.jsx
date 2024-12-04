@@ -1,16 +1,15 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState, useNavigate } from "react";
-import { Container, Modal, Button, Form } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Container, Modal, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap";
 import Select from "react-select";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPositionMap from "./ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
 import { GiGreekTemple } from "react-icons/gi";
-import { Tooltip, OverlayTrigger } from "react-bootstrap"; // Importa Tooltip e OverlayTrigger
 
 
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, LayersControl, Polygon, GeoJSON } from 'react-leaflet';
 
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
@@ -18,8 +17,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import areaAPI from "../../../api/areaAPI";
 import associationAPI from "../../../api/associationAPI";
 import geojsonData from "./KirunaMunicipality.json"
-import { area } from "@turf/turf";
-import { Icon } from 'leaflet';
+import { Icon, DivIcon } from 'leaflet';
 
 
 
@@ -55,11 +53,25 @@ const getIcon = (docType, stakeholders) => {
   });
 };
 
-function Map(props) {
+const getCustomIcon = (docType, stakeholders) => {
+  const iconUrl = getIcon(docType, stakeholders).options.iconUrl;
+  return new DivIcon({
+    html: `
+      <div style="position: relative; width: 32px; height: 32px;">
+        <div style="position: absolute; top: -2.5px; left: -2.5px; width: 37px; height: 37px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);"></div>
+        <img src="${iconUrl}" style="position: absolute; top: 0; left: 0; width: 32px; height: 32px;" />
+      </div>
+    `,
+    className: '',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+};
+
+function CustomMap(props) {
   const [documents, setDocuments] = useState([]);
   const [documentShown, setDocumentShown] = useState([]);
   const [filterOn, setFilterOn] = useState(false);
-  const [isVisualizeAssociation, setIsVisualizeAssociation] = useState(false); // vedi sulla mappa solo i documenti associati ad uno specifico documento
 
   const [files, setFiles] = useState();
   const [isPositionToModify, setIsPositionToModify] = useState(false);
@@ -91,7 +103,7 @@ function Map(props) {
     color: "red",
     weight: 2,
     opacity: 1,
-    fillOpacity: 0.1
+    fillOpacity: 0,
   };
 
   const onEachFeature = (feature, layer) => {
@@ -106,17 +118,6 @@ function Map(props) {
       Show all municipality documents
     </Tooltip>
   );
-
-
-
-
-
-  const geoJsonStyle = {
-    color: 'red',
-    weight: 2,
-    opacity: 1,
-    fillOpacity: 0 // No fill color
-  };
 
   // So that sync with the parent component
   useEffect(() => {
@@ -163,22 +164,11 @@ function Map(props) {
     return () => clearInterval(interval);
   }, []);
 
-
-
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
     setIsPositionToModify(false);
     setVisibleArea(null); // Nascondi l'area alla chiusura del modal
   };
-
-
-  /*const handleMarkerClick = async (doc) => {
-    setSelectedDoc(doc);
-    setShowOffcanvas(true); // Apri OffCanvas
-
-    await handleGetFiles(doc.docId)
-
-  };*/
 
   // Funzione mdocificata (restituiva errore)
   const handleGetFiles = async (docId) => {
@@ -194,7 +184,6 @@ function Map(props) {
       setFiles([]); // Fallback in caso di errore
     }
   };
-
 
   const handleDownload = (file) => {
     const URL = `http://localhost:3001/${file.path.slice(1)}`
@@ -219,7 +208,7 @@ function Map(props) {
   const handleMouseOver = (docId) => {
     console.log(`Mouseover on docId: ${docId}`);
     const areaAssociation = areaAssociations.find((a) => a.docId === docId);
-    if (areaAssociation && areaAssociation.areaId) {
+    if (areaAssociation?.areaId) {
       setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
     }
   };
@@ -240,7 +229,7 @@ function Map(props) {
     } 
 
     console.log("Sono in handleModifyPosition, ecco i parametri:", selectedDoc.docId, newLan, newLng);
-    const res = await props.handleModifyPosition(selectedDoc.docId, newLan, newLng);
+    await DocumentAPI.updateDocumentPosition(selectedDoc.docId, newLan, newLng);
     closeDocumentModal();
   };
 
@@ -269,21 +258,16 @@ function Map(props) {
     }
 
     setFilterOn(true);
-    //console.log("Sono in MAP.jsx, ecco il docId che mi è stato passato:", docId);
     let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
-    //console.log("Sono in MAP.jsx, ecco le associazioni che dovrei vedere:", assciationToShow);
     let docIdToShow = [];
     for (let association of assciationToShow) {
       if (association.doc1 === docId) {
-        //docToShow.push(documents.find(doc => doc.docId === association.doc2));
         docIdToShow.push(association.doc2)
       } else {
         docIdToShow.push(association.doc1)
       }
     }
-    //console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere associati al documentId:", docId, docIdToShow);
     const docToShow = documents.filter(doc => docIdToShow.includes(doc.docId));
-    //console.log("Sono in MAP.jsx, ecco i documenti che dovresti vedere (ppresi da documents.filter) associati al documentId:", docId, docToShow);
     setDocumentShown(docToShow);
   }
 
@@ -313,45 +297,43 @@ function Map(props) {
           spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
-          {!filterOn && documents.map((doc, index) => (
+          {!filterOn && documents.map((doc) => (
             <Marker
-              key={index}
+              key={doc.docId}
               position={[doc.lat, doc.lng]}
-              icon={getIcon(doc.type, doc.stackeholders)}
+              icon={getCustomIcon(doc.type, doc.stackeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
-            >
-            </Marker>
+            />
           ))}
 
-          {filterOn && documentShown.map((doc, index) => (
+          {filterOn && documentShown.map((doc) => (
             <Marker
-              key={index}
+              key={doc.docId}
               position={[doc.lat, doc.lng]}
-              icon={getIcon(doc.type, doc.stackeholders)}
+              icon={getCustomIcon(doc.type, doc.stackeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
-            >
-            </Marker>
+            />
           ))}
 
         </MarkerClusterGroup>
 
         {/**Show all the areas by document: */}
 
-        {areas.length > 0 && areas.map((area, index) => {
+        {areas.length > 0 && areas.map((area) => {
           if (area.areaId === visibleArea && area.areaType === "polygon") {
             try {
               const positions = JSON.parse(area.coordinates)[0];
               return (
                 <Polygon
-                  key={index}
+                  key={area.areaId}
                   positions={positions}
                   pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
                   eventHandlers={{
@@ -375,48 +357,6 @@ function Map(props) {
         />
 
       </MapContainer>
-
-      {/* {
-        !filterOn ? (
-          <Button
-            className="btn-municipality"
-            variant="light"
-            onClick={handleShowOnlyAllMunicipalityDocument}
-            style={{
-              backgroundColor: "white",
-              border: "1px solid black",
-              borderRadius: "50%", // Per fare il bottone circolare
-              width: "50px",
-              height: "50px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0",
-            }}
-          >
-            <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
-          </Button>
-        ) : (
-          <Button
-            className="btn-municipality"
-            variant="light"
-            onClick={() => setFilterOn(false)}
-            style={{
-              backgroundColor: "white",
-              border: "1px solid black",
-              borderRadius: "50%",
-              width: "50px",
-              height: "50px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0",
-            }}
-          >
-            <GiGreekTemple style={{ color: "black", fontSize: "24px" }} />
-          </Button>
-        )
-      } */}
 
       {
         !filterOn ? (
@@ -533,11 +473,7 @@ function Map(props) {
                 </Button>}
 
                 {props.isUrbanPlanner && isPositionToModify && <ChosenPositionMap handleSavePosition={handleSavePosition} />}
-
-
-
-
-
+                
               </div>
               <div className="download-buttons-container">
                 {files ? files.map((f, index) => (
@@ -559,4 +495,4 @@ function Map(props) {
   );
 }
 
-export default Map;
+export default CustomMap;

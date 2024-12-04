@@ -5,11 +5,9 @@
   padding: 0;
 }
 
-.leaflet-control-zoom{
+.leaflet-control-zoom {
   display: none;
 }
-
-
 
 .map-wrapper {
   position: relative;
@@ -25,12 +23,14 @@
   height: 100%;
 }
 
-.container-fluid{
---bs-gutter-x: 0;
+.container-fluid {
+  --bs-gutter-x: 0;
 }
 
-.files{
+.files {
   width: fit-content;
+  width: 50px;
+  height: 50px;
 }
 
 .download-buttons-container {
@@ -43,15 +43,10 @@
 
 .download-btns {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: center;
   max-width: 100px;
-  text-align: center; 
-}
-
-.files {
-  width: 50px; 
-  height: 50px;
+  text-align: center;
 }
 
 .file-name {
@@ -61,14 +56,14 @@
   max-width: 100%;
 }
 
-.btn-municipality{
+.btn-municipality {
   position: absolute;
   bottom: 5%;
   left: 20px;
   z-index: 1000; /* Assicura che sia visibile sopra la mappa */
 }
 
-.search-document{
+.search-document {
   backdrop-filter: blur(10px);
   border: 1px solid;
   border-radius: 10px;
