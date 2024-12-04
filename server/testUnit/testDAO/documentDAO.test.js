@@ -1,164 +1,162 @@
-import { test, expect, jest } from "@jest/globals";
+import { test, expect, jest, describe, beforeEach } from "@jest/globals";
 import { listDocuments, addDocument, deleteDocument } from "../../src/dao/documentDAO.mjs";
-import Document from "../../src/models/document.mjs"; // Importa la classe Document
-import sqlite3 from "sqlite3";
-const { Database } = sqlite3.verbose();
+import { db } from "../../src/database/db.mjs";
+import Document from "../../src/models/document.mjs";
 
-describe("Document DAO Tests", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-        jest.resetAllMocks();
+jest.mock("../../src/database/db.mjs");
+
+describe("documentDAO Tests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  describe("listDocuments", () => {
+    test("should return a list of Document instances with stakeholders mapped", async () => {
+      const mockDrows = [
+        {
+          docId: 1,
+          title: "title1",
+          description: "desc1",
+          scale: "1:100",
+          ASvalue: "AS1",
+          issuanceDate: "2024-11-01",
+          type: "Report",
+          connections: 5,
+          language: "EN",
+          pages: 10,
+        },
+      ];
+      const mockSrows = [{ docId: 1, name: "Stakeholder1" }];
+
+      db.all
+        .mockImplementationOnce((sql, params, callback) => callback(null, mockDrows)) // Fetch documents
+        .mockImplementationOnce((sql, params, callback) => callback(null, mockSrows)); // Fetch stakeholders
+
+      const result = await listDocuments();
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(Document);
+      expect(result[0].stakeholders).toBe("Stakeholder1");
+      expect(db.all).toHaveBeenCalledTimes(2);
     });
 
-    describe("listDocuments", () => {
-        test("should return a list of Document instances", async () => {
-            const mockRows = [
-                { docId: 1, title: 'titolo1', description: 'descrizione1', stackeholders: null, scale: null, issuanceDate: null, type: null, connections: null, language: null, pages: null },
-                { docId: 2, title: 'titolo2', description: 'descrizione2', stackeholders: null, scale: null, issuanceDate: null, type: null, connections: null, language: null, pages: null }
-            ];
+    test("should return an empty array if no documents exist", async () => {
+      db.all.mockImplementationOnce((sql, params, callback) => callback(null, []));
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, callback) => {
-                callback(null, mockRows); // Simula il recupero di righe dal database
-            });
-
-            const result = await listDocuments();
-            expect(result).toHaveLength(2);
-            expect(result[0]).toBeInstanceOf(Document);
-            expect(result[0].title).toBe('titolo1');
-            expect(result[1].title).toBe('titolo2');
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-
-        test("should return an empty array if no documents exist", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, callback) => {
-                callback(null, []);
-            });
-
-            const result = await listDocuments();
-            expect(result).toHaveLength(0);
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, callback) => {
-                callback(new Error("Database error"), null); // Simulate a database error
-            });
-
-            await expect(listDocuments()).rejects.toThrow("Database error");
-        });
+      const result = await listDocuments();
+      expect(result).toEqual([]);
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
 
-    describe("addDocument", () => {
-        test("should correctly add a document to the database (no error) ", async () => {
-            const validDocument = {
-                id: 1,
-                title: 'Test Document',
-                description: 'This is a test document.',
-                stakeholders: 'Stakeholder1',
-                scale: '1:100',
-                issuanceDate: '2024-11-01',
-                type: 'Report',
-                connections: 'Connection1',
-                language: 'EN',
-                pages: 10
-            };
+    test("should reject on first query database error", async () => {
+      db.all.mockImplementationOnce((sql, params, callback) => callback(new Error("DB error"), null));
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful insert
-            });
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful insert
-            });
-
-            const result = await addDocument(validDocument).catch((err) => console.log(err)); // cannt use expect because of this.lastId
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-
-        });
-        
-
-
-        test("should reject on insert error", async () => {
-            const validDocument = {
-                id: 1,
-                title: 'Test Document',
-                description: 'This is a test document.',
-                stakeholders: 'Stakeholder1',
-                scale: '1:100',
-                issuanceDate: '2024-11-01',
-                type: 'Report',
-                connections: 'Connection1',
-                language: 'EN',
-                pages: 10
-            };
-
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Insert error")); // Simulate insert error
-            });
-
-            await expect(addDocument(validDocument)).rejects.toThrow("Insert error");
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
-
-        test("should reject on database error", async () => {
-            const validDocument = {
-                id: 1,
-                title: 'Test Document',
-                description: 'This is a test document.',
-                stakeholders: 'Stakeholder1',
-                scale: '1:100',
-                issuanceDate: '2024-11-01',
-                type: 'Report',
-                connections: 'Connection1',
-                language: 'EN',
-                pages: 10
-            };
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simulate database error
-            });
-
-            await expect(addDocument(validDocument)).rejects.toThrow("Database error");
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
+      await expect(listDocuments()).rejects.toThrow("DB error");
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
 
+    test("should reject on second query database error", async () => {
+      const mockDrows = [
+        {
+          docId: 1,
+          title: "title1",
+          description: "desc1",
+          scale: "1:100",
+          ASvalue: "AS1",
+          issuanceDate: "2024-11-01",
+          type: "Report",
+          connections: 5,
+          language: "EN",
+          pages: 10,
+        },
+      ];
 
-    describe("deleteDocument", () => {
-        test("should correctly delete a document from the database (no error) ", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful delete
-            });
+      db.all
+        .mockImplementationOnce((sql, params, callback) => callback(null, mockDrows)) // Fetch documents
+        .mockImplementationOnce((sql, params, callback) => callback(new Error("Stakeholder query error"), null)); // Fetch stakeholders
 
-            const result = await deleteDocument(1);
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
+      await expect(listDocuments()).rejects.toThrow("Stakeholder query error");
+      expect(db.all).toHaveBeenCalledTimes(2);
+    });
+  });
 
-        test("should reject on delete error", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Delete error")); // Simulate delete error
-            });
+  describe("addDocument", () => {
+    test("should add a new document and stakeholders, returning its ID", async () => {
+      db.run
+        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 1 })) // Insert document
+        .mockImplementationOnce((sql, params, callback) => callback(null)); // Insert stakeholders
 
-            await expect(deleteDocument(1)).rejects.toThrow("Delete error");
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
+      const newDocument = {
+        title: "title1",
+        description: "desc1",
+        scale: "1:100",
+        issuanceDate: "2024-11-01",
+        type: "Report",
+        connections: 0,
+        language: "EN",
+        pages: 10,
+        stakeholders: "1, 2",
+      };
 
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simulate database error
-            });
-
-            await expect(deleteDocument(1)).rejects.toThrow("Database error");
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
+      const result = await addDocument(newDocument);
+      expect(result).toBe(1);
+      expect(db.run).toHaveBeenCalledTimes(3);
     });
 
+    test("should reject on document insertion error", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(new Error("Insert error"), null));
 
+      const newDocument = {
+        title: "title1",
+        description: "desc1",
+        scale: "1:100",
+        issuanceDate: "2024-11-01",
+        type: "Report",
+        connections: 0,
+        language: "EN",
+        pages: 10,
+        stakeholders: "1, 2",
+      };
 
+      await expect(addDocument(newDocument)).rejects.toThrow("Insert error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
 
+    test("should reject on stakeholders insertion error", async () => {
+      db.run
+        .mockImplementationOnce((sql, params, callback) => callback(null, { lastID: 1 })) // Insert document
+        .mockImplementationOnce((sql, params, callback) => callback(new Error("Stakeholder insert error"), null)); // Insert stakeholders
+
+      const newDocument = {
+        title: "title1",
+        description: "desc1",
+        scale: "1:100",
+        issuanceDate: "2024-11-01",
+        type: "Report",
+        connections: 0,
+        language: "EN",
+        pages: 10,
+        stakeholders: "1, 2",
+      };
+
+      await expect(addDocument(newDocument)).rejects.toThrow("Stakeholder insert error");
+      expect(db.run).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("deleteDocument", () => {
+    test("should delete a document by ID", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(null));
+
+      await expect(deleteDocument(1)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+
+    test("should reject on database error", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(new Error("Delete error"), null));
+
+      await expect(deleteDocument(1)).rejects.toThrow("Delete error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
 });
