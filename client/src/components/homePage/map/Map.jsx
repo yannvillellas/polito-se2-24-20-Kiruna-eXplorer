@@ -16,7 +16,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 
 import areaAPI from "../../../api/areaAPI";
 import associationAPI from "../../../api/associationAPI";
-import geojsonData from "./KirunaMunicipality.json"
+import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
 
 
