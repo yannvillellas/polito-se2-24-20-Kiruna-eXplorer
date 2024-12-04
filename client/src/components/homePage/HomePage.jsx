@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./homePage.css";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 
@@ -38,29 +38,29 @@ function HomePage(props) {
     const [errorMsg, setErrorMsg] = useState([]);
 
     useEffect(() => {
-        const fetchDocuments = async () => {
-            try {
-                const documents = await DocumentAPI.listDocuments();
-
-                const positions = await PositionAPI.listPositions();
-                documents.forEach(document => {
-                    const position = positions.find(position => position.docId === document.docId);
-                    if (position) {
-                        document.lat = position.latitude;
-                        document.lng = position.longitude;
-                    }
-                });
-
-                setDocuments(documents);
-
-
-            } catch (error) {
-                console.error("Error fetching documents:", error);
-            }
-        }
         fetchDocuments();
     }, []);
 
+    const fetchDocuments = async () => {
+        try {
+            const documents = await DocumentAPI.listDocuments();
+
+            const positions = await PositionAPI.listPositions();
+            documents.forEach(document => {
+                const position = positions.find(position => position.docId === document.docId);
+                if (position) {
+                    document.lat = position.latitude;
+                    document.lng = position.longitude;
+                }
+            });
+
+            setDocuments(documents);
+
+
+        } catch (error) {
+            console.error("Error fetching documents:", error);
+        }
+    };
 
     const handleUpload = async (document) => {
         const formData = new FormData();
@@ -125,11 +125,6 @@ function HomePage(props) {
             console.log("sono in handleAddDocument2")
             await PositionAPI.addPosition(position);
             console.log("sono in handleAddDocument3")
-
-            // Here i check if there are files to upload (and so i not create folders if there are no files)
-            /*if(document.files && document.files.length > 0){
-                // await handleUpload(docId, document.files);
-            }*/
 
             let areaId = null;
             if (document.area) {
@@ -197,36 +192,39 @@ function HomePage(props) {
         }
     }
 
+    const renderToastContainer = () => (
+        <ToastContainer className="p-3" position="top-end">
+            {errorMsg.map((error) => (
+                <Toast
+                    key={errorMsg.indexOf(error)}
+                    onClose={() => setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error))}
+                >
+                    <Toast.Header closeButton>
+                        <strong className="me-auto">Errore</strong>
+                    </Toast.Header>
+                    <Toast.Body>{error}</Toast.Body>
+                </Toast>
+            ))}
+        </ToastContainer>
+    );
+
+    const renderMapAndForms = () => (
+        <Row style={{ height: "100%" }}>
+            <Col style={{ position: "relative" }}>
+                <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner} />
+                {isUrbanPlanner && (
+                    <div className="add-document-container">
+                        <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} setErrorMsg={setErrorMsg} />
+                    </div>
+                )}
+            </Col>
+        </Row>
+    );
 
     return (
         <Container fluid>
-            {/*toastCOntainer used to visualize errors messages*/}
-            <ToastContainer className="p-3" position="top-end">
-                {errorMsg.map((error) => (
-                    <Toast
-                        key={errorMsg.indexOf(error)}
-                        onClose={() => setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error))}
-                    >
-                        <Toast.Header closeButton>
-                            <strong className="me-auto">Errore</strong>
-                        </Toast.Header>
-                        <Toast.Body>{error}</Toast.Body>
-                    </Toast>
-                ))}
-            </ToastContainer>
-            <Row style={{height: "100%"}}>
-                <Col style={{ position: "relative" }}>
-                    <Map documents={documents} handleModifyPosition={handleModifyPosition} isUrbanPlanner={isUrbanPlanner} />
-                    {isUrbanPlanner && (
-                        <div className="add-document-container">
-                            <UnifiedForms handleAddDocument={handleAddDocument} documents={documents} setErrorMsg={setErrorMsg} />
-                        </div>
-                    )}
-                </Col>
-
-            </Row>
-
-
+            {renderToastContainer()}
+            {renderMapAndForms()}
         </Container>
     );
 }
