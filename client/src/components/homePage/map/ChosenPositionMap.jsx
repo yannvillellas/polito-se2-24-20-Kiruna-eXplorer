@@ -1,22 +1,12 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Form, Modal, Offcanvas } from "react-bootstrap";
+import { useState} from "react";
+import { Container, Button, Form } from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, FeatureGroup, Marker, Popup, LayersControl, CircleMarker, Polygon, GeoJSON, useMapEvents } from 'react-leaflet';
-import { EditControl } from "react-leaflet-draw";
+import { MapContainer, TileLayer, Marker, LayersControl, GeoJSON, useMapEvents } from 'react-leaflet';
 
 import "leaflet-draw/dist/leaflet.draw.css";
-import L from 'leaflet';
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
-
-import geojsonData from "./KirunaMunicipality.json"
-import areaAPI from "../../../api/areaAPI";
+import geojsonData from "../../../data/KirunaMunicipality.json";
 
 
 
