@@ -103,6 +103,9 @@ sections:
 
 - What caused your errors in estimation (if any)?
 
+      For some tasks, we were unable to fully understand the scope and complexity of the work during the estimation phase, which led to underestimating the effort required.
+      The frontend refactor introduced unforeseen challenges, adding more complexity and time requirements than initially anticipated.
+
 - What lessons did you learn (both positive and negative) in this sprint?
 
       Positive:
