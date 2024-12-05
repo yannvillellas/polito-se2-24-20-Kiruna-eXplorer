@@ -104,31 +104,31 @@ sections:
 - What caused your errors in estimation (if any)?
 
 - What lessons did you learn (both positive and negative) in this sprint?
-  Positive:
-•	We effectively managed our tasks, ensuring progress without delays, and avoided bottlenecks where team members had to wait for others to complete their work.
-•	Coordination within the team was smooth, fostering better efficiency and communication.
-•	We leveraged each member's strengths effectively, which resulted in high-quality outputs in less time.
+      Positive:
+      We effectively managed our tasks, ensuring progress without delays, and avoided bottlenecks where team members had to wait for others to complete their work.
+      Coordination within the team was smooth, fostering better efficiency and communication.
+      We leveraged each member's strengths effectively, which resulted in high-quality outputs in less time.
 
-Negative:
-•	Implementing some UI/UX elements took significantly more time than expected because we did not plan for these changes from the beginning, leading to rework.
+      Negative:
+      Implementing some UI/UX elements took significantly more time than expected because we did not plan for these changes from the beginning, leading to rework.
 
 
 - Which improvement goals set in the previous retrospective were you able to achieve?
-•	We successfully managed meeting times, allocating more time to solve problems and focus on development.
-•	Some parts of the UI/UX design were implemented as planned.
+      We successfully managed meeting times, allocating more time to solve problems and focus on development.
+      Some parts of the UI/UX design were implemented as planned.
 
   
 - Which ones you were not able to achieve? Why?
-•	Unachieved Goal: We were unable to test all frontend components using Cypress.
-•	Reason: We lacked sufficient time to write test scripts for all parts of the application.
+      Unachieved Goal: We were unable to test all frontend components using Cypress.
+      Reason: We lacked sufficient time to write test scripts for all parts of the application.
 
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
-  •	For designing diagrams, we need to research and evaluate relevant libraries.
-o	Assign team members to research libraries, compare features, and select the most suitable one based on our project needs.
+      For designing diagrams, we need to research and evaluate relevant libraries.
+      Assign team members to research libraries, compare features, and select the most suitable one based on our project needs.
 
 
 > Propose one or two
 
 - One thing you are proud of as a Team!!
-  We maintained a positive and supportive atmosphere throughout the sprint, keeping morale high even during challenges.
+      We maintained a positive and supportive atmosphere throughout the sprint, keeping morale high even during challenges.
