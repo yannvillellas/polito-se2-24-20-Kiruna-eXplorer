@@ -159,7 +159,7 @@ function DocumentData(props) {
                     </span>
                 )}
             </td>
-            <td>{props.document.stackeholders}</td>
+            <td>{props.document.stakeholders}</td>
             <td>
                 {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
             </td>

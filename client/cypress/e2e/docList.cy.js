@@ -18,8 +18,8 @@ describe('HomePage Component Tests', () => {
         cy.intercept('GET', `${apiBaseURL}/documents`, {
             statusCode: 200,
             body: [
-                { docId: 1, title: 'Document 1', description: "descrizione molto molto molto molto molto ma molto ma molto ma molto lunga",stackeholders:"stake1", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
-                { docId: 2, title: 'Document 2', description: "prova",stackeholders:"stake2", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
+                { docId: 1, title: 'Document 1', description: "descrizione molto molto molto molto molto ma molto ma molto ma molto lunga",stakeholders:"stake1", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
+                { docId: 2, title: 'Document 2', description: "prova",stakeholders:"stake2", scale: "prova", issuanceDate: "prova", type: "prova", connections: 0, languages: "prova", pages: 10 },
             ],
         }).as('getDocuments');;
 

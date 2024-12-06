@@ -15,7 +15,6 @@ import documentTypeAPI from "../../api/documentTypeAPI"
 /**
  * 
  * Bugs: 
- * - stakeholder is mispelled in the database (as stackeholders)
  * - I need polling otherwise i cannot get the updated documents
  * 
  */
@@ -137,7 +136,7 @@ function DocList() {
   const applyFilters = () => {
     const filteredDocuments = allDocuments.filter((doc) => {
       const matchesTitle = doc.title.toLowerCase().includes(searchedTitle.toLowerCase());
-      const matchesStakeholder = selectedStakeholder ? doc.stackeholders.includes(selectedStakeholder.value) : true;
+      const matchesStakeholder = selectedStakeholder ? doc.stakeholders.includes(selectedStakeholder.value) : true;
       const matchesType = selectedType ? doc.type.includes(selectedType.value) : true;
       const matchesScale = selectedScale ? doc.scale.includes(selectedScale.value) : true;
 
@@ -361,7 +360,7 @@ function DocumentData(props) {
           </span>
         )}
       </td>
-      <td>{props.document.stackeholders}</td>
+      <td>{props.document.stakeholders}</td>
       <td>
         {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
       </td>
