@@ -66,7 +66,7 @@ sections:
 
 - Total task estimation error ratio: sum of total hours estimation / sum of total hours spent -1
 
-> 0.45
+> 0
 
   
 ## QUALITY MEASURES 
