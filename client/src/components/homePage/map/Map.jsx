@@ -307,7 +307,7 @@ function CustomMap(props) {
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}
-              icon={getCustomIcon(doc.type, doc.stackeholders)}
+              icon={getCustomIcon(doc.type, doc.stakeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),
@@ -320,7 +320,7 @@ function CustomMap(props) {
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}
-              icon={getCustomIcon(doc.type, doc.stackeholders)}
+              icon={getCustomIcon(doc.type, doc.stakeholders)}
               eventHandlers={{
                 click: () => handleMarkerClick([doc]),
                 mouseover: () => handleMouseOver(doc.docId),

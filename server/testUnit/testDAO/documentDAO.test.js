@@ -36,7 +36,7 @@ describe("documentDAO Tests", () => {
       const result = await listDocuments();
       expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(Document);
-      expect(result[0].stackeholders).toBe("Stakeholder1");
+      expect(result[0].stakeholders).toBe("Stakeholder1");
       expect(db.all).toHaveBeenCalledTimes(2);
     });
 
