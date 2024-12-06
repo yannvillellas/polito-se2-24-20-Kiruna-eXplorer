@@ -30,7 +30,7 @@ function DocList() {
 
   const stakeholderOptions = documents.map((doc) => ({
     value: doc.docId,
-    label: doc.stackeholders,
+    label: doc.stakeholders,
   }));*/
 
   const [stakeholdersOptions, setStakeholdersOptions] = useState([]);
@@ -180,7 +180,7 @@ function DocList() {
             placeholder="Select stakeholder"
             /*onChange={(selectedOption) =>{
               if (selectedOption) {
-                setDocuments(()=>allDocuments.filter((doc)=>doc.stackeholders.includes(selectedOption.value)))
+                setDocuments(()=>allDocuments.filter((doc)=>doc.stakeholders.includes(selectedOption.value)))
               } else {
                 setDocuments(allDocuments);
               }
