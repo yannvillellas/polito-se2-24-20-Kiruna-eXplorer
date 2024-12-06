@@ -26,27 +26,33 @@ import { Icon, DivIcon } from 'leaflet';
  * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
  */
 
+const validDocTypes = [
+  "Design document",
+  "Informative document",
+  "Material effects",
+  "Prescriptive document",
+  "Technical document"
+];
+
+const validStakeholders = [
+  "LKAB",
+  "Municipality",
+  "Regional authority",
+  "Architecture firms",
+  "Citizens"
+];
+
 const getIcon = (docType, stakeholders) => {
-  let iconUrl;
-  switch (stakeholders) {
-    case "LKAB":
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_lkab.png`;
-      break;
-    case "Municipality":
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_municipality.png`;
-      break;
-    case "Regional authority":
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_regional-authority.png`;
-      break;
-    case "Architecture firms":
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_architecture-firms.png`;
-      break;
-    case "Citizens":
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_citizens.png`;
-      break;
-    default:
-      iconUrl = `icons/${docType.toLowerCase().replace(' ', '-')}_others.png`;
-  }
+  const formattedDocType = validDocTypes.includes(docType)
+    ? docType.toLowerCase().replace(' ', '-')
+    : "other-document";
+
+  const formattedStakeholder = validStakeholders.includes(stakeholders)
+    ? stakeholders.toLowerCase().replace(' ', '-')
+    : "others";
+
+  const iconUrl = `icons/${formattedDocType}_${formattedStakeholder}.png`;
+
   return new Icon({
     iconUrl,
     iconSize: [32, 32],
