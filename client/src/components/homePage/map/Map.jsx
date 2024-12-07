@@ -461,10 +461,20 @@ function CustomMap(props) {
                 {selectedDoc.connections != 0 ? linkedDocuments.map((connection) => (
                   <p
                     key={connection.docTitle}
-                    onClick={() => handleConnectionClick(connection.otherDocumentId)}
-                    style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}  // Cambia colore al testo
+                    style={{
+                      marginBottom: '8px',  // Spazio tra i paragrafi
+                    }}
                   >
-                    {connection.docTitle}
+                    <span
+                      onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                      style={{
+                        color: 'blue',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {connection.docTitle}
+                    </span>
                   </p>
                 )) : ""}
               </div>
