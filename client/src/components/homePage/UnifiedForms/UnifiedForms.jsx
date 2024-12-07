@@ -1,30 +1,29 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./unifiedForms.css";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Form, Modal, Offcanvas, Alert } from "react-bootstrap";
 import Carousel from 'react-bootstrap/Carousel';
 import Link from "./link/Link"
 import DocumentAPI from "../../../api/documentAPI";
 import AddDocument from "./addDocument/AddDocument";
-import {TiDocumentAdd} from "react-icons/ti"
+import { TiDocumentAdd } from "react-icons/ti"
 import link from "../../../asset/link.svg"
 import ChosenPosition from "../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addDocument/addOriginalSource/AddOriginalSource";
 import { Tooltip, OverlayTrigger } from "react-bootstrap"; // Importa Tooltip e OverlayTrigger
 
 
-
 function UnifiedForms(props) {
 
     const [index, setIndex] = useState(0);
-    
+
     const [showModalAdd, setShowModalAdd] = useState(false);
     const [newDocument, setNewDocument] = useState({
         docId: null,
         title: "",
         stakeholders: "",
         scale: "",
-        ASvalue:null,
+        ASvalue: null,
         issuanceDate: "",
         type: "",
         connections: 0,
@@ -72,7 +71,7 @@ function UnifiedForms(props) {
             ...document, // Se document ha i campi che coincidono con quelli di prevDocument, sovrascrivi ( mi viene utile per AddDocument, ChosenPosition/ChosenArea e AddOriginalSource)
         }));
     };
-    
+
     const handleAddLatLongToDocumentModal = (lat, lng) => {
         console.log("Sono in Unified Form, handleAddLatLongToDocumentModal, ho ricevuto:", lat, lng);
         setNewDocument((prevDocument) => ({
@@ -83,7 +82,7 @@ function UnifiedForms(props) {
 
     };
 
-    const handleSetArea = (area) => {  
+    const handleSetArea = (area) => {
         console.log("Sono in UnifiedForms, handleSetArea, ho ricevuto:", area);
         setNewDocument((prevDocument) => ({
             ...prevDocument,
@@ -93,10 +92,10 @@ function UnifiedForms(props) {
 
     const renderTooltip = (message) => (props) => (
         <Tooltip id="button-tooltip" {...props}>
-          {message}
+            {message}
         </Tooltip>
-      );
-      
+    );
+
 
     useEffect(() => {
         console.log("Sono in UnifiedForms, newDocument:", newDocument);
@@ -126,59 +125,65 @@ function UnifiedForms(props) {
     }
 
     return (
-        <>  
-        <div className="btn-unified-forms">
-            <OverlayTrigger
-                placement="top" // Posizione del tooltip rispetto al bottone
-                delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
-                overlay={renderTooltip("Add new Document")}
-            >
-                <Button
+        <>
+            <div className="btn-unified-forms">
+                <OverlayTrigger
+                    placement="top" // Posizione del tooltip rispetto al bottone
+                    delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
+                    overlay={renderTooltip("Add new Document")}
+                >
+                    <Button
                         className=" rounded-circle d-flex align-items-center justify-content-center btn-add-document"
                         variant="none"
                         style={{ width: "50px", height: "50px", }}
                         onClick={onBtnSelectAdd}
                     >
                         <i className="bi bi-plus" style={{ fontSize: "2rem" }}></i>
-                </Button>
-            </OverlayTrigger>
-            <OverlayTrigger
-                placement="top" // Posizione del tooltip rispetto al bottone
-                delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
-                overlay={renderTooltip("Insert new Association")}
-            >
-                <Button
+                    </Button>
+                </OverlayTrigger>
+                {/*  <---------------------------------------------------------------------------------------------------------------------------------------- ADD LINK BUTTON 
+                <OverlayTrigger
+                    placement="top" // Posizione del tooltip rispetto al bottone
+                    delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
+                    overlay={renderTooltip("Insert new Association")}
+                >
+                    <Button
                         className=" rounded-circle d-flex align-items-center justify-content-center btn-add-link"
                         variant="none"
                         style={{ width: "50px", height: "50px" }}
                         onClick={() => setOnlyLinkForm(true)}
                     >
-                        <i className="bi bi-link-45deg"  style={{ fontSize: "2rem" }}></i>
-                </Button>
-            </OverlayTrigger>
-        </div>
-            
+                        <i className="bi bi-link-45deg" style={{ fontSize: "2rem" }}></i>
+                    </Button>
+                </OverlayTrigger>
+                */}
+            </div>
+
 
             {/*Modal only for link documents*/}
+            {/*  <---------------------------------------------------------------------------------------------------------------------------------------- ADD LINK BUTTON (MODAL)
             <Modal show={onlyLinkForm} onHide={() => setOnlyLinkForm(false)} size="xl">
                 <Modal.Header closeButton>
                     <Modal.Title className="modal-title"> <img src={link} alt="" /> Insert link</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    
                     <Link 
                         documents={props.documents} 
                         alone={true} 
                         setOnlyLinkForm={setOnlyLinkForm} 
                         setErrorMsg={props.setErrorMsg}>
                     </Link>
+                    
                 </Modal.Body>
             </Modal>
+            */}
             {/************************************/}
 
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title className="modal-title"> 
-                        {index === 2 ? <><img src={link} alt=""/> Add Link </> : <><TiDocumentAdd className="modal-icon"/> Add Document</>}
+                    <Modal.Title className="modal-title">
+                        {index === 2 ? <><img src={link} alt="" /> Add Link </> : <><TiDocumentAdd className="modal-icon" /> Add Document</>}
                     </Modal.Title>
                     <div style={{ position: 'absolute', top: '30px', right: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
                         {[0, 1, 2].map((slideIndex) => (
@@ -200,6 +205,13 @@ function UnifiedForms(props) {
                     <Carousel activeIndex={index} onSelect={handleSelect} controls={false} indicators={false} interval={null}>
                         <Carousel.Item>
                             <AddDocument
+
+                                /* Not used:
+                                stakeholdersOptions={props.stakeholdersOptions}
+                                scaleOptions={props.scaleOptions}
+                                typeOptions={props.typeOptions}
+                                */
+
                                 handleAddDocumentToModal={handleAddDocumentToModal}
                                 handleNext={handleNext}
                                 newDocument={newDocument}
@@ -236,19 +248,19 @@ function UnifiedForms(props) {
                                             variant="primary"
                                             type="button"
                                             className="btn-modal-save"
-                                            onClick={async() => {
-                                                if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
+                                            onClick={async () => {
+                                                if (newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== '') {
                                                     console.log("sto aggiungendo il doc: ", newDocument)
                                                     await props.handleAddDocument(newDocument);
                                                     console.log("ho finito: ")
                                                     //handleNext();
                                                     handleClose()
-                                                }else{
+                                                } else {
                                                     alert("Please select a position")
                                                 }
                                             }}
                                         >
-                                             Save & Close
+                                            Save & Close
                                         </Button>
                                     </Col>
                                     <Col className="d-flex justify-content-end">
@@ -256,17 +268,17 @@ function UnifiedForms(props) {
                                             variant="primary"
                                             type="button"
                                             className="btn-modal-link"
-                                            onClick={async() => {
-                                                if(newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== ''){
+                                            onClick={async () => {
+                                                if (newDocument.lng !== null && newDocument.lng !== '' && newDocument.lat !== null && newDocument.lat !== '') {
                                                     console.log("sto aggiungendo il doc: ", newDocument)
                                                     console.log("ho finito: ")
                                                     handleNext();
-                                                }else{
+                                                } else {
                                                     alert("Please select a position")
                                                 }
                                             }}
                                         >
-                                             Link the Documents
+                                            Link the Documents
                                         </Button>
                                     </Col>
                                 </Row>
@@ -276,16 +288,17 @@ function UnifiedForms(props) {
                         <Carousel.Item>
 
                             <Modal.Body>
-                                <Link 
-                                     documents={props.documents} handlePrev={handlePrev} handleClose={handleClose} 
-                                     newDocument={newDocument} docId={newDocument.docId} title={newDocument.title} 
-                                     confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false} 
-                                     setErrorMsg={props.setErrorMsg}
+                                {/**This is the Matteos-component non the react-library-component  */}
+                                <Link
+                                    documents={props.documents} handlePrev={handlePrev} handleClose={handleClose}
+                                    newDocument={newDocument} docId={newDocument.docId} title={newDocument.title}
+                                    confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false}
+                                    setErrorMsg={props.setErrorMsg}
                                 ></Link>
                             </Modal.Body>
                         </Carousel.Item>
                     </Carousel>
-                </Modal.Body> 
+                </Modal.Body>
                 <Modal.Footer>
                     <p>All fields marked with * are mandatory.</p>
                 </Modal.Footer>

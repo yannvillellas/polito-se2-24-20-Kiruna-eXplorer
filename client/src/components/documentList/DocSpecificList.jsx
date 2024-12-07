@@ -12,30 +12,17 @@ import associationAPI from "../../api/associationAPI";
 
 import { useParams } from "react-router-dom";
 
-function DocSpecificList() {
+function DocSpecificList(props) {
     const { docId } = useParams();
     const docIdInt = parseInt(docId);
-    const [allDocuments, setAllDocuments] = useState([]);
     const [documentShown, setDocumentShown] = useState([]);
-    const [allPositions, setAllPositions] = useState([]);
+
     const [highlightedDocId, setHighlightedDocId] = useState(null);
 
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
-                console.log("Sono in DocSpecificList, useEffect, docId:", docIdInt);
-                const docs = await DocumentAPI.listDocuments();
-                setAllDocuments(docs);
-                console.log("Sono in DocSpecificList, useEffect, ecco i documenti:", docs);
-
-                const allPositions = await PositionAPI.listPositions();
-                console.log("Sono in DocSpecificList, useEffect, ecco le posizioni:", allPositions);
-                setAllPositions(allPositions);
-
-                const allAssociations = await associationAPI.getAllAssociations(); // Fetch all associations
-                console.log("Sono in DocSpecificList, useEffect, ecco le associazioni:", allAssociations);
-                const associations = allAssociations.filter(association => association.doc1 === docIdInt || association.doc2 === docIdInt);
-                console.log("Sono in DocSpecificList, useEffect, ecco le associazioni filtrate:", associations);
+                const associations = props.allAssociations.filter(association => association.doc1 === docIdInt || association.doc2 === docIdInt);
                 // Rendo una lista di id dei documenti associati ( enon tutte le associzioni)
                 const docIdGetFromAssociations = associations.map(association => {
                     if (association.doc1 === docIdInt) {
@@ -44,11 +31,8 @@ function DocSpecificList() {
                         return association.doc1;
                     }
                 });
-                console.log("Sono in DocSpecificList, useEffect, ecco gli id dei documenti associati:", docIdGetFromAssociations);
-                const documentsFiltered = docs.filter(doc => docIdGetFromAssociations.includes(doc.docId));
-                console.log("Sono in DocSpecificList, useEffect, ecco i documenti filtrati:", documentsFiltered);
-                const docFromDocId = docs.find(doc => doc.docId === docIdInt);
-                console.log("Sono in DocSpecificList, useEffect, ecco il documento con docId:", docFromDocId);
+                const documentsFiltered = props.documents.filter(doc => docIdGetFromAssociations.includes(doc.docId));
+                const docFromDocId = props.documents.find(doc => doc.docId === docIdInt);
                 setHighlightedDocId(docIdInt);
                 setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
 
@@ -88,7 +72,7 @@ function DocSpecificList() {
                                 <DocumentRow key={index}
                                     document={doc}
                                     isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
-                                    allPositions={allPositions}
+                                    allPositions={props.positions}
                                 />
                             ))}
                         </tbody>
@@ -195,7 +179,7 @@ function DocumentFile(props) {
     useEffect(() => {
         const fetchFiles = async () => {
             try {
-                const files = await DocumentAPI.getFiles(props.document.docId);
+                const files = await DocumentAPI.getFiles(props.document.docId); // Will stay here, and not on App.jsx, for the same reason of the other times
                 if (files) {
                     setFiles(Array.from(files));
                 } else {

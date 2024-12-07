@@ -19,114 +19,8 @@ import documentTypeAPI from "../../api/documentTypeAPI"
  * 
  */
 
-function DocList() {
+function DocList(props) {
   const [documents, setDocuments] = useState([]);
-  const [allDocuments, setAllDocuments] = useState([]);
-
-  /*const titleOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.title,
-  }));
-
-  const stakeholderOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.stakeholders,
-  }));*/
-
-  const [stakeholdersOptions, setStakeholdersOptions] = useState([]);
-  const [scaleOptions, setScaleOptions] = useState([]);
-  const [typeOptions, setTypeOptions] = useState([])
-  useEffect(() => {
-    const fetchOptions = async () => {
-      const stakeholderList = await stakeholderAPI.getStakeholders()
-      const scaleList = await scaleAPI.getScales()
-      const typeList = await documentTypeAPI.getDocumentTypes()
-      setStakeholdersOptions(stakeholderList.map((s) => { return { value: s.name, label: s.name } }))
-      setScaleOptions(scaleList.map((s) => { return { value: s.name, label: s.name } }))
-      setTypeOptions(typeList.map((t) => { return { value: t.type, label: t.type } }))
-    }
-    fetchOptions();
-  }, [])
-
-  /*const scaleOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.scale,
-  }));
-
-  const typeOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.type,
-  }));
-
-  const languageOptions = documents.map((doc) => ({
-    value: doc.docId,
-    label: doc.language,
-  }));*/
-
-
-
-  const [selectedDocument, setSelectedDocument] = useState(null);
-  const [allPositions, setAllPositions] = useState([]);
-
-  // for some reasons sometimes documents is empty (if i use it in DocList)
-  const fetchDocuments = async () => {
-    try {
-      const res = await DocumentAPI.listDocuments();
-      const pos = await PositionAPI.listPositions();
-      // console.log("Sono in DocList.jsx, ricevo dal db i documenti: ", res);
-      setDocuments(res || []);
-      setAllDocuments(res || []);
-      console.log(res)
-
-      setAllPositions(pos || []);
-
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-    }
-  };
-
-  // Fetch documents on component mount
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  /*
-  // Polling: and then update the document after 5 sec
-  useEffect(() => {
-    const intervalId = setInterval(async () => {
-      try {
-        const res = await DocumentAPI.listDocuments();
-
-        if (!selectedDocument) {
-          // Aggiorna sia la lista completa sia i documenti mostrati
-          setAllDocuments(res || []);
-          setDocuments(res || []);
-        } else {
-          // Aggiorna solo la lista completa per evitare sovrascritture
-          setAllDocuments(res || []);
-          console.log("Polling: Document list updated in background.");
-        }
-      } catch (error) {
-        console.error("Error during polling:", error);
-      }
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [selectedDocument]);
-  */
-
-  // Gestione del cambio selezione nel Select
-  const handleSelectChange = (selectedOption) => {
-    if (selectedOption) {
-      setSelectedDocument(selectedOption);
-      setDocuments(allDocuments.filter((doc) => doc.docId === selectedOption.value));
-    } else {
-      setSelectedDocument(null);
-      setDocuments(allDocuments); // Ripristina solo quando non c'è selezione
-    }
-  };
-
-  //const [searchedTitle, setSearchedTitle] = useState("")
 
   const [searchedTitle, setSearchedTitle] = useState("");
   const [selectedStakeholder, setSelectedStakeholder] = useState(null);
@@ -134,7 +28,7 @@ function DocList() {
   const [selectedScale, setSelectedScale] = useState(null);
 
   const applyFilters = () => {
-    const filteredDocuments = allDocuments.filter((doc) => {
+    const filteredDocuments = props.documents.filter((doc) => {
       const matchesTitle = doc.title.toLowerCase().includes(searchedTitle.toLowerCase());
       const matchesStakeholder = selectedStakeholder ? doc.stakeholders.includes(selectedStakeholder.value) : true;
       const matchesType = selectedType ? doc.type.includes(selectedType.value) : true;
@@ -153,7 +47,6 @@ function DocList() {
 
   return (
     <>
-      <h2 className="mb-4">"Kiruna's Document Library"</h2>
       <Row className="filters">
         <Col>
         <Form.Group>
@@ -162,11 +55,6 @@ function DocList() {
             type="text"
             className="border-dark border-2"
             value={searchedTitle}
-            /*onChange={(e) => {
-              setSearchedTitle(e.target.value)
-              console.log(e.target.value)
-              setDocuments(() => allDocuments.filter(doc => doc.title.toLowerCase().includes(e.target.value.toLowerCase())))
-            }}*/
             onChange={(e) => setSearchedTitle(e.target.value)}
           />
         </Form.Group>
@@ -175,16 +63,9 @@ function DocList() {
         <Form.Group>
           <Form.Label>Search by stakeholder</Form.Label>
           <Select
-            options={stakeholdersOptions}
+            options={props.stakeholdersOptions}
             isClearable
             placeholder="Select stakeholder"
-            /*onChange={(selectedOption) =>{
-              if (selectedOption) {
-                setDocuments(()=>allDocuments.filter((doc)=>doc.stakeholders.includes(selectedOption.value)))
-              } else {
-                setDocuments(allDocuments);
-              }
-            }}*/
             onChange={setSelectedStakeholder}
           />
         </Form.Group>
@@ -193,16 +74,9 @@ function DocList() {
         <Form.Group>
           <Form.Label>Search by type</Form.Label>
           <Select
-            options={typeOptions}
+            options={props.typeOptions}
             isClearable
             placeholder="Select type of document"
-            /*onChange={(selectedOption) =>{
-              if (selectedOption) {
-                setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
-              } else {
-                setDocuments(allDocuments);
-              }
-            }}*/
             onChange={setSelectedType}
           />
         </Form.Group>
@@ -211,16 +85,9 @@ function DocList() {
         <Form.Group>
           <Form.Label>Search by scale</Form.Label>
           <Select
-            options={scaleOptions}
+            options={props.scaleOptions}
             isClearable
             placeholder="Select scale of document"
-            /*onChange={(selectedOption) =>{
-              if (selectedOption) {
-                setDocuments(()=>allDocuments.filter((doc)=>doc.type.includes(selectedOption.value)))
-              } else {
-                setDocuments(allDocuments);
-              }
-            }}*/
             onChange={setSelectedScale}
           />
         </Form.Group>
@@ -228,7 +95,7 @@ function DocList() {
       </Row>
       <Container fluid >
         {/* Tabella dei documenti */}
-        <DocumentTable documents={documents} allPositions={allPositions} />
+        <DocumentTable documents={documents} allPositions={props.positions} />
       </Container>
     </>
   );
@@ -314,19 +181,6 @@ function DocumentData(props) {
     };
   }, []);
 
-  /*useEffect(() => {
-    const description = props.document.description;
-    if (isCompact && description) {
-      setTruncatedDescription(description.split(" ").slice(0, 3).join(" ") + "...");
-    } else {
-      setTruncatedDescription(description);
-    }
-  }, [isCompact, props.document.description]);
-
-  useEffect(() => {
-    console.log("Is compact?", isCompact);
-  }, [isCompact]);*/
-
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -392,7 +246,7 @@ function DocumentData(props) {
 
 
 function DocumentFile(props) {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // Will be maintein here so that file get taken only when the document appear in the table
 
   useEffect(() => {
     const fetchFiles = async () => {

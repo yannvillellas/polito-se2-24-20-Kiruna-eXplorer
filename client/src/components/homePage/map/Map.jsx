@@ -75,25 +75,22 @@ const getCustomIcon = (docType, stakeholders) => {
 };
 
 function CustomMap(props) {
-  const [documents, setDocuments] = useState([]);
-  const [documentShown, setDocumentShown] = useState([]);
-  const [filterOn, setFilterOn] = useState(false);
+  const [documentShown, setDocumentShown] = useState([]); // This componet state
+  const [filterOn, setFilterOn] = useState(false); // This componet state
 
-  const [files, setFiles] = useState();
-  const [isPositionToModify, setIsPositionToModify] = useState(false);
+  const [isPositionToModify, setIsPositionToModify] = useState(false); // This componet state
 
-  const [showDocumentModal, setShowDocumentModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState(null);
-  const [areas, setAreas] = useState([]);
-  const [visibleArea, setVisibleArea] = useState(null);
-  const [areaAssociations, setAreaAssociations] = useState([]);
+  const [showDocumentModal, setShowDocumentModal] = useState(false); // This componet state
+  const [selectedDoc, setSelectedDoc] = useState(null);   // This componet state
+  const [visibleArea, setVisibleArea] = useState(null); // This componet state
 
+  const [files, setFiles] = useState(); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )
+  // Manage connectionsList of the document with DOC_ID
+  const [linkedDocuments, setLinkedDocuments] = useState([]); // Call API (getAssociationBy_DOC_ID), but here is easier (same concept of files) where each element will have structure: {aId: 1, title: "title", type: "type", doc1: doc1Id, doc2: doc2Id}
 
   // Gestisco la modifica della posizione
   const [newLan, setNewLan] = useState(null);
   const [newLng, setNewLng] = useState(null);
-
-
 
 
   const onFeatureClick = (e) => {
@@ -125,50 +122,8 @@ function CustomMap(props) {
     </Tooltip>
   );
 
-  // So that sync with the parent component
-  useEffect(() => {
-    if (props.documents) {
-      setDocuments(props.documents);
-
-    }
-  }, [props.documents]);
-
-  /* Non mi si aggiorna in automatico le aree appena aggiunto documento, perciò temporaneamente opto per il polling */
-  // Lascio anceh questa perchè così le aree mi vengono caricate subito all'apertura della pagina
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        const areas = await areaAPI.listAreas();
-        console.log("Sono in Map.jsx, ecco tutte le aree: ", areas);
-        const areaAssociations = await areaAPI.listAreaAssociations();
-        console.log("Sono in Map.jsx, ecco tutte le areeAssociation: ", areaAssociations);
-        setAreas(areas);
-        setAreaAssociations(areaAssociations);
-      } catch (error) {
-        console.error("Error fetching areas:", error);
-      }
-    }
-    fetchAreas();
-  }, []);
 
 
-  // Polling per le aree ( e le areeAssociation)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const fetchAreas = async () => {
-        try {
-          const areas = await areaAPI.listAreas();
-          const areaAssociations = await areaAPI.listAreaAssociations();
-          setAreas(areas);
-          setAreaAssociations(areaAssociations);
-        } catch (error) {
-          console.error("Error fetching areas:", error);
-        }
-      }
-      fetchAreas();
-    }, 5000); // Ogni 5 secondi
-    return () => clearInterval(interval);
-  }, []);
 
   const closeDocumentModal = () => {
     setShowDocumentModal(false);
@@ -202,18 +157,32 @@ function CustomMap(props) {
     aTag.remove();
   }
 
-  const handleMarkerClick = async (docs) => {
-    setSelectedDoc(docs[0]);
+
+
+  const handleMarkerClick = async (doc) => { // Passo l'intero documento
+    setSelectedDoc(doc);
     setShowDocumentModal(true);
 
-    await handleGetFiles(docs[0].docId)
+    await handleGetFiles(doc.docId);
+    await handleShowTitleAllLinkedDocument(doc.docId);
 
   };
+
+  const handleConnectionClick = async (docId) => {
+    console.log("Sono in handleConnectionClick, ecco il docId: ", docId);
+    // prendo l'intero documento:
+    const doc = props.documents.filter(doc => doc.docId === docId)[0];
+    // chiamo handleMarkerClick passando l'intero documento:
+    handleMarkerClick(doc);
+  };
+
+
+
 
   // da fixare tenendo conto di areeAssociation
   const handleMouseOver = (docId) => {
     console.log(`Mouseover on docId: ${docId}`);
-    const areaAssociation = areaAssociations.find((a) => a.docId === docId);
+    const areaAssociation = props.areaAssociations.find((a) => a.docId === docId);
     if (areaAssociation?.areaId) {
       setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
     }
@@ -232,7 +201,7 @@ function CustomMap(props) {
     } else if (newLan < -90 || newLan > 90 || newLng < -180 || newLng > 180) {
       alert("Latitude must be between -90 and 90, longitude must be between -180 and 180");
       return;
-    } 
+    }
 
     console.log("Sono in handleModifyPosition, ecco i parametri:", selectedDoc.docId, newLan, newLng);
     await DocumentAPI.updateDocumentPosition(selectedDoc.docId, newLan, newLng);
@@ -245,16 +214,12 @@ function CustomMap(props) {
   };
 
 
-
-
-
-
-
   const handleShowOnlyAllMunicipalityDocument = () => {
     setFilterOn(true);
-    setDocumentShown(documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
+    setDocumentShown(props.documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
 
   }
+
 
   const handleShowAllLinkedDocument = async (docId) => {
 
@@ -265,6 +230,7 @@ function CustomMap(props) {
 
     setFilterOn(true);
     let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Ecco le associazioni: ", assciationToShow);
     let docIdToShow = [];
     for (let association of assciationToShow) {
       if (association.doc1 === docId) {
@@ -273,8 +239,38 @@ function CustomMap(props) {
         docIdToShow.push(association.doc1)
       }
     }
-    const docToShow = documents.filter(doc => docIdToShow.includes(doc.docId));
+    const docToShow = props.documents.filter(doc => docIdToShow.includes(doc.docId));
     setDocumentShown(docToShow);
+  }
+
+  const handleShowTitleAllLinkedDocument = async (docId) => {
+
+    if (!docId) { // Se non è stato selezionato nessun documento
+      setLinkedDocuments([]);
+      return;
+    }
+    console.log("Sono in handleShowTitleAllLinkedDocument, ecco il docId: ", docId);
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    console.log("Sono in MAP.jsx ecco le associationToSHow che ho rievuto: ", assciationToShow);
+    console.log("Ecco i linksType passsati come props: ", props.linksType);
+    let titleList = [];
+    let title = "";
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        // se il titolo non è già presente in titleList aggiuggilo
+        title = props.documents.filter(doc => doc.docId === association.doc2)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc2 });
+        }
+      } else {
+        title = props.documents.filter(doc => doc.docId === association.doc1)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc1 });
+        }
+      }
+    }
+    console.log("Ecco i documenti associati: ", titleList);
+    setLinkedDocuments(titleList);
   }
 
 
@@ -303,13 +299,13 @@ function CustomMap(props) {
           spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
-          {!filterOn && documents.map((doc) => (
+          {!filterOn && props.documents.map((doc) => (
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}
               icon={getCustomIcon(doc.type, doc.stakeholders)}
               eventHandlers={{
-                click: () => handleMarkerClick([doc]),
+                click: () => handleMarkerClick(doc),
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
@@ -322,7 +318,7 @@ function CustomMap(props) {
               position={[doc.lat, doc.lng]}
               icon={getCustomIcon(doc.type, doc.stakeholders)}
               eventHandlers={{
-                click: () => handleMarkerClick([doc]),
+                click: () => handleMarkerClick(doc), // passo intero documento:
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
@@ -333,7 +329,7 @@ function CustomMap(props) {
 
         {/**Show all the areas by document: */}
 
-        {areas.length > 0 && areas.map((area) => {
+        {props.areas.length > 0 && props.areas.map((area) => {
           if (area.areaId === visibleArea && area.areaType === "polygon") {
             try {
               const positions = JSON.parse(area.coordinates)[0];
@@ -419,7 +415,7 @@ function CustomMap(props) {
       }
 
 
-
+      {/*} // Filter on the top that permit you to see only link
       <Form className="search-document">
         <Form.Group className="mb-3">
           <Form.Label style={{color: "white"}}>Choose a document so all linked-document will be shown</Form.Label>
@@ -434,6 +430,7 @@ function CustomMap(props) {
           />
         </Form.Group>
       </Form>
+      */}
 
 
       <Modal show={showDocumentModal} onHide={closeDocumentModal} size="xl">
@@ -456,12 +453,40 @@ function CustomMap(props) {
                   :
                   ""
               ))}
+
+              <div key={"connections"}>
+                <p>
+                  <strong>Connections:</strong>
+                </p>
+                {selectedDoc.connections != 0 ? linkedDocuments.map((connection) => (
+                  <p
+                    key={connection.docTitle}
+                    onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                    style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}  // Cambia colore al testo
+                  >
+                    {connection.docTitle}
+                  </p>
+                )) : ""}
+              </div>
+
+
               <div key={"position"}>
                 <p>
                   <strong>Position:</strong>{(selectedDoc.lat == 67.8558 && selectedDoc.lng == 20.2253) ? " All municipalities" : `(${selectedDoc.lat.toFixed(4)}, ${selectedDoc.lng.toFixed(4)})`}
                 </p>
                 {props.isUrbanPlanner && !isPositionToModify && <Button variant="primary" onClick={() => setIsPositionToModify(true)}>
-                  Reposition
+                  Modify Position
+                </Button>}
+
+                {props.isUrbanPlanner && <Button variant="primary">
+                  Modify
+                </Button>}
+
+                {props.isUrbanPlanner && <Button variant="primary" onClick={() => {
+                  handleShowAllLinkedDocument(selectedDoc.docId)
+                  closeDocumentModal();
+                }}>
+                  See all related document on the map
                 </Button>}
 
                 {props.isUrbanPlanner && isPositionToModify && <Button variant="primary" onClick={() => {
@@ -475,11 +500,11 @@ function CustomMap(props) {
                   setNewLng(null);
                   setIsPositionToModify(false);
                 }}>
-                  Cancel 
+                  Cancel
                 </Button>}
 
                 {props.isUrbanPlanner && isPositionToModify && <ChosenPositionMap handleSavePosition={handleSavePosition} />}
-                
+
               </div>
               <div className="download-buttons-container">
                 {files ? files.map((f, index) => (
