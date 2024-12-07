@@ -164,7 +164,7 @@ function Link(props) {
 
           <Form.Group as={Row} className="rows">
             <Form.Label column sm="2" className="name-label">
-              Link Type
+              Connections Type
             </Form.Label>
             <Col sm="8" className="col-link">
               <button
@@ -174,7 +174,7 @@ function Link(props) {
                 {selectedTypes.length > 0 ? (
                   `Selected: ${selectedTypes.join(", ")}`
                 ) : (
-                  <span className="hint">Select type(s)</span>
+                  <span className="hint">Select connection(s)</span>
                 )}
                 <span className="arrow">&#9662;</span>
               </button>
@@ -274,7 +274,7 @@ function Link(props) {
           <Modal.Title>Confirm Submission</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to submit this link association?
+          Are you sure you want to submit this connections?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowConfirmation(false)}>

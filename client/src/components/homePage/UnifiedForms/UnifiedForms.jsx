@@ -278,7 +278,7 @@ function UnifiedForms(props) {
                                                 }
                                             }}
                                         >
-                                            Link the Documents
+                                            Add connections
                                         </Button>
                                     </Col>
                                 </Row>
