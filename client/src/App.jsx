@@ -376,7 +376,7 @@ function App() {
 
 
                 <Route
-                    path='/homePage'
+                    path='/homePage/:docId?'
                     element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}
                         isUrbanPlanner={isUrbanPlanner}
                         documents={documents}

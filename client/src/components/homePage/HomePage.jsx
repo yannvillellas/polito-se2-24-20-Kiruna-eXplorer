@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import PropTypes from 'prop-types';
 
+import { useParams } from "react-router-dom";
+
 import Map from './map/Map.jsx';
 import DocumentAPI from "../../api/documentAPI";
 import PositionAPI from "../../api/positionAPI";
@@ -15,6 +17,8 @@ import stakeholderAPI from "../../api/stakeholderAPI.js";
 
 
 function HomePage(props) {
+    const { docId } = useParams();
+
     const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
     const [errorMsg, setErrorMsg] = useState([]);
 
@@ -42,6 +46,7 @@ function HomePage(props) {
             <Row style={{ height: "100%" }}>
                 <Col style={{ position: "relative" }}>
                     <Map
+                        openMarkerId={docId} // docId as a promp 
                         isUrbanPlanner={isUrbanPlanner}
 
                         documents={props.documents}
@@ -62,7 +67,7 @@ function HomePage(props) {
                                 typeOptions={props.typeOptions}
 
                                 setErrorMsg={setErrorMsg}
-                                
+
                                 handleAddDocument={props.handleAddDocument}
                             />
                         </div>

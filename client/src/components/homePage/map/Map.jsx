@@ -92,6 +92,14 @@ function CustomMap(props) {
   const [newLan, setNewLan] = useState(null);
   const [newLng, setNewLng] = useState(null);
 
+  // Se ho il parametro in /homepage/:docId mi prendo il documento e mi apro direttamtne il modal:
+  useEffect(() => {
+    if (props.openMarkerId) {
+      handleConnectionClick(Number(props.openMarkerId));
+    }
+  }, [props.openMarkerId, props.documents]);
+  
+
 
   const onFeatureClick = (e) => {
     // Ottieni il layer (poligono, multipoligono, ecc.)
@@ -299,7 +307,8 @@ function CustomMap(props) {
           spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
-          {!filterOn && props.documents.map((doc) => (
+          {/* If there is no /homepage/:docId than map worsk normally otherwise it has to open immediatelly the  marker wit docId  */}
+          { !filterOn && props.documents.map((doc) => (
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}
@@ -312,7 +321,7 @@ function CustomMap(props) {
             />
           ))}
 
-          {filterOn && documentShown.map((doc) => (
+          { filterOn && documentShown.map((doc) => (
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}

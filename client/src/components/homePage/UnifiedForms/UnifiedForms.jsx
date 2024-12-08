@@ -8,7 +8,7 @@ import DocumentAPI from "../../../api/documentAPI";
 import AddDocument from "./addDocument/AddDocument";
 import { TiDocumentAdd } from "react-icons/ti"
 import link from "../../../asset/link.svg"
-import ChosenPosition from "../chosenPosition/ChosenPosition";
+import ChosenPosition from "./chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addDocument/addOriginalSource/AddOriginalSource";
 import { Tooltip, OverlayTrigger } from "react-bootstrap"; // Importa Tooltip e OverlayTrigger
 

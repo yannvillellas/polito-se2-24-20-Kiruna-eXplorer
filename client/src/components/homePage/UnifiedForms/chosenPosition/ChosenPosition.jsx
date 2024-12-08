@@ -9,8 +9,8 @@ import { EditControl } from "react-leaflet-draw";
 
 import "leaflet-draw/dist/leaflet.draw.css";
 
-import geojsonData from "../../../data/KirunaMunicipality.json";
-import areaAPI from "../../../api/areaAPI";
+import geojsonData from "../../../../data/KirunaMunicipality.json";
+import areaAPI from "../../../../api/areaAPI";
 
 function ChosenPosition(props) {
     const [selectedOption, setSelectedOption] = useState('');
@@ -45,7 +45,7 @@ function ChosenPosition(props) {
         setSelectedOption(e.target.value); // Aggiorna lo stato con il valore selezionato
         setPosition({ lat: null, lng: null });
         props.handleAddLatLongToDocumentModal(null, null); // otherwise if you change and go back it will be saved as the previous value
-
+        props.handleSetArea(null); // Resetta l'area selezionata
         if (e.target.value === 'allMunicipalities') {
             // I'm not setting the position based on the cetroid of teh area because will be srtange to have a marker in the middle of the map
             // So i'm leaving it on (67.8558, 20.2253) that is in the middle of the city

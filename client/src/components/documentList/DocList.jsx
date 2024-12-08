@@ -1,9 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./DocList.css"
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DocumentAPI from "../../api/documentAPI";
-import { Table, Container, Button, Row,Col } from "react-bootstrap";
+import { Table, Container, Button, Row, Col } from "react-bootstrap";
 import { Form, Card } from 'react-bootstrap';
 import Select from "react-select";
 import PositionAPI from "../../api/positionAPI";
@@ -26,6 +25,7 @@ function DocList(props) {
   const [selectedStakeholder, setSelectedStakeholder] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedScale, setSelectedScale] = useState(null);
+  const [selectedDescription, setSelectedDescription] = useState("");
 
   const applyFilters = () => {
     const filteredDocuments = props.documents.filter((doc) => {
@@ -33,8 +33,9 @@ function DocList(props) {
       const matchesStakeholder = selectedStakeholder ? doc.stakeholders.includes(selectedStakeholder.value) : true;
       const matchesType = selectedType ? doc.type.includes(selectedType.value) : true;
       const matchesScale = selectedScale ? doc.scale.includes(selectedScale.value) : true;
+      const matchesDescription = selectedDescription ? doc.description.toLowerCase().includes(selectedDescription.toLowerCase()) : true;
 
-      return matchesTitle && matchesStakeholder && matchesType && matchesScale;
+      return matchesTitle && matchesStakeholder && matchesType && matchesScale && matchesDescription;
     });
 
     setDocuments(filteredDocuments);
@@ -43,54 +44,65 @@ function DocList(props) {
   // Effetto per aggiornare i documenti ogni volta che cambia un filtro
   useEffect(() => {
     applyFilters();
-  }, [searchedTitle, selectedStakeholder, selectedType, selectedScale]);
+  }, [searchedTitle, selectedStakeholder, selectedType, selectedScale, selectedDescription]);
 
   return (
     <>
       <Row className="filters">
         <Col>
-        <Form.Group>
-          <Form.Label>Search by title</Form.Label>
-          <Form.Control
-            type="text"
-            className="border-dark border-2"
-            value={searchedTitle}
-            onChange={(e) => setSearchedTitle(e.target.value)}
-          />
-        </Form.Group>
+          <Form.Group>
+            <Form.Label>Search by title</Form.Label>
+            <Form.Control
+              type="text"
+              className="border-dark border-2"
+              value={searchedTitle}
+              onChange={(e) => setSearchedTitle(e.target.value)}
+            />
+          </Form.Group>
         </Col>
         <Col>
-        <Form.Group>
-          <Form.Label>Search by stakeholder</Form.Label>
-          <Select
-            options={props.stakeholdersOptions}
-            isClearable
-            placeholder="Select stakeholder"
-            onChange={setSelectedStakeholder}
-          />
-        </Form.Group>
+          <Form.Group>
+            <Form.Label>Search by description</Form.Label>
+            <Form.Control
+              type="text"
+              className="border-dark border-2"
+              value={selectedDescription}
+              onChange={(e) => setSelectedDescription(e.target.value)}
+            />
+          </Form.Group>
         </Col>
         <Col>
-        <Form.Group>
-          <Form.Label>Search by type</Form.Label>
-          <Select
-            options={props.typeOptions}
-            isClearable
-            placeholder="Select type of document"
-            onChange={setSelectedType}
-          />
-        </Form.Group>
+          <Form.Group>
+            <Form.Label>Search by stakeholder</Form.Label>
+            <Select
+              options={props.stakeholdersOptions}
+              isClearable
+              placeholder="Select stakeholder"
+              onChange={setSelectedStakeholder}
+            />
+          </Form.Group>
         </Col>
         <Col>
-        <Form.Group>
-          <Form.Label>Search by scale</Form.Label>
-          <Select
-            options={props.scaleOptions}
-            isClearable
-            placeholder="Select scale of document"
-            onChange={setSelectedScale}
-          />
-        </Form.Group>
+          <Form.Group>
+            <Form.Label>Search by type</Form.Label>
+            <Select
+              options={props.typeOptions}
+              isClearable
+              placeholder="Select type of document"
+              onChange={setSelectedType}
+            />
+          </Form.Group>
+        </Col>
+        <Col>
+          <Form.Group>
+            <Form.Label>Search by scale</Form.Label>
+            <Select
+              options={props.scaleOptions}
+              isClearable
+              placeholder="Select scale of document"
+              onChange={setSelectedScale}
+            />
+          </Form.Group>
         </Col>
       </Row>
       <Container fluid >
@@ -109,30 +121,30 @@ function DocumentTable(props) {
   return (
     <Container fluid >
       <div className="custom-table-wrapper-main">
-      <div className="table-scroll-main">
-        <Table striped bordered hover className="custom-table shadow-sm">
-          <thead style={{ backgroundColor: "#007bff", color: "white" }}>
-            <tr>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Stakeholders</th>
-              <th>Scale</th>
-              <th>Issuance Date</th>
-              <th>Type</th>
-              <th>Connections</th>
-              <th>Language</th>
-              <th>Pages</th>
-              <th>(lat, lng)</th>
-              <th>Files</th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((doc, index) => (
-              <DocumentRow key={index} document={doc} allPositions={props.allPositions} />
-            ))}
-          </tbody>
-        </Table>
-      </div>
+        <div className="table-scroll-main">
+          <Table striped bordered hover className="custom-table shadow-sm">
+            <thead style={{ backgroundColor: "#007bff", color: "white" }}>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Stakeholders</th>
+                <th>Scale</th>
+                <th>Issuance Date</th>
+                <th>Type</th>
+                <th>Connections</th>
+                <th>Language</th>
+                <th>Pages</th>
+                <th>Map/Diagram</th>
+                <th>Files</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.map((doc, index) => (
+                <DocumentRow key={index} document={doc} allPositions={props.allPositions} />
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </div>
     </Container>
   );
@@ -148,71 +160,12 @@ function DocumentRow(props) {
   );
 }
 function DocumentData(props) {
-  const [position, setPosition] = useState({ lat: "N/A", lng: "N/A" });
-
-
-  const [isCompact, setIsCompact] = useState(false);
-  //const [truncatedDescription, setTruncatedDescription] = useState(props.document.description ? props.document.description.split(" ").slice(0, 3).join(" ") + "..." : "");
-
-  // Stato per tracciare se la descrizione è espansa
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Troncamento della descrizione
-  const truncatedDescription = props.document.description
-    ? (props.document.description.split(" ").length>10? props.document.description.split(" ").slice(0, 10).join(" ") + "..." : props.document.description)
-    : "";
-
-  // Descrizione mostrata in base allo stato `isExpanded`
-  const displayedDescription = isExpanded
-    ? props.document.description
-    : truncatedDescription;
-  
-  // Effetto per tracciare la larghezza della finestra
-  useEffect(() => {
-    const handleResize = () => {
-      setIsCompact(window.innerWidth < 1790); // Cambia la soglia secondo necessità
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Imposta lo stato iniziale
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    const fetchPosition = async () => {
-      try {
-        // const pos = await PositionAPI.listPositions();
-        const pos = props.allPositions;
-
-        // Trova la posizione del documento basandosi sul docId di props.document
-        const docPos = pos.find((p) => p.docId === props.document.docId);
-
-        if (docPos) {
-          setPosition({ lat: docPos.latitude, lng: docPos.longitude });
-        } else {
-          setPosition({ lat: "N/A", lng: "N/A" });
-        }
-      } catch (error) {
-        console.error("Error fetching position:", error);
-      }
-    };
-
-    fetchPosition();
-  }, [props.document.docId]); // Dipende da props.document.docId
 
   return (
     <>
       <td>{props.document.title}</td>
-      <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
-        {displayedDescription}
-        {props.document.description.split(" ").length > 10 && (
-          <span style={{ color: "blue", textDecoration: "underline" }}>
-            {isExpanded ? " Reduce" : " Show all"}
-          </span>
-        )}
+      <td>
+        {props.document.description}
       </td>
       <td>{props.document.stakeholders}</td>
       <td>
@@ -231,15 +184,15 @@ function DocumentData(props) {
 
         {props.document.connections === 0 && <p>0</p>}
 
-
       </td>
       <td>{props.document.language}</td>
       <td>{props.document.pages}</td>
-      {position.lat === "N/A" || position.lng === "N/A" ?
-        <td>N/A</td>
-        :
-        <td>{`${parseFloat(position.lat).toFixed(4)}, ${parseFloat(position.lng).toFixed(4)} `}</td>
-      }
+
+      <td>
+        <Link to={`/homePage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+          Map
+        </Link>
+      </td>
     </>
   );
 }

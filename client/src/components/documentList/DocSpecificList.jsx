@@ -63,7 +63,7 @@ function DocSpecificList(props) {
                                 <th>Connections</th>
                                 <th>Language</th>
                                 <th>Pages</th>
-                                <th>(lat, lng)</th>
+                                <th>Map/Diagram</th>
                                 <th>Files</th>
                             </tr>
                         </thead>
@@ -98,6 +98,7 @@ function DocumentRow(props) {
             <DocumentFile
                 key={props.index}
                 document={props.document}
+                isHighlighted={props.isHighlighted}
             />
         </tr>
     );
@@ -135,21 +136,16 @@ function DocumentData(props) {
     return (
         <>
             <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
-            <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
-                {displayedDescription}
-                {props.document.description.split(" ").length > 10 && (
-                    <span style={{ color: "blue", textDecoration: "underline" }}>
-                        {isExpanded ? "Reduce" : " Show all "}
-                    </span>
-                )}
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>
+                {props.document.description}
             </td>
-            <td>{props.document.stakeholders}</td>
-            <td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.stakeholders}</td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}> 
                 {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
             </td>
-            <td>{props.document.issuanceDate}</td>
-            <td>{props.document.type}</td>
-            <td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.issuanceDate}</td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.type}</td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>
                 {props.document.connections !== 0 &&
 
                     <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
@@ -160,14 +156,12 @@ function DocumentData(props) {
 
                 {props.document.connections === 0 && <p>0</p>}
             </td>
-            <td>{props.document.language}</td>
-            <td>{props.document.pages}</td>
-            <td>
-                {position.lat === "N/A" || position.lng === "N/A" ?
-                    <td>N/A</td>
-                    :
-                    <td>{`${parseFloat(position.lat).toFixed(4)}, ${parseFloat(position.lng).toFixed(4)} `}</td>
-                }
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.language}</td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.pages}</td>
+            <td className={props.isHighlighted ? "highlighted-row" : ""}>
+                <p>
+                    On the map
+                </p>
             </td>
         </>
     );
@@ -205,7 +199,7 @@ function DocumentFile(props) {
 
     return (
 
-        <td>
+        <td className={props.isHighlighted ? "highlighted-row" : ""}>
             {files.length > 0 ? (
                 files.map((f, index) => (
                     <div key={f.name || index}>

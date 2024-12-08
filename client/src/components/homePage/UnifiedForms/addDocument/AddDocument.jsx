@@ -3,7 +3,7 @@ import "./addDocument.css";
 import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form, FormControl, Modal } from "react-bootstrap";
 import Select, {components} from "react-select";
-import ChosenPosition from "../../chosenPosition/ChosenPosition";
+import ChosenPosition from "../chosenPosition/ChosenPosition";
 import AddOriginalSource from "./addOriginalSource/AddOriginalSource";
 import { booleanContains, polygon } from "@turf/turf";
 import stakeholderAPI from "../../../../api/stakeholderAPI"
