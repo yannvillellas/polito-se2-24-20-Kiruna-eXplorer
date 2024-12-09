@@ -167,6 +167,15 @@ function App() {
     const handleAddDocument = async (document) => {
 
         try {
+
+            // fix document.pages as blank string
+            if (document.pages === "") {
+                document.pages = "-";
+            }
+
+
+
+
             const docId = await DocumentAPI.addDocument(document);
 
             const position = {
