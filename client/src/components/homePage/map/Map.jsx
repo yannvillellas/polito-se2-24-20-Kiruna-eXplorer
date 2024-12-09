@@ -92,13 +92,19 @@ function CustomMap(props) {
   const [newLan, setNewLan] = useState(null);
   const [newLng, setNewLng] = useState(null);
 
+
+  // managing the evidence of the document
+  const [highlightedDocId, setHighlightedDocId] = useState(null);
+
   // Se ho il parametro in /homepage/:docId mi prendo il documento e mi apro direttamtne il modal:
   useEffect(() => {
     if (props.openMarkerId) {
       handleConnectionClick(Number(props.openMarkerId));
+      // For teh evidence of the document
+      setHighlightedDocId(Number(props.openMarkerId));
     }
   }, [props.openMarkerId, props.documents]);
-  
+
 
 
   const onFeatureClick = (e) => {
@@ -194,11 +200,25 @@ function CustomMap(props) {
     if (areaAssociation?.areaId) {
       setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
     }
+
+    /* FOR the evidence of the document
+    if (docId === highlightedDocId) {
+      setHighlightedDocId(null); // Rimuovi l'evidenziazione quando il mouse ci passa
+    }
+      */
+
   };
 
   const handleMouseOut = (docId) => {
     console.log(`Mouseout on docId: ${docId}`);
     setVisibleArea(null); // Rimuove l'area visibile
+
+    /* FOR the evidence of the document
+    if (docId === highlightedDocId) {
+      setHighlightedDocId(null); // Rimuovi l'evidenziazione quando il mouse esce
+    }
+    */
+
   };
 
   const handleModifyPosition = async (newLan, newLng) => {
@@ -286,7 +306,7 @@ function CustomMap(props) {
   return (
 
     <Container fluid className="map-container">
-      <MapContainer center={[67.8558, 20.2253]} zoom={12} >
+      <MapContainer center={props.mapCenter} zoom={12} >
         <LayersControl position="topleft">
           <LayersControl.BaseLayer checked name="Google Satellite">
             <TileLayer
@@ -308,7 +328,7 @@ function CustomMap(props) {
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
           {/* If there is no /homepage/:docId than map worsk normally otherwise it has to open immediatelly the  marker wit docId  */}
-          { !filterOn && props.documents.map((doc) => (
+          {!filterOn && props.documents.map((doc) => (
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}
@@ -321,7 +341,7 @@ function CustomMap(props) {
             />
           ))}
 
-          { filterOn && documentShown.map((doc) => (
+          {filterOn && documentShown.map((doc) => (
             <Marker
               key={doc.docId}
               position={[doc.lat, doc.lng]}

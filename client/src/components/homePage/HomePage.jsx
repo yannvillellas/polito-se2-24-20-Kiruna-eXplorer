@@ -14,10 +14,14 @@ import areaAPI from "../../api/areaAPI";
 import documentTypeAPI from "../../api/documentTypeAPI.js";
 import scaleAPI from "../../api/scaleAPI.js";
 import stakeholderAPI from "../../api/stakeholderAPI.js";
+import { map } from "leaflet";
 
 
 function HomePage(props) {
     const { docId } = useParams();
+    const [isDocId, setIsDocId] = useState(false);
+    const [mapCenter, setMapCenter] = useState({ lat: 41.89193, lng: 12.51133 });
+
 
     const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
     const [errorMsg, setErrorMsg] = useState([]);
@@ -25,6 +29,19 @@ function HomePage(props) {
     const handleCloseError = (error) => {
         setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error));
     };
+
+    useEffect(() => {
+        if (!docId)
+            setIsDocId(false); // this permits that if a person press on the header: MAP the view will be reset to the center of kiruna
+        else {
+            const doc = props.documents.find((doc) => doc.docId === Number(docId));
+            if (doc) {
+                setMapCenter([doc.lat, doc.lng]);
+                setIsDocId(true);
+                console.log("Sono in HomePage, docId: ", docId, doc.lat, doc.lng);
+            }
+        }
+    }, [docId]);
 
 
     return (
@@ -45,8 +62,9 @@ function HomePage(props) {
             </ToastContainer>
             <Row style={{ height: "100%" }}>
                 <Col style={{ position: "relative" }}>
-                    <Map
-                        openMarkerId={docId} // docId as a promp 
+                    {!isDocId && <Map
+                        openMarkerId={docId} // docId as a promp
+                        mapCenter={[67.8558, 20.2253]}
                         isUrbanPlanner={isUrbanPlanner}
 
                         documents={props.documents}
@@ -56,7 +74,24 @@ function HomePage(props) {
                         areaAssociations={props.areaAssociations}
 
                         handleModifyPosition={props.handleModifyPosition}
-                    />
+                    />}
+
+                    {isDocId && <Map
+                        openMarkerId={docId} // docId as a promp
+                        mapCenter={mapCenter}
+                        isUrbanPlanner={isUrbanPlanner}
+
+                        documents={props.documents}
+                        linksType={props.linksType}
+
+                        areas={props.areas}
+                        areaAssociations={props.areaAssociations}
+
+                        handleModifyPosition={props.handleModifyPosition}
+                    />}
+
+
+
                     {isUrbanPlanner && (
                         <div className="add-document-container">
                             <UnifiedForms
