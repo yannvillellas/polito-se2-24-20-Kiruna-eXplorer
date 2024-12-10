@@ -32,6 +32,7 @@ function HomePage(props) {
 
     const handleChangeMapViewBasedOnDocId = (docId) => {
         const doc = props.documents.find((doc) => doc.docId === Number(docId));
+        // This solution is due to the fact that for some reasons the map result as not-rendered so i cannot use the property og the map onCreate() to set the center of the map
         if (doc) {
             navigate('/homePage'); // Naviga a /homePage (refresh)
             console.log("Sono in HomePage, navigo a /homePage");
