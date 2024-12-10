@@ -180,7 +180,7 @@ function CustomMap(props) {
 
     console.log("Sono in handleMarkerClick, ecco il doc: ", doc);
 
-    
+
     try {
       await handleShowTitleAllLinkedDocument(doc.docId);
       console.log("Sono in handleMarkerClick, sono tornato da handleShowTitleAllLinkedDocument");
@@ -496,13 +496,22 @@ function CustomMap(props) {
         <Modal.Body>
           {selectedDoc ? (
             <>
-              {Object.entries(selectedDoc).filter(([key]) => key != "docId" && key != "connections" && key != "title" && key != "lat" && key != "lng").map(([key, value]) => (
-                key != "ASvalue" || value != null ? <p key={key}>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                </p>
-                  :
-                  ""
-              ))}
+              {Object.entries(selectedDoc)
+                .filter(([key, value]) =>
+                  key !== "docId" &&
+                  key !== "connections" &&
+                  key !== "title" &&
+                  key !== "lat" &&
+                  key !== "lng" &&
+                  value !== null &&
+                  value !== undefined &&
+                  value !== "" // esclude stringhe vuote
+                )
+                .map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                  </p>
+                ))}
 
               <div key={"connections"}>
                 <p>
@@ -567,7 +576,7 @@ function CustomMap(props) {
 
               </div>
               <div className="download-buttons-container">
-                { (files && files.length > 0) ? files.map((f, index) => (
+                {(files && files.length > 0) ? files.map((f, index) => (
                   <div key={f.name || index} className="download-btns">
                     <Button onClick={() => handleDownload(f)} className="files">
                       <i className="bi bi-file-earmark-text-fill"></i>
