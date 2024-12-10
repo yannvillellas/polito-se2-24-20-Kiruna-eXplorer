@@ -20,12 +20,6 @@ import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
 
 
-
-/** BUGS:
- *  - If i press on a marker and i close the area is still visible untill i pass over that marker again
- * - associationDAO: getAssociations non funziona (es se prendi 59 -> 57 ma 57 non ti ritorna 59, ritorna solo doc_0 che è metà dei colelgamenti) 
- */
-
 const validDocTypes = [
   "Design document",
   "Informative document",
@@ -99,7 +93,8 @@ function CustomMap(props) {
   // Se ho il parametro in /homepage/:docId mi prendo il documento e mi apro direttamtne il modal:
   useEffect(() => {
     if (props.openMarkerId) {
-      handleConnectionClick(Number(props.openMarkerId));
+
+      // handleConnectionClick(Number(props.openMarkerId)); // This will open the modal with the document and all the linked document
       // For teh evidence of the document
       setHighlightedDocId(Number(props.openMarkerId));
     }
@@ -199,11 +194,12 @@ function CustomMap(props) {
   };
 
   const handleConnectionClick = async (docId) => {
+    props.handleChangeMapViewBasedOnDocId(docId);
     console.log("Sono in handleConnectionClick, ecco il docId: ", docId);
     // prendo l'intero documento:
-    const doc = props.documents.filter(doc => doc.docId === docId)[0];
+    // const doc = props.documents.filter(doc => doc.docId === docId)[0];
     // chiamo handleMarkerClick passando l'intero documento:
-    handleMarkerClick(doc);
+    // handleMarkerClick(doc);
   };
 
 

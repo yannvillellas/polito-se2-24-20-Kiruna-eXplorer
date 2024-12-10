@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import PropTypes from 'prop-types';
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Map from './map/Map.jsx';
 import DocumentAPI from "../../api/documentAPI";
@@ -16,9 +16,9 @@ import scaleAPI from "../../api/scaleAPI.js";
 import stakeholderAPI from "../../api/stakeholderAPI.js";
 import { map } from "leaflet";
 
-
 function HomePage(props) {
     const { docId } = useParams();
+    const navigate = useNavigate();
     const [isDocId, setIsDocId] = useState(false);
     const [mapCenter, setMapCenter] = useState({ lat: 41.89193, lng: 12.51133 });
 
@@ -29,6 +29,21 @@ function HomePage(props) {
     const handleCloseError = (error) => {
         setErrorMsg((prevErrors) => prevErrors.filter((e) => e !== error));
     };
+
+    const handleChangeMapViewBasedOnDocId = (docId) => {
+        const doc = props.documents.find((doc) => doc.docId === Number(docId));
+        if (doc) {
+            navigate('/homePage'); // Naviga a /homePage (refresh)
+            console.log("Sono in HomePage, navigo a /homePage");
+            setTimeout(() => {
+                setMapCenter([doc.lat, doc.lng]);
+                setIsDocId(true);
+                navigate(`/homePage/${docId}`); // Dopo un breve ritardo, naviga a /homePage/:docId
+                console.log("Sono in HomePage, navigo a /homePage/:docId");
+            }, 100); // Usa un piccolo ritardo per garantire il re-render
+        }
+    };
+
 
     useEffect(() => {
         if (!docId)
@@ -64,6 +79,7 @@ function HomePage(props) {
                 <Col style={{ position: "relative" }}>
                     {!isDocId && <Map
                         openMarkerId={docId} // docId as a promp
+                        handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={[67.8558, 20.2253]}
                         isUrbanPlanner={isUrbanPlanner}
 
@@ -78,6 +94,7 @@ function HomePage(props) {
 
                     {isDocId && <Map
                         openMarkerId={docId} // docId as a promp
+                        handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={mapCenter}
                         isUrbanPlanner={isUrbanPlanner}
 
