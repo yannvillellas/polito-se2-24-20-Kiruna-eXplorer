@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./homePage.css";
+import "./mapPage.css";
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import PropTypes from 'prop-types';
@@ -7,10 +7,10 @@ import PropTypes from 'prop-types';
 import { useNavigate, useParams } from "react-router-dom";
 
 import Map from './map/Map.jsx';
-import DocumentAPI from "../../api/documentAPI";
-import PositionAPI from "../../api/positionAPI";
-import UnifiedForms from "./UnifiedForms/UnifiedForms";
-import areaAPI from "../../api/areaAPI";
+import DocumentAPI from "../../api/documentAPI.js";
+import PositionAPI from "../../api/positionAPI.js";
+import UnifiedForms from "./UnifiedForms/UnifiedForms.jsx";
+import areaAPI from "../../api/areaAPI.js";
 import documentTypeAPI from "../../api/documentTypeAPI.js";
 import scaleAPI from "../../api/scaleAPI.js";
 import stakeholderAPI from "../../api/stakeholderAPI.js";
@@ -34,13 +34,13 @@ function HomePage(props) {
         const doc = props.documents.find((doc) => doc.docId === Number(docId));
         // This solution is due to the fact that for some reasons the map result as not-rendered so i cannot use the property og the map onCreate() to set the center of the map
         if (doc) {
-            navigate('/homePage'); // Naviga a /homePage (refresh)
-            console.log("Sono in HomePage, navigo a /homePage");
+            navigate('/mapPage'); // Naviga a /mapPage (refresh)
+            console.log("Sono in HomePage, navigo a /mapPage");
             setTimeout(() => {
                 setMapCenter([doc.lat, doc.lng]);
                 setIsDocId(true);
-                navigate(`/homePage/${docId}`); // Dopo un breve ritardo, naviga a /homePage/:docId
-                console.log("Sono in HomePage, navigo a /homePage/:docId");
+                navigate(`/mapPage/${docId}`); // Dopo un breve ritardo, naviga a /mapPAge/:docId
+                console.log("Sono in HomePage, navigo a /mapPage/:docId");
             }, 100); // Usa un piccolo ritardo per garantire il re-render
         }
     };

@@ -3,9 +3,9 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import MainPage from './components/mainPage/MainPage';
-import HomePage from './components/homePage/HomePage';
+import MapPage from './components/mapPage/MapPage';
 import PageNotFound from './components/pageNotFound/PageNotFound';
-import Map from './components/homePage/map/Map';
+import Map from './components/mapPage/map/Map';
 import Login from './components/authentication/Login';
 import Registration from './components/authentication/Registration';
 import Header from './components/header/Header';
@@ -337,7 +337,7 @@ function App() {
                     setUser(newUser)
                     setLoggedIn(true);
                     setIsUrbanPlanner(true);
-                    navigate('/homePage');
+                    navigate('/mapPage'); // <------------------------------------------------- be careful now ther e is mapPage
                 } else {
                     console.log("errore durante il login")
                     navigate('/login')
@@ -367,7 +367,7 @@ function App() {
                 }
             >
 
-                <Route path="/" element={<Navigate replace to={loggedIn ? '/homePage' : '/mainPage'} />} />
+                <Route path="/" element={<Navigate replace to={loggedIn ? '/mapPage' : '/mainPage'} />} /> {/*<------------------------------------------------- be careful now ther e is mapPage */}
                 <Route
                     path="/login"
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
@@ -379,8 +379,8 @@ function App() {
 
 
                 <Route
-                    path='/homePage/:docId?'
-                    element={<HomePage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}
+                    path='/mapPage/:docId?'
+                    element={<MapPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout}
                         isUrbanPlanner={isUrbanPlanner}
                         documents={documents}
                         linksType={linksType}

@@ -90,7 +90,7 @@ function CustomMap(props) {
   // managing the evidence of the document
   const [highlightedDocId, setHighlightedDocId] = useState(null);
 
-  // Se ho il parametro in /homepage/:docId mi prendo il documento e mi apro direttamtne il modal:
+  // Se ho il parametro in /mapPage/:docId mi prendo il documento e mi apro direttamtne il modal:
   useEffect(() => {
     if (props.openMarkerId) {
 
@@ -344,7 +344,7 @@ function CustomMap(props) {
           spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
-          {/* If there is no /homepage/:docId than map worsk normally otherwise it has to open immediatelly the  marker wit docId  */}
+          {/* If there is no /mapPage/:docId than map worsk normally otherwise it has to open immediatelly the  marker wit docId  */}
           {!filterOn && props.documents.map((doc) => (
             <Marker
               key={doc.docId}

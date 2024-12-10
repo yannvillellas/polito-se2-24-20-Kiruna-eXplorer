@@ -19,7 +19,7 @@ function Header(props) {
           <span className="separator">|</span>
           <nav className="header-center">
             <ul>
-              <li><Link to="/homePage">Map</Link></li>
+              <li><Link to="/mapPage">Map</Link></li>
               {props.isUrbanPlanner && <li><Link to="/documentPage">Documents</Link></li>}
             </ul>
           </nav>

@@ -189,7 +189,7 @@ function DocumentData(props) {
       <td>{props.document.pages}</td>
 
       <td>
-        <Link to={`/homePage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+        <Link to={`/mapPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
           Map
         </Link>
       </td>
