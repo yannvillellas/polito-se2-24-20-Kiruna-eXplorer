@@ -255,6 +255,40 @@ app.get("/api/documents", [], async (req, res) => {
 app.get("/api/documents/:docId/files", (req, res) => {
   const subfolder = req.params.docId;
   const uploadDir = path.join(__dirname, "uploads");
+  const folderPath = path.join(uploadDir, subfolder);
+  
+  try {
+    // Controlla se la sottocartella esiste
+    if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
+      // return res.status(400).send("Sottocartella non valida o non trovata.");
+      return res.json([]); // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
+    }
+
+    // Legge i file nella sottocartella specificata
+    const files = fs.readdirSync(folderPath);
+    
+    // Se non ci sono file, restituisce un array vuoto
+    if (files.length === 0) { // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
+      return res.json([]);
+    }
+
+    // Se ci sono file, restituisce i dettagli dei file
+    const fileDetails = files.map((file) => ({
+      name: file,
+      path: `/uploads/${subfolder}/${file}`,
+    }));
+
+    res.json(fileDetails);
+  } catch (error) {
+    console.error("Errore durante la lettura della directory:", error);
+    res.status(500).send("Errore del server durante la lettura dei file.");
+  }
+});
+
+/* Vecchio codice: causa problemi se non esistono file:
+app.get("/api/documents/:docId/files", (req, res) => {
+  const subfolder = req.params.docId;
+  const uploadDir = path.join(__dirname, "uploads");
 
   // Ottiene la lista delle sottocartelle presenti nella cartella uploads
   const availableFolders = fs.readdirSync(uploadDir).filter((item) => {
@@ -277,6 +311,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
 
   res.json(files);
 });
+*/
 
 app.delete("/api/documents", isUrbanPlanner, [], async (req, res) => {
   try {

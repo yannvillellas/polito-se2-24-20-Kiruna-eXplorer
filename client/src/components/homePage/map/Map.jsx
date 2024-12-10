@@ -149,6 +149,7 @@ function CustomMap(props) {
   const handleGetFiles = async (docId) => {
     try {
       const files = await DocumentAPI.getFiles(docId); // Risolvi la Promise
+      console.log("Ecco i files: ", files);
       if (files) {
         setFiles(Array.from(files));
       } else {
@@ -177,8 +178,23 @@ function CustomMap(props) {
     setSelectedDoc(doc);
     setShowDocumentModal(true);
 
-    await handleGetFiles(doc.docId);
-    await handleShowTitleAllLinkedDocument(doc.docId);
+    console.log("Sono in handleMarkerClick, ecco il doc: ", doc);
+
+    
+    try {
+      await handleShowTitleAllLinkedDocument(doc.docId);
+      console.log("Sono in handleMarkerClick, sono tornato da handleShowTitleAllLinkedDocument");
+    } catch (error) {
+      console.error("Error fetching linked documents:", error);
+    }
+
+    // Questo codice con i files è problematico: quando non ci sono files
+    try {
+      await handleGetFiles(doc.docId);
+      console.log("Sono in handleMarkerClick, sono tornato da handleGetFiles");
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    }
 
   };
 
@@ -274,6 +290,7 @@ function CustomMap(props) {
   const handleShowTitleAllLinkedDocument = async (docId) => {
 
     if (!docId) { // Se non è stato selezionato nessun documento
+      console.log("Sono in handleShowTitleAllLinkedDocument, non c'è nessun docId");
       setLinkedDocuments([]);
       return;
     }
@@ -300,6 +317,10 @@ function CustomMap(props) {
     console.log("Ecco i documenti associati: ", titleList);
     setLinkedDocuments(titleList);
   }
+
+  useEffect(() => {
+    console.log("Sono in useEffect di MAP.jsx, ho settato i linked document: ", linkedDocuments);
+  }, [linkedDocuments]);
 
 
 
@@ -487,7 +508,7 @@ function CustomMap(props) {
                 <p>
                   <strong>Connections:</strong>
                 </p>
-                {selectedDoc.connections != 0 ? linkedDocuments.map((connection) => (
+                {linkedDocuments.length > 0 ? linkedDocuments.map((connection) => (
                   <p
                     key={connection.docTitle}
                     style={{
@@ -505,7 +526,7 @@ function CustomMap(props) {
                       {connection.docTitle}
                     </span>
                   </p>
-                )) : ""}
+                )) : "This file has no connections"}
               </div>
 
 
@@ -546,7 +567,7 @@ function CustomMap(props) {
 
               </div>
               <div className="download-buttons-container">
-                {files ? files.map((f, index) => (
+                { (files && files.length > 0) ? files.map((f, index) => (
                   <div key={f.name || index} className="download-btns">
                     <Button onClick={() => handleDownload(f)} className="files">
                       <i className="bi bi-file-earmark-text-fill"></i>

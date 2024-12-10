@@ -48,17 +48,14 @@ function App() {
     useEffect(() => {
         const fetchAllAssociations = async () => {
             try {
-                const allAssociations = await associationAPI.getAllAssociations(); 
+                const allAssociations = await associationAPI.getAllAssociations();
                 setAllAssociations(allAssociations);
             } catch (error) {
                 console.error("Error fetching all associations:", error);
             }
         }
         fetchAllAssociations();
-    }, []);
-
-
-
+    }, [documents]);
 
 
     useEffect(() => {
@@ -71,7 +68,7 @@ function App() {
             setTypeOptions(typeList.map((t) => { return { value: t.type, label: t.type } }))
         }
         fetchOptions();
-    }, [])
+    }, [documents])
 
 
 
@@ -117,7 +114,7 @@ function App() {
             }
         }
         fetchLinksType();
-    }, []);
+    }, [documents]);
 
 
 
@@ -172,9 +169,6 @@ function App() {
             if (document.pages === "") {
                 document.pages = "-";
             }
-
-
-
 
             const docId = await DocumentAPI.addDocument(document);
 
@@ -420,7 +414,7 @@ function App() {
                         documents={documents}
                         positions={positions}
                         allAssociations={allAssociations}
-                    
+
                     />}
                 />
 
