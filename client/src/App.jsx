@@ -164,12 +164,16 @@ function App() {
     const handleAddDocument = async (document) => {
 
         try {
+            console.log("Sono in App.jsx, handleAddDocument, sto aggiungendo il documento:", document);
             // fix document.pages as blank string
             if (document.pages === "") {
                 document.pages = "-";
-            } else if (document.language === "" || document.language === null || document.language === undefined) {
+            } 
+            
+            if (document.language === "" || document.language === null || document.language === undefined) {
                 document.language = "-";
             }
+
 
             const docId = await DocumentAPI.addDocument(document);
 
