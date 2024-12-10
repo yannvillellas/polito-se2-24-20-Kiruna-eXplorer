@@ -323,7 +323,7 @@ function CustomMap(props) {
   return (
 
     <Container fluid className="map-container">
-      <MapContainer center={props.mapCenter} zoom={12} >
+      <MapContainer center={props.mapCenter} zoom={props.zoom} >
         <LayersControl position="topleft">
           <LayersControl.BaseLayer checked name="Google Satellite">
             <TileLayer

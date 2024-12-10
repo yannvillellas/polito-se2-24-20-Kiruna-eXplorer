@@ -82,6 +82,7 @@ function HomePage(props) {
                         openMarkerId={docId} // docId as a promp
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={[67.8558, 20.2253]}
+                        zoom={14}
                         isUrbanPlanner={isUrbanPlanner}
 
                         documents={props.documents}
@@ -97,6 +98,7 @@ function HomePage(props) {
                         openMarkerId={docId} // docId as a promp
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={mapCenter}
+                        zoom={16}
                         isUrbanPlanner={isUrbanPlanner}
 
                         documents={props.documents}
