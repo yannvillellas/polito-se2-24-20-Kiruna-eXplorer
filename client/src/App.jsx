@@ -164,10 +164,11 @@ function App() {
     const handleAddDocument = async (document) => {
 
         try {
-
             // fix document.pages as blank string
             if (document.pages === "") {
                 document.pages = "-";
+            } else if (document.language === "" || document.language === null || document.language === undefined) {
+                document.language = "-";
             }
 
             const docId = await DocumentAPI.addDocument(document);
