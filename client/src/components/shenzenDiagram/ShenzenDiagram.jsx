@@ -68,7 +68,7 @@ const Nodes = ({ nodes, xScale, yScale }) => {
 };
 
 // Component to draw the links
-const Links = ({ links, nodes, xScale, yScale, verticalOffset = 10, horizontalSpacing = 30 }) => {
+const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing}) => {
   // Raggruppa i nodi con la stessa data e categoria
   const groupedNodes = nodes.reduce((acc, node) => {
     const key = `${node.date}-${node.category}`;
@@ -114,19 +114,61 @@ const Links = ({ links, nodes, xScale, yScale, verticalOffset = 10, horizontalSp
     }
     return 0; // Nessun nodo vicino
   };
-  
 
-  // Raggruppa i link tra gli stessi nodi
+
+  // Raggruppa i link tra gli stessi nodi (indipendentemente dall'ordine)
   const groupedLinks = links.reduce((acc, link) => {
-    const key = `${link.source}-${link.target}`;
+    // Ordina source e target per normalizzare la chiave
+    const key = [link.source, link.target].sort().join("-");
     if (!acc[key]) acc[key] = [];
     acc[key].push(link);
     return acc;
   }, {});
 
+  // Calcola i centri dei gruppi di link
+  const groupCenters = Object.entries(groupedLinks).map(([key, groupedLinks]) => {
+    const sourcePos = nodePositions[groupedLinks[0].source];
+    const targetPos = nodePositions[groupedLinks[0].target];
+
+    if (sourcePos && targetPos) {
+      const centerX = (sourcePos.x + targetPos.x) / 2;
+      const centerY = (sourcePos.y + targetPos.y) / 2;
+      return { key, centerX, centerY };
+    }
+    return null;
+  }).filter(Boolean);
+
+  // Tieni traccia dei gruppi già spostati
+  const verticalAdjustments = {};
+  const adjustedGroups = new Set();
+
+  groupCenters.forEach((group, index) => {
+    groupCenters.forEach((otherGroup, otherIndex) => {
+      if (index !== otherIndex && !adjustedGroups.has(group.key) && !adjustedGroups.has(otherGroup.key)) {
+        const distX = Math.abs(group.centerX - otherGroup.centerX);
+        const distY = Math.abs(group.centerY - otherGroup.centerY);
+
+        if (distX < 100 && distY < 50) { // Se i gruppi sono vicini
+          if (group.centerY > otherGroup.centerY) {
+            // Sposta solo il gruppo più in basso
+            verticalAdjustments[group.key] = (verticalAdjustments[group.key] || 0) + 200;
+            adjustedGroups.add(group.key);
+          } else {
+            // Sposta solo il gruppo più in alto
+            verticalAdjustments[otherGroup.key] = (verticalAdjustments[otherGroup.key] || 0) - 200;
+            adjustedGroups.add(otherGroup.key);
+          }
+        }
+      }
+    });
+  });
+
+  
   return (
     <g>
       {Object.entries(groupedLinks).flatMap(([key, groupedLinks]) => {
+        const verticalShift = verticalAdjustments[key] || 0;
+        //console.log(verticalShift,key)
         return groupedLinks.map((link, index) => {
           const sourcePos = nodePositions[link.source];
           const targetPos = nodePositions[link.target];
@@ -143,20 +185,16 @@ const Links = ({ links, nodes, xScale, yScale, verticalOffset = 10, horizontalSp
           const totalLinks = groupedLinks.length;
           const step = horizontalSpacing / (totalLinks - 1 || 1); // Evita divisioni per 0
           const horizontalOffset = (index - (totalLinks - 1) / 2) * step;
+          const stepV= verticalSpacing / (totalLinks - 1 || 1)
+          const verticalOffset = (index - (totalLinks - 1) / 2) * stepV;
 
           // Trova punti di deviazione se necessario
           let midX = (x1 + x2) / 2 + horizontalOffset;
-          let midY = (y1 + y2) / 2;
+          let midY = (y1 + y2) / 2 + verticalShift +verticalOffset;
 
-          /*if (isNearNode(midX, midY)) {
-            // Devia il percorso se il punto medio è vicino a un nodo
-            midY -= 50; // Sposta verso l'alto
-          }*/
-          
-          if(isNearNode(midX,midY)==1){
+          if (isNearNode(midX, midY) === 1) {
             midY -= 50;
-          }else if(isNearNode(midX,midY)==-1){
-            console.log("prova")
+          } else if (isNearNode(midX, midY) === -1) {
             midY += 50;
           }
 
@@ -198,7 +236,7 @@ const Links = ({ links, nodes, xScale, yScale, verticalOffset = 10, horizontalSp
 
 function ShenzenDiagram(props) {
 
-  const selectType= (typeId)=>{
+  const selectType = (typeId) => {
     //console.log(typeId)
     /*if(typeId==1){  //direct consequence
       return "solid"
@@ -213,59 +251,59 @@ function ShenzenDiagram(props) {
     }else{  //other types
       return "double-dotted"
     }*/
-   if(typeId==1 || typeId==2){  //direct and indirect consequence
-    return "solid"
-   }else if(typeId==3 || typeId==4){  //projection and collateral consequence
-    return "dashed"
-   }else if(typeId==5){ //update
-    return "dotted"
-   }else{ //other
-    return "dash-dotted"
-   }
+    if (typeId == 1 || typeId == 2) {  //direct and indirect consequence
+      return "solid"
+    } else if (typeId == 3 || typeId == 4) {  //projection and collateral consequence
+      return "dashed"
+    } else if (typeId == 5) { //update
+      return "dotted"
+    } else { //other
+      return "dash-dotted"
+    }
   }
 
-  const selectLinkColor = (typeId) =>{
-    if(typeId==1){  //direct consequence
+  const selectLinkColor = (typeId) => {
+    if (typeId == 1) {  //direct consequence
       return "#000000"    //black
-    }else if(typeId==2){  //indirect consequence
+    } else if (typeId == 2) {  //indirect consequence
       return "#0018a5"    //blue
-    }else if(typeId==3){  //collateral consequence
+    } else if (typeId == 3) {  //collateral consequence
       return "#da4700"     //orange
-    }else if(typeId==4){  //projection
+    } else if (typeId == 4) {  //projection
       return "#00920e"    //green
-    }else if(typeId==5){  //update
+    } else if (typeId == 5) {  //update
       return "#bf21b2"    //purple
-    }else{  //other types
+    } else {  //other types
       return "#757575"    //grey
     }
   }
 
-  const selectDate = (date)=>{
-    if(date.split("/").length==1){  //only year
-      return date+"/01/01"  //add month and day
-    }else if(date.split("/").length==1){  //only month and year
-      return date+"/01" //add day
-    }else{
+  const selectDate = (date) => {
+    if (date.split("/").length == 1) {  //only year
+      return date + "/01/01"  //add month and day
+    } else if (date.split("/").length == 1) {  //only month and year
+      return date + "/01" //add day
+    } else {
       return date //complete date
     }
   }
 
-  const selectColor = (sh)=>{
-    if(sh.split(",").length>1){//more than 1 stakeholders==> others
+  const selectColor = (sh) => {
+    if (sh.split(",").length > 1) {//more than 1 stakeholders==> others
       return "#819d9f"
     }
 
-    if(sh==="LKAB"){
+    if (sh === "LKAB") {
       return "#181a1b"
-    }else if(sh==="Municipality"){
+    } else if (sh === "Municipality") {
       return "#805f5b"
-    }else if(sh==="Regional authority"){
+    } else if (sh === "Regional authority") {
       return "#62222c"
-    }else if(sh==="Architecture firms"){
+    } else if (sh === "Architecture firms") {
       return "#a8a19b"
-    }else if(sh==="Citizens"){
+    } else if (sh === "Citizens") {
       return "#a5cacc"
-    }else{  //others
+    } else {  //others
       return "#819d9f"
     }
   }
@@ -275,7 +313,7 @@ function ShenzenDiagram(props) {
     const { minDate, maxDate } = nodes.reduce(
       (acc, node, index) => {
         const nodeDate = new Date(node.date);
-        
+
         // Per il primo nodo, inizializza minDate e maxDate
         if (index === 0) {
           acc.minDate = nodeDate;
@@ -286,19 +324,19 @@ function ShenzenDiagram(props) {
           // Aggiorna la data più lontana (maxDate)
           if (nodeDate > acc.maxDate) acc.maxDate = nodeDate;
         }
-  
+
         return acc;
       },
       {}
     );
-  
-    return  [minDate, maxDate];
+
+    return [minDate, maxDate];
   }
 
-  function findScaleRange(nodes){
-    let result=[]
-    nodes.forEach((n)=>{
-      if(!result.includes(n.category)){
+  function findScaleRange(nodes) {
+    let result = []
+    nodes.forEach((n) => {
+      if (!result.includes(n.category)) {
         result.push(n.category)
       }
     })
@@ -358,22 +396,22 @@ function ShenzenDiagram(props) {
     domain: [0, totalDays], // Include the full date range
     range: [50 + marginLeft, width - 50], // Applica il margine alla scala X
   });*/
-  
+
   const yScale = scaleBand({
     domain: findScaleRange(nodes),
     range: [50, height - 50],
     padding: 0.5,
   });
-  
+
   // Generate ticks for the grid
   const xTicks = xScale.ticks(d3.timeYear.every(1)); // Generate year ticks
   const yTicks = yScale.domain();
-  
+
   return (
     <svg width={width} height={height} style={{ background: "white" }}>
       {/* Background */}
       <rect width={width} height={height} fill="white" />
-  
+
       {/* Grid */}
       <g>
         {/* Vertical lines for the X axis */}
@@ -388,7 +426,7 @@ function ShenzenDiagram(props) {
             strokeDasharray="4"
           />
         ))}
-  
+
         {/* Horizontal lines for the Y axis */}
         {yTicks.map((category, i) => (
           <line
@@ -402,7 +440,7 @@ function ShenzenDiagram(props) {
           />
         ))}
       </g>
-  
+
       {/* Axes */}
       <g>
         {/* X axis (time labels) */}
@@ -411,7 +449,7 @@ function ShenzenDiagram(props) {
             {tick.getFullYear()} {/* Display only the year */}
           </text>
         ))}
-  
+
         {/* Y axis (category labels) */}
         {yTicks.map((category, i) => (
           <text
@@ -426,25 +464,25 @@ function ShenzenDiagram(props) {
           </text>
         ))}
       </g>
-  
+
       {/* Nodes */}
       <Nodes
         nodes={nodes}
         xScale={(date) => xScale(new Date(date))} // Position nodes based on the full date
         yScale={yScale}
       />
-  
+
       {/* Links */}
       <Links
         links={links}
         nodes={nodes}
         xScale={(date) => xScale(new Date(date))} // Adjust the link positioning
         yScale={yScale}
-        verticalOffset={-17}
-        horizontalSpacing={50}
+        verticalSpacing={-20}
+        horizontalSpacing={40}
       />
     </svg>
   );
-}  
+}
 
 export default ShenzenDiagram;
