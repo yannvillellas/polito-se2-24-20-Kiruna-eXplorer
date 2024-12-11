@@ -319,11 +319,32 @@ function CustomMap(props) {
   }, [linkedDocuments]);
 
 
+  const calculateBounds = (geojson) => {
+    const coordinates = geojson.features.flatMap(feature => feature.geometry.coordinates.flat(2));
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const margin = 0.05;
+    return [
+      [minLat - margin, minLng - margin],
+      [maxLat + margin, maxLng + margin]
+    ];
+  };
+
+  const bounds = calculateBounds(geojsonData);
 
   return (
 
     <Container fluid className="map-container">
-      <MapContainer center={props.mapCenter} zoom={props.zoom} >
+      <MapContainer 
+        center={props.mapCenter} 
+        zoom={props.zoom} 
+        maxBounds={bounds} 
+        minZoom={7}
+      >
         <LayersControl position="topleft">
           <LayersControl.BaseLayer checked name="Google Satellite">
             <TileLayer
