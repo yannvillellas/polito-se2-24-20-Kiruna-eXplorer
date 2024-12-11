@@ -23,7 +23,7 @@ import { Icon, DivIcon } from 'leaflet';
 const validDocTypes = [
   "Design document",
   "Informative document",
-  "Material effects",
+  "Material effect",
   "Prescriptive document",
   "Technical document"
 ];
