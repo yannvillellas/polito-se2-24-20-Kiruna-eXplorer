@@ -13,6 +13,7 @@ import AuthAPI from './api/authAPI';
 import UserAPI from './api/userAPI';
 import DocList from "./components/documentList/DocList";
 import DocSpecificList from "./components/documentList/DocSpecificList";
+import ShenzenDiagram from './components/shenzenDiagram/ShenzenDiagram';
 
 // Import updated:
 import DocumentAPI from './api/documentAPI';
@@ -168,8 +169,8 @@ function App() {
             // fix document.pages as blank string
             if (document.pages === "") {
                 document.pages = "-";
-            } 
-            
+            }
+
             if (document.language === "" || document.language === null || document.language === undefined) {
                 document.language = "-";
             }
@@ -419,6 +420,14 @@ function App() {
                         positions={positions}
                         allAssociations={allAssociations}
 
+                    />}
+                />
+
+                <Route
+                    path="/diagram"
+                    element={<ShenzenDiagram
+                        documents={documents}
+                        allAssociations={allAssociations}
                     />}
                 />
 
