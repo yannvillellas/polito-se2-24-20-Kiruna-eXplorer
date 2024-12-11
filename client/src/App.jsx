@@ -378,7 +378,6 @@ function App() {
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
                 />
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
-                <Route path="/map" element={<Map role={user?.role} />} />
                 <Route path="*" element={<PageNotFound />} />
                 <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
 

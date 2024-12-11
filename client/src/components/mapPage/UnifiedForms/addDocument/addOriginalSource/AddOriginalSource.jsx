@@ -46,13 +46,13 @@ function AddOriginalSource(props){
     return (
     <>
         <Form.Group controlId="formFileSm" className="mt-3">
-            <Form.Label>Select here the file in input </Form.Label>
+            <Form.Label>Select here the original resources</Form.Label>
             {/* Bottone personalizzato */}
             <div>
               <Button onClick={handleButtonClick} className="btn-upload btn btn-primary">
-                Upload files
+                Upload original resources
               </Button>
-              {files?.length>0? `${files.length} file(s) selected` : ""}
+              {files?.length>0? `${files.length} original resource(s) selected` : ""}
             </div>
             <Form.Control 
                 type="file" 

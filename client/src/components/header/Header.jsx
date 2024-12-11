@@ -20,7 +20,7 @@ function Header(props) {
           <nav className="header-center">
             <ul>
               <li><Link to="/mapPage">Map</Link></li>
-              {props.isUrbanPlanner && <li><Link to="/documentPage">Documents</Link></li>}
+              {<li><Link to="/documentPage">Documents</Link></li>}
             </ul>
           </nav>
         </div>
