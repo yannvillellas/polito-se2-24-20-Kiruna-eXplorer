@@ -6,8 +6,8 @@ import { line, curveBasis } from "d3-shape";
 
 import * as d3 from "d3"
 
-const width = 1000;
-const height = 500;
+const width = 1100;
+const height = 600;
 
 // Mock data
 /*const data = {
@@ -334,12 +334,33 @@ function ShenzenDiagram(props) {
   }
 
   function findScaleRange(nodes) {
-    let result = []
+    /*let result = []
     nodes.forEach((n) => {
       if (!result.includes(n.category)) {
         result.push(n.category)
       }
     })
+    return result*/
+    let fixed=["Text", "Concept", "Blueprint/Effects"]
+    let result=["Text", "Concept"]
+    let archScale=[]
+    let others=["Blueprint/Effects"]
+    nodes.forEach((n) => {
+      if (!fixed.includes(n.category) && n.category.startsWith("1:")) { //architectural scales
+        archScale.push(n.category)
+      }else if(!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")){  //others category
+        console.log(n.category)
+        others.push(n.category)
+      }
+    })
+    const sortedArcScale = archScale.sort((a, b) => {
+      const numA = parseInt(a.split(":")[1], 10); // Ottieni il numero dopo ":"
+      const numB = parseInt(b.split(":")[1], 10);
+      return numB - numA; // Ordine decrescente
+    });
+    console.log(others)
+    result=result.concat(sortedArcScale)
+    result=result.concat(others)
     return result
   }
 
@@ -355,7 +376,7 @@ function ShenzenDiagram(props) {
       newNodes.push({
         id: doc.docId,
         label: doc.title,
-        category: doc.scale,
+        category: doc.scale==="Architectural Scale"? doc.ASvalue:doc.scale,
         date: selectDate(doc.issuanceDate),
         color: selectColor(doc.stakeholders),
       });
@@ -478,8 +499,8 @@ function ShenzenDiagram(props) {
         nodes={nodes}
         xScale={(date) => xScale(new Date(date))} // Adjust the link positioning
         yScale={yScale}
-        verticalSpacing={-20}
-        horizontalSpacing={40}
+        verticalSpacing={-10}
+        horizontalSpacing={30}
       />
     </svg>
   );
