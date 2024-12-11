@@ -9,7 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import { GiGreekTemple } from "react-icons/gi";
 
 
-import { MapContainer, TileLayer, Marker, LayersControl, Polygon, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, LayersControl, Polygon, GeoJSON, Popup } from 'react-leaflet';
 
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
@@ -355,7 +355,17 @@ function CustomMap(props) {
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
-            />
+              ref={(markerRef) => {
+                if (markerRef) {
+                  markerRef.on('mouseover', () => markerRef.openPopup());
+                  markerRef.on('mouseout', () => markerRef.closePopup());
+                }
+              }}
+            >
+              <Popup>
+                <strong>{doc.title}</strong> {/* Usa il titolo del documento */}
+              </Popup>
+            </Marker>
           ))}
 
           {filterOn && documentShown.map((doc) => (
@@ -368,7 +378,17 @@ function CustomMap(props) {
                 mouseover: () => handleMouseOver(doc.docId),
                 mouseout: () => handleMouseOut(doc.docId),
               }}
-            />
+              ref={(markerRef) => {
+                if (markerRef) {
+                  markerRef.on('mouseover', () => markerRef.openPopup());
+                  markerRef.on('mouseout', () => markerRef.closePopup());
+                }
+              }}
+            >
+              <Popup>
+                <strong>{doc.title}</strong> {/* Usa il titolo del documento */}
+              </Popup>
+            </Marker>
           ))}
 
         </MarkerClusterGroup>
