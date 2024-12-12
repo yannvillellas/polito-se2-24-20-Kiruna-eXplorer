@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
@@ -475,55 +475,87 @@ function ShenzenDiagram(props) {
   const xTicks = xScale.ticks(d3.timeYear.every(1)); // Generate year ticks
   const yTicks = yScale.domain();
 
+  const svgRef = useRef(null);
+  const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity); // Stato per il zoom
+
+  // Funzione di gestione del zoom
+  const handleZoom = (event) => {
+    // Aggiorna lo stato con la trasformazione di zoom
+    setZoomTransform(event.transform);
+
+    // Applica la trasformazione al gruppo 'chart-container'
+    const svg = d3.select(svgRef.current);
+    svg.select('g.chart-container')
+      .attr('transform', event.transform);
+  };
+
+  useEffect(() => {
+    const svg = d3.select(svgRef.current);
+
+    // Crea il comportamento di zoom
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5])  // Limita lo zoom tra 0.5x e 5x
+      .translateExtent([[0, 0], [width, height]])  // Limita la traslazione
+      .on('zoom', handleZoom);  // Imposta la funzione di zoom
+
+    // Aggiungi la funzionalità di zoom all'SVG
+    svg.call(zoom);
+
+    // Resetta lo zoom al caricamento (opzionale)
+    svg.call(zoom.transform, d3.zoomIdentity);
+
+    return () => {
+      // Cleanup dell'evento di zoom quando il componente è smontato
+      svg.on('.zoom', null);
+    };
+  }, [width, height]);
+
   return (
-    <svg width={width} height={height} style={{ background: "white" }}>
+    <svg ref={svgRef} width={width} height={height} style={{ background: "white" }}>
       {/* Background */}
       <rect width={width} height={height} fill="white" />
 
-      {/* Grid */}
-      <g>
-        {/* Vertical lines for the X axis */}
+      {/* Griglia e assi */}
+      <g className="chart-container">
+        {/* Linee verticali per l'asse X */}
         {xTicks.map((tick, i) => (
           <line
             key={i}
-            x1={xScale(tick)} // Usa la scala con il margine
+            x1={xScale(tick)}
             y1={50}
-            x2={xScale(tick)} // Usa la scala con il margine
+            x2={xScale(tick)}
             y2={height - 50}
             stroke="#e0e0e0"
             strokeDasharray="4"
           />
         ))}
 
-        {/* Horizontal lines for the Y axis */}
+        {/* Linee orizzontali per l'asse Y */}
         {yTicks.map((category, i) => (
           <line
             key={i}
-            x1={50 + marginLeft} // Aggiungi il margine per spostare la linea a destra
+            x1={50 + marginLeft}
             y1={yScale(category) + yScale.bandwidth() / 2}
-            x2={width - 50 + marginLeft} // Aggiungi il margine per spostare la linea a destra
+            x2={width - 50 + marginLeft}
             y2={yScale(category) + yScale.bandwidth() / 2}
             stroke="#e0e0e0"
             strokeDasharray="4"
           />
         ))}
-      </g>
 
-      {/* Axes */}
-      <g>
-        {/* X axis (time labels) */}
+        {/* Asse X (etichette temporali) */}
         {xTicks.map((tick, i) => (
           <text key={i} x={xScale(tick)} y={height - 30} fontSize={10} textAnchor="middle">
-            {tick.getFullYear()} {/* Display only the year */}
+            {tick.getFullYear()}
           </text>
         ))}
 
-        {/* Y axis (category labels) */}
+        {/* Asse Y (etichette delle categorie) */}
         {yTicks.map((category, i) => (
           <text
             key={i}
-            x={10} // Le etichette Y rimangono a x=10
-            y={yScale(category) + yScale.bandwidth() / 2 - 30} // Traslazione verso l'alto
+            x={10}
+            y={yScale(category) + yScale.bandwidth() / 2 - 30}
             fontSize={10}
             textAnchor="start"
             dominantBaseline="middle"
@@ -533,22 +565,26 @@ function ShenzenDiagram(props) {
         ))}
       </g>
 
-      {/* Nodes */}
-      <Nodes
-        nodes={nodes}
-        xScale={(date) => xScale(new Date(date))} // Position nodes based on the full date
-        yScale={yScale}
-      />
+      {/* Nodi */}
+      <g className="chart-container" transform={zoomTransform.toString()}>
+        <Nodes
+          nodes={nodes}
+          xScale={(date) => xScale(new Date(date))}
+          yScale={yScale}
+        />
+      </g>
 
-      {/* Links */}
-      <Links
-        links={links}
-        nodes={nodes}
-        xScale={(date) => xScale(new Date(date))} // Adjust the link positioning
-        yScale={yScale}
-        verticalSpacing={-10}
-        horizontalSpacing={30}
-      />
+      {/* Link */}
+      <g className="chart-container" transform={zoomTransform.toString()}>
+        <Links
+          links={links}
+          nodes={nodes}
+          xScale={(date) => xScale(new Date(date))}
+          yScale={yScale}
+          verticalSpacing={-10}
+          horizontalSpacing={30}
+        />
+      </g>
     </svg>
   );
 }
