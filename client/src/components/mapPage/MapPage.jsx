@@ -7,22 +7,13 @@ import PropTypes from 'prop-types';
 import { useNavigate, useParams } from "react-router-dom";
 
 import Map from './map/Map.jsx';
-import DocumentAPI from "../../api/documentAPI.js";
-import PositionAPI from "../../api/positionAPI.js";
 import UnifiedForms from "./UnifiedForms/UnifiedForms.jsx";
-import areaAPI from "../../api/areaAPI.js";
-import documentTypeAPI from "../../api/documentTypeAPI.js";
-import scaleAPI from "../../api/scaleAPI.js";
-import stakeholderAPI from "../../api/stakeholderAPI.js";
-import { map } from "leaflet";
 
 function HomePage(props) {
     const { docId } = useParams();
     const navigate = useNavigate();
     const [isDocId, setIsDocId] = useState(false);
     const [mapCenter, setMapCenter] = useState({ lat: 41.89193, lng: 12.51133 });
-
-
     const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
     const [errorMsg, setErrorMsg] = useState([]);
 
@@ -57,7 +48,7 @@ function HomePage(props) {
                 console.log("Sono in HomePage, docId: ", docId, doc.lat, doc.lng);
             }
         }
-    }, [docId]);
+    }, [docId, props.documents]);
 
 
     return (
@@ -79,64 +70,58 @@ function HomePage(props) {
             <Row style={{ height: "100%" }}>
                 <Col style={{ position: "relative" }}>
                     {!isDocId && <Map
-                        openMarkerId={docId} // docId as a promp
+                        highlightedDocId={Number(docId)} // docId as a promp
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={[67.8558, 20.2253]}
                         zoom={14}
                         isUrbanPlanner={isUrbanPlanner}
-
                         documents={props.documents}
                         linksType={props.linksType}
-
                         areas={props.areas}
                         areaAssociations={props.areaAssociations}
-
                         handleModifyPosition={props.handleModifyPosition}
                     />}
-
                     {isDocId && <Map
-                        openMarkerId={docId} // docId as a promp
+                        highlightedDocId={Number(docId)} // docId as a promp
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={mapCenter}
                         zoom={16}
                         isUrbanPlanner={isUrbanPlanner}
-
                         documents={props.documents}
                         linksType={props.linksType}
-
                         areas={props.areas}
                         areaAssociations={props.areaAssociations}
-
                         handleModifyPosition={props.handleModifyPosition}
                     />}
-
-
-
                     {isUrbanPlanner && (
                         <div className="add-document-container">
                             <UnifiedForms
                                 documents={props.documents}
-
                                 stakeholdersOptions={props.stakeholdersOptions}
                                 scaleOptions={props.scaleOptions}
                                 typeOptions={props.typeOptions}
-
                                 setErrorMsg={setErrorMsg}
-
                                 handleAddDocument={props.handleAddDocument}
                             />
                         </div>
                     )}
                 </Col>
-
             </Row>
-
-
         </Container>
     );
 }
+
 HomePage.propTypes = {
-    role: PropTypes.string.isRequired
+    role: PropTypes.string.isRequired,
+    documents: PropTypes.array.isRequired,
+    linksType: PropTypes.array.isRequired,
+    areas: PropTypes.array.isRequired,
+    areaAssociations: PropTypes.array.isRequired,
+    handleModifyPosition: PropTypes.func.isRequired,
+    stakeholdersOptions: PropTypes.array.isRequired,
+    scaleOptions: PropTypes.array.isRequired,
+    typeOptions: PropTypes.array.isRequired,
+    handleAddDocument: PropTypes.func.isRequired,
 };
 
 export default HomePage;

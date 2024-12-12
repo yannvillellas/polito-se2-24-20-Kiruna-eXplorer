@@ -1,8 +1,8 @@
 import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
-import { Container, Modal, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap";
-import Select from "react-select";
+import PropTypes from 'prop-types';
+import { Container, Modal, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPositionMap from "./ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
@@ -14,7 +14,6 @@ import { MapContainer, TileLayer, Marker, LayersControl, Polygon, GeoJSON, Popup
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
 
-import areaAPI from "../../../api/areaAPI";
 import associationAPI from "../../../api/associationAPI";
 import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
@@ -45,7 +44,7 @@ const getIcon = (docType, stakeholders) => {
     ? stakeholders.toLowerCase().replace(' ', '-')
     : "others";
 
-  const iconUrl = `icons/${formattedDocType}_${formattedStakeholder}.png`;
+  const iconUrl = `/icons/${formattedDocType}_${formattedStakeholder}.png`;
 
   return new Icon({
     iconUrl,
@@ -53,12 +52,13 @@ const getIcon = (docType, stakeholders) => {
   });
 };
 
-const getCustomIcon = (docType, stakeholders) => {
+const getCustomIcon = (docType, stakeholders, isHighlighted) => {
   const iconUrl = getIcon(docType, stakeholders).options.iconUrl;
+  const borderColor = isHighlighted ? 'red' : 'rgba(255, 255, 255, 0.9)';
   return new DivIcon({
     html: `
       <div style="position: relative; width: 32px; height: 32px;">
-        <div style="position: absolute; top: -2.5px; left: -2.5px; width: 37px; height: 37px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);"></div>
+        <div style="position: absolute; top: -2.5px; left: -2.5px; width: 37px; height: 37px; border-radius: 50%; background-color: ${borderColor};"></div>
         <img src="${iconUrl}" style="position: absolute; top: 0; left: 0; width: 32px; height: 32px;" />
       </div>
     `,
@@ -92,13 +92,13 @@ function CustomMap(props) {
 
   // Se ho il parametro in /mapPage/:docId mi prendo il documento e mi apro direttamtne il modal:
   useEffect(() => {
-    if (props.openMarkerId) {
+    if (props.highlightedDocId) {
 
       // handleConnectionClick(Number(props.openMarkerId)); // This will open the modal with the document and all the linked document
       // For teh evidence of the document
-      setHighlightedDocId(Number(props.openMarkerId));
+      setHighlightedDocId(Number(props.highlightedDocId));
     }
-  }, [props.openMarkerId, props.documents]);
+  }, [props.highlightedDocId, props.documents]);
 
 
 
@@ -221,8 +221,7 @@ function CustomMap(props) {
 
   };
 
-  const handleMouseOut = (docId) => {
-    console.log(`Mouseout on docId: ${docId}`);
+  const handleMouseOut = () => {
     setVisibleArea(null); // Rimuove l'area visibile
 
     /* FOR the evidence of the document
@@ -257,26 +256,23 @@ function CustomMap(props) {
   const handleShowOnlyAllMunicipalityDocument = () => {
     setFilterOn(true);
     setDocumentShown(props.documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
-
   }
 
 
   const handleShowAllLinkedDocument = async (docId) => {
-
     if (!docId) { // Se non è stato selezionato nessun documento
       setFilterOn(false);
       return;
     }
 
     setFilterOn(true);
-    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
-    console.log("Ecco le associazioni: ", assciationToShow);
+    let associationToShow = await associationAPI.getAssociationsByDocId(docId);
     let docIdToShow = [];
-    for (let association of assciationToShow) {
+    for (let association of associationToShow) {
       if (association.doc1 === docId) {
-        docIdToShow.push(association.doc2)
+        docIdToShow.push(association.doc2);
       } else {
-        docIdToShow.push(association.doc1)
+        docIdToShow.push(association.doc1);
       }
     }
     const docToShow = props.documents.filter(doc => docIdToShow.includes(doc.docId));
@@ -318,23 +314,32 @@ function CustomMap(props) {
     console.log("Sono in useEffect di MAP.jsx, ho settato i linked document: ", linkedDocuments);
   }, [linkedDocuments]);
 
+  const bounds = [[67.3062, 17.8498], [69.1099, 23.3367]];
 
-  const calculateBounds = (geojson) => {
-    const coordinates = geojson.features.flatMap(feature => feature.geometry.coordinates.flat(2));
-    const lats = coordinates.map(coord => coord[1]);
-    const lngs = coordinates.map(coord => coord[0]);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    const margin = 0.05;
-    return [
-      [minLat - margin, minLng - margin],
-      [maxLat + margin, maxLng + margin]
-    ];
-  };
-
-  const bounds = calculateBounds(geojsonData);
+  const renderMarkers = (documents) => {
+    return documents.map((doc) => (
+        <Marker
+            key={doc.docId}
+            position={[doc.lat, doc.lng]}
+            icon={getCustomIcon(doc.type, doc.stakeholders, doc.docId === highlightedDocId)}
+            eventHandlers={{
+                click: () => handleMarkerClick(doc),
+                mouseover: () => handleMouseOver(doc.docId),
+                mouseout: () => handleMouseOut(),
+            }}
+            ref={(markerRef) => {
+                if (markerRef) {
+                    markerRef.on('mouseover', () => markerRef.openPopup());
+                    markerRef.on('mouseout', () => markerRef.closePopup());
+                }
+            }}
+        >
+            <Popup>
+                <strong>{doc.title}</strong>
+            </Popup>
+        </Marker>
+    ));
+};
 
   return (
 
@@ -365,53 +370,7 @@ function CustomMap(props) {
           spiderfyDistanceMultiplier={1} // Opzione per regolare la distanza tra i marker
           zoomToBoundsOnClick={true}   // Abilito lo zoom automatico
         >
-          {/* If there is no /mapPage/:docId than map worsk normally otherwise it has to open immediatelly the  marker wit docId  */}
-          {!filterOn && props.documents.map((doc) => (
-            <Marker
-              key={doc.docId}
-              position={[doc.lat, doc.lng]}
-              icon={getCustomIcon(doc.type, doc.stakeholders)}
-              eventHandlers={{
-                click: () => handleMarkerClick(doc),
-                mouseover: () => handleMouseOver(doc.docId),
-                mouseout: () => handleMouseOut(doc.docId),
-              }}
-              ref={(markerRef) => {
-                if (markerRef) {
-                  markerRef.on('mouseover', () => markerRef.openPopup());
-                  markerRef.on('mouseout', () => markerRef.closePopup());
-                }
-              }}
-            >
-              <Popup>
-                <strong>{doc.title}</strong> {/* Usa il titolo del documento */}
-              </Popup>
-            </Marker>
-          ))}
-
-          {filterOn && documentShown.map((doc) => (
-            <Marker
-              key={doc.docId}
-              position={[doc.lat, doc.lng]}
-              icon={getCustomIcon(doc.type, doc.stakeholders)}
-              eventHandlers={{
-                click: () => handleMarkerClick(doc), // passo intero documento:
-                mouseover: () => handleMouseOver(doc.docId),
-                mouseout: () => handleMouseOut(doc.docId),
-              }}
-              ref={(markerRef) => {
-                if (markerRef) {
-                  markerRef.on('mouseover', () => markerRef.openPopup());
-                  markerRef.on('mouseout', () => markerRef.closePopup());
-                }
-              }}
-            >
-              <Popup>
-                <strong>{doc.title}</strong> {/* Usa il titolo del documento */}
-              </Popup>
-            </Marker>
-          ))}
-
+          {renderMarkers(filterOn ? documentShown : props.documents)}
         </MarkerClusterGroup>
 
         {/**Show all the areas by document: */}
@@ -631,5 +590,17 @@ function CustomMap(props) {
     </Container>
   );
 }
+
+CustomMap.propTypes = {
+  highlightedDocId: PropTypes.number,
+  documents: PropTypes.array.isRequired,
+  mapCenter: PropTypes.array.isRequired,
+  zoom: PropTypes.number.isRequired,
+  areaAssociations: PropTypes.array.isRequired,
+  areas: PropTypes.array.isRequired,
+  handleChangeMapViewBasedOnDocId: PropTypes.func.isRequired,
+  isUrbanPlanner: PropTypes.bool.isRequired,
+  linksType: PropTypes.array.isRequired,
+};
 
 export default CustomMap;
