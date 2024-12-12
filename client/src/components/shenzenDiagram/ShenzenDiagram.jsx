@@ -2,6 +2,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import { line, curveBasis } from "d3-shape";
+import associationAPI from "../../api/associationAPI";
+import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 
 import * as d3 from "d3"
@@ -68,7 +70,7 @@ const Nodes = ({ nodes, xScale, yScale }) => {
 };
 
 // Component to draw the links
-const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing}) => {
+const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing }) => {
   // Raggruppa i nodi con la stessa data e categoria
   const groupedNodes = nodes.reduce((acc, node) => {
     const key = `${node.date}-${node.category}`;
@@ -93,18 +95,10 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
   });
 
   // Funzione per controllare se un punto è vicino a un nodo
-  /*const isNearNode = (x, y, nodeRadius = 15) => {
-    return nodes.some((node) => {
-      const { x: nx, y: ny } = nodePositions[node.id];
-      return Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2;
-    });
-  };*/
   const isNearNode = (x, y, nodeRadius = 15) => {
     for (const node of nodes) {
       const { x: nx, y: ny } = nodePositions[node.id];
       if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2) {
-        console.log("node", ny, nx);
-        console.log("point", y, x);
         if (ny >= y) {
           return 1; // Nodo sopra
         } else {
@@ -163,72 +157,120 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
     });
   });
 
-  
+  const [tooltipData, setTooltipData] = useState({ show: false, x: 0, y: 0, content: "" });
+  const virtualTarget = {
+    getBoundingClientRect: () => ({
+      top: tooltipData.y,
+      left: tooltipData.x,
+      bottom: tooltipData.y,
+      right: tooltipData.x,
+      width: 0,
+      height: 0,
+    }),
+  };
+  const handleMouseEnter = (event, linkType) => {
+    const { clientX, clientY } = event; // Posizione del mouse
+    setTooltipData({
+      show: true,
+      x: clientX,
+      y: clientY,
+      content: `${linkType}`,
+    });
+  };
+
+  const handleMouseMove = (event) => {
+    const { clientX, clientY } = event;
+    setTooltipData((prev) => ({
+      ...prev,
+      x: clientX,
+      y: clientY,
+    }));
+  };
+
+  const handleMouseLeave = () => {
+    setTooltipData({ show: false, x: 0, y: 0, content: "" });
+  };
+
+
   return (
-    <g>
-      {Object.entries(groupedLinks).flatMap(([key, groupedLinks]) => {
-        const verticalShift = verticalAdjustments[key] || 0;
-        //console.log(verticalShift,key)
-        return groupedLinks.map((link, index) => {
-          const sourcePos = nodePositions[link.source];
-          const targetPos = nodePositions[link.target];
+    <>
+      <g>
+        {Object.entries(groupedLinks).flatMap(([key, groupedLinks]) => {
+          const verticalShift = verticalAdjustments[key] || 0;
+          //console.log(verticalShift,key)
+          return groupedLinks.map((link, index) => {
+            const sourcePos = nodePositions[link.source];
+            const targetPos = nodePositions[link.target];
+            //console.log(link.linkType)
+            if (!sourcePos || !targetPos) {
+              console.warn(`Invalid link: source=${link.source}, target=${link.target}`);
+              return null;
+            }
 
-          if (!sourcePos || !targetPos) {
-            console.warn(`Invalid link: source=${link.source}, target=${link.target}`);
-            return null;
-          }
+            const { x: x1, y: y1 } = sourcePos;
+            const { x: x2, y: y2 } = targetPos;
 
-          const { x: x1, y: y1 } = sourcePos;
-          const { x: x2, y: y2 } = targetPos;
+            // Calcola offset orizzontale per separare i link sovrapposti
+            const totalLinks = groupedLinks.length;
+            const step = horizontalSpacing / (totalLinks - 1 || 1); // Evita divisioni per 0
+            const horizontalOffset = (index - (totalLinks - 1) / 2) * step;
+            const stepV = verticalSpacing / (totalLinks - 1 || 1)
+            const verticalOffset = (index - (totalLinks - 1) / 2) * stepV;
 
-          // Calcola offset orizzontale per separare i link sovrapposti
-          const totalLinks = groupedLinks.length;
-          const step = horizontalSpacing / (totalLinks - 1 || 1); // Evita divisioni per 0
-          const horizontalOffset = (index - (totalLinks - 1) / 2) * step;
-          const stepV= verticalSpacing / (totalLinks - 1 || 1)
-          const verticalOffset = (index - (totalLinks - 1) / 2) * stepV;
+            // Trova punti di deviazione se necessario
+            let midX = (x1 + x2) / 2 + horizontalOffset;
+            let midY = (y1 + y2) / 2 + verticalShift + verticalOffset;
 
-          // Trova punti di deviazione se necessario
-          let midX = (x1 + x2) / 2 + horizontalOffset;
-          let midY = (y1 + y2) / 2 + verticalShift +verticalOffset;
+            if (isNearNode(midX, midY) === 1) {
+              midY -= 50;
+            } else if (isNearNode(midX, midY) === -1) {
+              midY += 50;
+            }
 
-          if (isNearNode(midX, midY) === 1) {
-            midY -= 50;
-          } else if (isNearNode(midX, midY) === -1) {
-            midY += 50;
-          }
+            // Linea curva
+            const curvedLine = line()
+              .x((d) => d.x)
+              .y((d) => d.y)
+              .curve(curveBasis)([
+                { x: x1, y: y1 },
+                { x: midX, y: midY },
+                { x: x2, y: y2 },
+              ]);
 
-          // Linea curva
-          const curvedLine = line()
-            .x((d) => d.x)
-            .y((d) => d.y)
-            .curve(curveBasis)([
-              { x: x1, y: y1 },
-              { x: midX, y: midY },
-              { x: x2, y: y2 },
-            ]);
-
-          return (
-            <path
-              key={`${key}-${index}`}
-              d={curvedLine}
-              fill="none"
-              stroke={link.color || "black"}
-              strokeWidth={2}
-              strokeDasharray={
-                link.type === "dashed"
-                  ? "6,3"
-                  : link.type === "dotted"
-                  ? "2,2"
-                  : link.type === "dash-dotted"
-                  ? "6,3,2,3"
-                  : "0" //else solid
-              }
-            />
-          );
-        });
-      })}
-    </g>
+            return (
+              <>
+                <path
+                  key={`${key}-${index}`}
+                  d={curvedLine}
+                  fill="none"
+                  stroke={link.color || "black"}
+                  strokeWidth={2}
+                  strokeDasharray={
+                    link.type === "dashed"
+                      ? "6,3"
+                      : link.type === "dotted"
+                        ? "2,2"
+                        : link.type === "dash-dotted"
+                          ? "6,3,2,3"
+                          : "0" //else solid
+                  }
+                  onMouseEnter={(e) => handleMouseEnter(e, link.linkType)}
+                  onMouseLeave={handleMouseLeave}
+                  //onMouseMove={handleMouseMove}
+                />
+              </>
+            );
+          });
+        })}
+      </g>
+      <Overlay show={tooltipData.show} target={virtualTarget} placement="top">
+        {(props) => (
+          <Tooltip {...props} id="tooltip-link">
+            {tooltipData.content}
+          </Tooltip>
+        )}
+      </Overlay>
+    </>
   );
 };
 
@@ -341,15 +383,15 @@ function ShenzenDiagram(props) {
       }
     })
     return result*/
-    let fixed=["Text", "Concept", "Blueprint/Effects"]
-    let result=["Text", "Concept"]
-    let archScale=[]
-    let others=["Blueprint/Effects"]
+    let fixed = ["Text", "Concept", "Blueprint/Effects"]
+    let result = ["Text", "Concept"]
+    let archScale = []
+    let others = ["Blueprint/Effects"]
     nodes.forEach((n) => {
       if (!fixed.includes(n.category) && n.category.startsWith("1:")) { //architectural scales
         archScale.push(n.category)
-      }else if(!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")){  //others category
-        console.log(n.category)
+      } else if (!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")) {  //others category
+        //console.log(n.category)
         others.push(n.category)
       }
     })
@@ -358,9 +400,9 @@ function ShenzenDiagram(props) {
       const numB = parseInt(b.split(":")[1], 10);
       return numB - numA; // Ordine decrescente
     });
-    console.log(others)
-    result=result.concat(sortedArcScale)
-    result=result.concat(others)
+    //console.log(others)
+    result = result.concat(sortedArcScale)
+    result = result.concat(others)
     return result
   }
 
@@ -369,30 +411,35 @@ function ShenzenDiagram(props) {
   const [links, setLinks] = useState([]);
 
   useEffect(() => {
-    const newNodes = [];
-    const newLinks = [];
+    const fetchData = async () => {
+      const newNodes = [];
+      const newLinks = [];
 
-    props.documents.forEach((doc) => {
-      newNodes.push({
-        id: doc.docId,
-        label: doc.title,
-        category: doc.scale==="Architectural Scale"? doc.ASvalue:doc.scale,
-        date: selectDate(doc.issuanceDate),
-        color: selectColor(doc.stakeholders),
+      props.documents.forEach((doc) => {
+        newNodes.push({
+          id: doc.docId,
+          label: doc.title,
+          category: doc.scale === "Architectural Scale" ? doc.ASvalue : doc.scale,
+          date: selectDate(doc.issuanceDate),
+          color: selectColor(doc.stakeholders),
+        });
       });
-    });
 
-    props.allAssociations.forEach((link) => {
-      newLinks.push({
-        source: link.doc1,
-        target: link.doc2,
-        type: selectType(link.typeId),
-        color: selectLinkColor(link.typeId),
+      props.allAssociations.forEach(async (link) => {
+        newLinks.push({
+          source: link.doc1,
+          target: link.doc2,
+          type: selectType(link.typeId),
+          color: selectLinkColor(link.typeId),
+          linkType: await associationAPI.getTypeByTypeId(link.typeId)
+        });
       });
-    });
 
-    setNodes(newNodes);
-    setLinks(newLinks);
+      setNodes(newNodes);
+      setLinks(newLinks);
+    }
+
+    fetchData();
   }, [props.documents, props.allAssociations]);
 
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico

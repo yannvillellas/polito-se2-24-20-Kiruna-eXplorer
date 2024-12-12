@@ -17,7 +17,7 @@ import {
   addPosition,
   updatePosition,
 } from "./src/dao/positionDAO.mjs";
-import { getLinksType } from "./src/dao/linkTypeDAO.mjs";
+import { getLinksType, getTypeByTypeId} from "./src/dao/linkTypeDAO.mjs";
 import {
   addArea,
   listAreas,
@@ -632,6 +632,15 @@ app.get("/api/linkTypes", [], async (req, res) => {
   try {
     const types = await getLinksType();
     res.status(200).json(types);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/linkTypes/:id", [], async (req, res) => {
+  try {
+    const type = await getTypeByTypeId(req.params.id);
+    res.status(200).json(type);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
