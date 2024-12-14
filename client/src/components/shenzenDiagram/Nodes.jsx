@@ -21,7 +21,7 @@ const Nodes = ({ nodes, xScale, yScale, nodePositions }) => {
                         key={node.id}
                         cx={x}
                         cy={y}
-                        r={node.category >= 4 ? 8 : 10} // esempio di logica per il raggio
+                        r={10} 
                         fill={node.color}
                         stroke="black"
                         strokeWidth={1}
