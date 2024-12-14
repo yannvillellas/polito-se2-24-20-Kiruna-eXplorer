@@ -1,9 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import PropTypes from 'prop-types';
-import { Container, Modal, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Container, Modal, Button, Tooltip, OverlayTrigger, Offcanvas  } from "react-bootstrap";
 import DocumentAPI from "../../../api/documentAPI";
-import ChosenPositionMap from "./ChosenPositionMap";
+import ChosenPositionMap from "../map/ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
 import { GiGreekTemple } from "react-icons/gi";
 
@@ -17,7 +17,7 @@ import associationAPI from "../../../api/associationAPI";
 import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
 
-function ModalMarker(props) {
+function OffcanvasMarker(props) {
 
     const [showDocumentModal, setShowDocumentModal] = useState(false); // This componet state
     // Manage connectionsList of the document with DOC_ID
@@ -128,17 +128,22 @@ function ModalMarker(props) {
 
     return (
         <>
-            <Modal show={showDocumentModal} onHide={props.closeDocumentModal} size="xl">
-                <Modal.Header closeButton>
-                    <Modal.Title>
+            <Offcanvas 
+                show={showDocumentModal} 
+                onHide={props.closeDocumentModal} 
+                placement="end"
+                style={{ width: '500px' }} 
+                >
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>
                         {props.selectedDoc ? (
                             props.selectedDoc.title
                         ) : (
                             <p>Select a marker for visualize the details.</p>
                         )}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+                    </Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
                     {props.selectedDoc ? (
                         <>
                             {Object.entries(props.selectedDoc)
@@ -238,11 +243,11 @@ function ModalMarker(props) {
                     ) : (
                         <p>Select a marker for visualize the details.</p>
                     )}
-                </Modal.Body>
-            </Modal>
+                </Offcanvas.Body>
+            </Offcanvas>
         </>
     );
 }
 
 
-export default ModalMarker;
+export default OffcanvasMarker;

@@ -17,7 +17,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import associationAPI from "../../../api/associationAPI";
 import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
-import ModalMarker from "./ModalMarker";
+import OffcanvasMarker from "../offcanvasMarker/OffcanvasMarker";
 
 
 const validDocTypes = [
@@ -375,7 +375,7 @@ function CustomMap(props) {
       */}
 
       {/* Modal for the document */}
-      {selectedDoc && <ModalMarker
+      {selectedDoc && <OffcanvasMarker
         selectedDoc={selectedDoc}
         documents={props.documents}
 
