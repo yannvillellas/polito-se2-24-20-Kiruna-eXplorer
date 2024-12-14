@@ -1,0 +1,28 @@
+@keyframes bounce {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-5px); /* Su di 5 pixel */
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0; /* La freccia scompare */
+    }
+  }
+  
+  .arrow-bounce {
+    fill:red;
+    animation: bounce 0.8s ease-in-out infinite, fadeOut 0.5s ease-in-out 2.5s forwards; /* Ritardo di 2.5 secondi prima di iniziare a scomparire */
+  }

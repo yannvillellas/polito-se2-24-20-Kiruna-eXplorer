@@ -1,9 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./ShenzenDiagram.css"
 import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
 import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
 //import { scaleLinear } from 'd3-scale';
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -14,6 +16,7 @@ import * as d3 from "d3"
 const height = 600;*/
 
 function ShenzenDiagram(props) {
+  const { docId } = useParams();
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
@@ -286,6 +289,8 @@ function ShenzenDiagram(props) {
 
     return () => svg.on(".zoom", null);
   }, [dimensions]);
+  console.log(docId)
+  console.log(nodesPosition[docId])
 
   return (
     <>
@@ -366,6 +371,21 @@ function ShenzenDiagram(props) {
             horizontalSpacing={30}
             nodePositions={nodesPosition}
           />
+
+          {/*docId && nodesPosition[docId]!=undefined &&(
+            <HandPointer nodesPositions={nodesPosition} nodeId={docId} />
+          )*/}
+          {nodesPosition[docId] && (
+            <g>
+              {/* Freccia disegnata sopra il nodo */}
+              <polygon
+                points={`${nodesPosition[docId].x - 10},${nodesPosition[docId].y + 30} 
+                             ${nodesPosition[docId].x + 10},${nodesPosition[docId].y + 30} 
+                             ${nodesPosition[docId].x},${nodesPosition[docId].y + 10}`}
+                className="arrow-bounce"
+              />
+            </g>
+          )}
         </g>
       </svg>
     </>
