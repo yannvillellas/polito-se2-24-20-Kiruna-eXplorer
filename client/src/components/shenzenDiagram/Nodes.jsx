@@ -18,6 +18,7 @@ const Nodes = ({ nodes, xScale, yScale, nodePositions }) => {
 
                 return (
                     <circle
+                        className={node.label}
                         key={node.id}
                         cx={x}
                         cy={y}
