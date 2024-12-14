@@ -8,34 +8,13 @@ import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
 
 
 // Component to draw the links
-const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing }) => {
-    // Raggruppa i nodi con la stessa data e categoria
-    const groupedNodes = nodes.reduce((acc, node) => {
-        const key = `${node.date}-${node.category}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(node);
-        return acc;
-    }, {});
-
-    // Calcola le posizioni dei nodi con offset
-    const nodePositions = {};
-    Object.values(groupedNodes).forEach((group) => {
-        const count = group.length;
-        const offsetStep = 20; // Distanza verticale tra i nodi
-        const baseY = yScale(group[0].category);
-
-        group.forEach((node, index) => {
-            const offset = (index - (count - 1) / 2) * offsetStep; // Calcola offset verticale
-            const x = xScale(new Date(node.date));
-            const y = baseY + offset;
-            nodePositions[node.id] = { x, y }; // Memorizza la posizione
-        });
-    });
+const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing,nodePositions }) => {
 
     // Funzione per controllare se un punto è vicino a un nodo
     const isNearNode = (x, y, nodeRadius = 15) => {
         for (const node of nodes) {
             const { x: nx, y: ny } = nodePositions[node.id];
+            //console.log(nx,ny)
             if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2) {
                 if (ny >= y) {
                     return 1; // Nodo sopra

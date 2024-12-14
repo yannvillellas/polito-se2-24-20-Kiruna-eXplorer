@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -17,14 +17,14 @@ function ShenzenDiagram(props) {
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
-    height: window.innerHeight-150,
+    height: window.innerHeight - 150,
   });
 
   useEffect(() => {
     const handleResize = () => {
       setDimensions({
         width: window.innerWidth,
-        height: window.innerHeight-150,
+        height: window.innerHeight - 150,
       });
     };
 
@@ -156,6 +156,58 @@ function ShenzenDiagram(props) {
   //create data for diagram from documents and links
   const [nodes, setNodes] = useState([]);
   const [links, setLinks] = useState([]);
+  const [nodesPosition, setNodesPosition] = useState({})
+
+  /************ COMPUTING NODE POSITIONS *****************************/
+  const computeNodePositions = () => {
+    const groupedNodes = nodes.reduce((acc, node) => {
+      const year = new Date(node.date).getFullYear();
+      const key = `${year}-${node.category}`;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(node);
+      return acc;
+    }, {});
+
+    let positions = {}
+
+    Object.entries(groupedNodes).forEach(([groupKey, group]) => {
+      // Ordina i nodi nel gruppo per data (dal meno recente al più recente)
+      group.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // Distanza tra i nodi
+      const verticalOffsetStep = 21; // Distanza verticale massima alternata
+
+      // Coordinate base per il gruppo
+      const baseX = xScale(new Date(group[0].date)); // Primo nodo (minima data)
+      const baseY = yScale(group[0].category);
+
+      group.forEach((node, index) => {
+        // Calcola offset per evitare sovrapposizioni
+        const verticalOffset = (index % 2 === 0 ? 0 : verticalOffsetStep); // Alterna tra 0 e +20
+
+        // Calcolo dell'offset orizzontale proporzionale alla distanza temporale
+        let horizontalOffset = 0; // Nessun offset orizzontale di default
+        if (index > 0) {
+          const previousDate = new Date(group[index - 1].date);
+          const currentDate = new Date(node.date);
+          if (currentDate.getTime() !== previousDate.getTime()) {
+            const timeDifference = currentDate - previousDate; // Differenza temporale in millisecondi
+            horizontalOffset = Math.max(11, timeDifference / (1000 * 60 * 60 * 24)); // Proporzionale ai giorni
+          }
+        }
+
+        const x = baseX + horizontalOffset;
+        const y = baseY - verticalOffset + 5;
+
+        // Aggiungi la posizione al array temporaneo
+        positions = { ...positions, [node.id]: { x, y } };
+      });
+    });
+
+    setNodesPosition(positions)
+  }
+
+  /********************************************************************/
 
   useEffect(() => {
     const fetchData = async () => {
@@ -187,6 +239,7 @@ function ShenzenDiagram(props) {
     }
 
     fetchData();
+    computeNodePositions();
   }, [props.documents, props.allAssociations]);
 
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
@@ -196,11 +249,6 @@ function ShenzenDiagram(props) {
     domain: findDateRange(nodes), // Include the full date range
     range: [50 + marginLeft, dimensions.width - 50], // Applica il margine alla scala X
   });
-  /*const extendedWidth = dimensions.width * 3.2;
-  const xScale = scaleTime({
-    domain: findDateRange(props.nodes), 
-    range: [50, extendedWidth - 50], 
-  });*/
 
   const yScale = scaleBand({
     domain: findScaleRange(nodes),
@@ -214,17 +262,6 @@ function ShenzenDiagram(props) {
 
   const svgRef = useRef(null);
   const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity); // Stato per il zoom
-
-  // Funzione di gestione del zoom
-  const handleZoom = (event) => {
-    // Aggiorna lo stato con la trasformazione di zoom
-    setZoomTransform(event.transform);
-
-    // Applica la trasformazione al gruppo 'chart-container'
-    const svg = d3.select(svgRef.current);
-    svg.select('g.chart-container')
-      .attr('transform', event.transform);
-  };
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -245,98 +282,92 @@ function ShenzenDiagram(props) {
 
     svg.call(zoom);
     svg.call(zoom.transform, d3.zoomIdentity);
+    computeNodePositions();
 
     return () => svg.on(".zoom", null);
   }, [dimensions]);
 
   return (
     <>
-    {/*<div style={{ width: "100%", overflowX: "auto" }} ref={containerRef}>
       <svg
         ref={svgRef}
-        width={extendedWidth}
-        height={dimensions.height}
-        viewBox={`0 0 ${extendedWidth} ${dimensions.height}`}
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         style={{ background: "white" }}
       >
-        <rect width={extendedWidth} height={dimensions.height} fill="white" />*/}
-    <svg
-      ref={svgRef}
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-      style={{ background: "white" }}
-    >
-      <rect width={dimensions.width} height={dimensions.height} fill="white" />
+        <rect width={dimensions.width} height={dimensions.height} fill="white" />
 
-      <g className="chart-container">
-        {xTicks.map((tick, i) => (
-          <line
-            key={i}
-            x1={xScale(tick)}
-            y1={50}
-            x2={xScale(tick)}
-            y2={dimensions.height - 50}
-            stroke="#e0e0e0"
-            strokeDasharray="4"
+        <g className="chart-container">
+          {xTicks.map((tick, i) => (
+            <line
+              key={i}
+              x1={xScale(tick)}
+              y1={50}
+              x2={xScale(tick)}
+              y2={dimensions.height - 50}
+              stroke="#e0e0e0"
+              strokeDasharray="4"
+            />
+          ))}
+
+          {yTicks.map((category, i) => (
+            <line
+              key={i}
+              x1={50 + marginLeft}
+              y1={yScale(category) + yScale.bandwidth() / 2}
+              x2={dimensions.width - 50 + marginLeft}
+              //x2={extendedWidth - 50 + marginLeft}
+              y2={yScale(category) + yScale.bandwidth() / 2}
+              stroke="#e0e0e0"
+              strokeDasharray="4"
+            />
+          ))}
+
+          {xTicks.map((tick, i) => (
+            <text
+              key={i}
+              x={xScale(tick)}
+              y={dimensions.height - 30}
+              fontSize={10}
+              textAnchor="middle"
+            >
+              {tick.getFullYear()}
+            </text>
+          ))}
+
+          {yTicks.map((category, i) => (
+            <text
+              key={i}
+              x={10}
+              y={yScale(category) + yScale.bandwidth() / 2 - 30}
+              fontSize={10}
+              textAnchor="start"
+              dominantBaseline="middle"
+            >
+              {category}
+            </text>
+          ))}
+        </g>
+
+        <g className="chart-container" transform={zoomTransform.toString()}>
+          <Nodes
+            nodes={nodes}
+            xScale={(date) => xScale(new Date(date))}
+            yScale={yScale}
+            nodePositions={nodesPosition}
           />
-        ))}
-
-        {yTicks.map((category, i) => (
-          <line
-            key={i}
-            x1={50 + marginLeft}
-            y1={yScale(category) + yScale.bandwidth() / 2}
-            x2={dimensions.width - 50 + marginLeft}
-            //x2={extendedWidth - 50 + marginLeft}
-            y2={yScale(category) + yScale.bandwidth() / 2}
-            stroke="#e0e0e0"
-            strokeDasharray="4"
+          <Links
+            links={links}
+            nodes={nodes}
+            xScale={(date) => xScale(new Date(date))}
+            yScale={yScale}
+            verticalSpacing={-10}
+            horizontalSpacing={30}
+            nodePositions={nodesPosition}
           />
-        ))}
-
-        {xTicks.map((tick, i) => (
-          <text
-            key={i}
-            x={xScale(tick)}
-            y={dimensions.height - 30}
-            fontSize={10}
-            textAnchor="middle"
-          >
-            {tick.getFullYear()}
-          </text>
-        ))}
-
-        {yTicks.map((category, i) => (
-          <text
-            key={i}
-            x={10}
-            y={yScale(category) + yScale.bandwidth() / 2 - 30}
-            fontSize={10}
-            textAnchor="start"
-            dominantBaseline="middle"
-          >
-            {category}
-          </text>
-        ))}
-      </g>
-
-      <g className="chart-container" transform={zoomTransform.toString()}>
-        <Nodes
-          nodes={nodes}
-          xScale={(date) => xScale(new Date(date))}
-          yScale={yScale}
-        />
-        <Links
-          links={links}
-          nodes={nodes}
-          xScale={(date) => xScale(new Date(date))}
-          yScale={yScale}
-          verticalSpacing={-10}
-          horizontalSpacing={30}
-        />
-      </g>
-    </svg>
+        </g>
+      </svg>
     </>
   );
 }
