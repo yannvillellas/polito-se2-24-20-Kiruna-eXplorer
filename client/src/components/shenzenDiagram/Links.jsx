@@ -8,11 +8,14 @@ import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
 
 
 // Component to draw the links
-const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing,nodePositions }) => {
+const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing, nodePositions }) => {
 
     // Funzione per controllare se un punto è vicino a un nodo
-    const isNearNode = (x, y, nodeRadius = 15) => {
+    const isNearNode = (x, y,nodeId=null, nodeRadius = 15) => {
         for (const node of nodes) {
+            if(node.id==nodeId){
+                continue
+            }
             const { x: nx, y: ny } = nodePositions[node.id];
             //console.log(nx,ny)
             if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2) {
@@ -108,6 +111,25 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
         setTooltipData({ show: false, x: 0, y: 0, content: "" });
     };
 
+    const getPointAtDistance = (x1, y1, x2, y2, distance) => {
+        // Calcola la differenza tra le coordinate (direzione del vettore)
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        // Calcola la distanza tra i due punti (lunghezza del vettore)
+        const length = Math.sqrt(dx * dx + dy * dy);
+
+        // Normalizza il vettore (direzione unitaria)
+        const unitX = dx / length;
+        const unitY = dy / length;
+
+        // Calcola il punto alla distanza specificata (ad esempio, 20px da source)
+        const pointX = x1 + unitX * distance;
+        const pointY = y1 + unitY * distance;
+
+        return { x: pointX, y: pointY };
+    };
+
 
     return (
         <>
@@ -138,11 +160,30 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
                         let midX = (x1 + x2) / 2 + horizontalOffset;
                         let midY = (y1 + y2) / 2 + verticalShift + verticalOffset;
 
+                        let { x: pointFromSourceX, y: pointFromSourceY } = getPointAtDistance(x1, y1, x2, y2, 15); // Punto a 10px dalla source
+                        let { x: pointFromDestX, y: pointFromDestY } = getPointAtDistance(x2, y2, x1, y1, 15); // Punto a 10px dalla destination
+                        //console.log(x1, y2, pointFromSourceX, pointFromSourceY)
+
                         if (isNearNode(midX, midY) === 1) {
                             midY -= 50;
                         } else if (isNearNode(midX, midY) === -1) {
                             midY += 50;
                         }
+                        //pointFromSourceY += 50;
+
+                        if (isNearNode(pointFromSourceX, pointFromSourceY, link.source) === 1) {
+                            pointFromSourceY -= 50;
+                        } else if (isNearNode(pointFromSourceX, pointFromSourceY, link.source) === -1) {
+                            pointFromSourceY += 50;
+                        }
+
+
+                        if (isNearNode(pointFromDestX, pointFromDestY, link.target) === 1) {
+                            pointFromDestY -= 50;
+                        } else if (isNearNode(pointFromDestX, pointFromDestY,link.target) === -1) {
+                            pointFromDestY += 50;
+                        }
+
 
                         // Linea curva
                         const curvedLine = line()
@@ -150,7 +191,9 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
                             .y((d) => d.y)
                             .curve(curveBasis)([
                                 { x: x1, y: y1 },
+                                { x: pointFromSourceX, y: pointFromSourceY },
                                 { x: midX, y: midY },
+                                { x: pointFromDestX, y: pointFromDestY },
                                 { x: x2, y: y2 },
                             ]);
 
