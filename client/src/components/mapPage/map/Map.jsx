@@ -78,6 +78,8 @@ function CustomMap(props) {
   const [selectedDoc, setSelectedDoc] = useState(null);   // This componet state
   const [visibleArea, setVisibleArea] = useState(null); // This componet state
 
+  // Modifica della stroia 11:
+  const [visibleAreas, setVisibleAreas] = useState([]); // This componet state
 
   // Gestisco la modifica della posizione
   const [newLan, setNewLan] = useState(null);
@@ -141,9 +143,7 @@ function CustomMap(props) {
 
 
 
-  const handleMarkerClick = async (doc) => { // Passo l'intero documento
-    setSelectedDoc(doc);
-  };
+
 
 
 
@@ -169,18 +169,7 @@ function CustomMap(props) {
   }
 
 
-  const handleMouseOver = (docId) => {
-    console.log(`Mouseover on docId: ${docId}`);
-    const areaAssociation = props.areaAssociations.find((a) => a.docId === docId);
-    if (areaAssociation?.areaId) {
-      setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
-    }
 
-  };
-
-  const handleMouseOut = () => {
-    setVisibleArea(null); // Rimuove l'area visibile
-  };
 
   const handleModifyPosition = async (newLan, newLng) => {
     console.log("Sono in handleModifyPosition, ecco i parametri:", newLan, newLng);
@@ -208,8 +197,51 @@ function CustomMap(props) {
     setDocumentShown(props.documents.filter(doc => doc.lat === 67.8558 && doc.lng === 20.2253)); // <----------------------------------------------------------------------------------------------------------- Is define here how ALL MUNICIPALITY document is defined 
   }
 
+  const handleMarkerClick = async (doc) => { // Passo l'intero documento
+    setSelectedDoc(doc);
+
+    setVisibleAreas([]); // Rimuove tutte le aree visibili, così ci si concentra sulla singola
+
+  };
+
+  const handleMouseOver = (docId) => {
+    console.log(`Mouseover on docId: ${docId}`);
+    const areaAssociation = props.areaAssociations.find((a) => a.docId === docId);
+    if (areaAssociation?.areaId) {
+      setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
+    }
+
+    
+
+  };
+
+  const handleMouseOut = () => {
+    setVisibleArea(null); // Rimuove l'area visibile
+  };
+  
+  const handleRightClick = (event, docId) => {
+
+    // Mi serve per gestire l'evento custom di leaflet del tasto destro
+    const nativeEvent = event.originalEvent;
+    nativeEvent.preventDefault(); // Per evitare il menu contestuale predefinito del browser
+
+    
+    const areaAssociation = props.areaAssociations.find((a) => a.docId === docId);
+    if (areaAssociation?.areaId) {
+      setVisibleAreas([...visibleAreas, areaAssociation.areaId]); // Imposta l'area visibile
+    }
+    
+
+    console.log('Tasto destro su:', docId);
+    // Aggiungi qui altre azioni (ad esempio, aprire un menu custom)
+  };
 
 
+  useEffect(() => {
+    console.log("Visible areas:", visibleAreas);
+  }, [visibleAreas]);
+
+  
   const bounds = [[67.3062, 17.8498], [69.1099, 23.3367]];
 
   const renderMarkers = (documents) => {
@@ -222,6 +254,7 @@ function CustomMap(props) {
           click: () => handleMarkerClick(doc),
           mouseover: () => handleMouseOver(doc.docId),
           mouseout: () => handleMouseOut(),
+          contextmenu: (event) => handleRightClick(event, doc.docId)
         }}
         ref={(markerRef) => {
           if (markerRef) {
@@ -273,6 +306,30 @@ function CustomMap(props) {
 
         {props.areas.length > 0 && props.areas.map((area) => {
           if (area.areaId === visibleArea && area.areaType === "polygon") {
+            try {
+              const positions = JSON.parse(area.coordinates)[0];
+              return (
+                <Polygon
+                  key={area.areaId}
+                  positions={positions}
+                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                  eventHandlers={{
+                    click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
+                  }}
+                />
+              );
+            } catch (error) {
+              console.error(`Error parsing coordinates for area ID: ${area.areaId}`, error);
+              return null;
+            }
+          }
+          return null;
+        })}
+
+        {/**Show all the areas of all documented pressed by teh right clisck: */}
+        {props.areas.length > 0 && props.areas.map((area) => {
+          // if area.areaId is in visibleAreas then show the areas
+          if (visibleAreas.includes(area.areaId) && area.areaType === "polygon") {
             try {
               const positions = JSON.parse(area.coordinates)[0];
               return (
