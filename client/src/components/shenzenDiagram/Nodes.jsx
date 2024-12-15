@@ -20,6 +20,42 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
         setSelectedNode(node)
     }
 
+    //---------------icon part------------------------------
+    const validDocTypes = [
+        "Design document",
+        "Informative document",
+        "Material effects",
+        "Prescriptive document",
+        "Technical document"
+      ];
+      
+      const validStakeholders = [
+        "LKAB",
+        "Municipality",
+        "Regional authority",
+        "Architecture firms",
+        "Citizens"
+      ];
+      
+      const getIcon = (docType, stakeholders) => {
+        const formattedDocType = validDocTypes.includes(docType)
+          ? docType.toLowerCase().replace(' ', '-')
+          : "other-document";
+      
+        const formattedStakeholder = validStakeholders.includes(stakeholders)
+          ? stakeholders.toLowerCase().replace(' ', '-')
+          : "others";
+      
+        const iconUrl = `icons/${formattedDocType}_${formattedStakeholder}.png`;
+      
+        return {
+          iconUrl,
+          iconSize: [32, 32],
+        };
+      };
+    
+  //---------------icon part------------------------------
+
     /*let diagramNodes=[]
     let previous=1*/
 
@@ -50,6 +86,8 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
                     }
                     diagramNodes.push({x:x,y:y})*/
 
+                    const { iconUrl } = getIcon(node.docType, node.stakeholders);
+
                     return (
                         <OverlayTrigger
                             key={node.id}
@@ -60,16 +98,19 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
                                 </Tooltip>
                             }
                         >
-                            <circle
-                                cx={x}
-                                cy={y}
-                                r={10}
-                                fill={node.color}
-                                stroke="black"
-                                strokeWidth={1}
-                                onClick={() => handleClickNode(node)}
+                            <g
+                                transform={`translate(${x}, ${y})`}
                                 style={{ cursor: "pointer" }}
-                            />
+                                onClick={() => handleClickNode(node)}
+                            >
+                                <image
+                                    href={iconUrl}
+                                    width={32} 
+                                    height={32}
+                                    x={-16} 
+                                    y={-16} 
+                                />
+                            </g>
                         </OverlayTrigger>
                     );
                 });

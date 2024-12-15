@@ -175,6 +175,8 @@ function ShenzenDiagram(props) {
           category: doc.scale === "Architectural Scale" ? doc.ASvalue : doc.scale,
           date: selectDate(doc.issuanceDate),
           color: selectColor(doc.stakeholders),
+          docType: doc.type,
+          stakeholders: doc.stakeholders,
         });
       });
 
