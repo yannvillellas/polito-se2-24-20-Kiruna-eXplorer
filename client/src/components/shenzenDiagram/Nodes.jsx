@@ -49,18 +49,28 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
                         }
                     }
                     diagramNodes.push({x:x,y:y})*/
+
                     return (
-                        <circle
+                        <OverlayTrigger
                             key={node.id}
-                            cx={x}
-                            cy={y}
-                            r={10}
-                            fill={node.color}
-                            stroke="black"
-                            strokeWidth={1}
-                            onClick={() => handleClickNode(node)}
-                            style={{ cursor: "pointer" }}
-                        />
+                            placement="top"
+                            overlay={
+                                <Tooltip id={`tooltip-${node.id}`}>
+                                    {node.label || "No title available"}
+                                </Tooltip>
+                            }
+                        >
+                            <circle
+                                cx={x}
+                                cy={y}
+                                r={10}
+                                fill={node.color}
+                                stroke="black"
+                                strokeWidth={1}
+                                onClick={() => handleClickNode(node)}
+                                style={{ cursor: "pointer" }}
+                            />
+                        </OverlayTrigger>
                     );
                 });
             })}
