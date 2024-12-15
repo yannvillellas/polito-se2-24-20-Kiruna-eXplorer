@@ -9,14 +9,17 @@ import { useNavigate, useParams } from "react-router-dom";
 //import { scaleLinear } from 'd3-scale';
 import Nodes from "./Nodes";
 import Links from "./Links";
+import diagramAPI from "../../api/diagramAPI";
 
 import * as d3 from "d3"
+import { use } from "react";
 
 /*const width = 1100;
 const height = 600;*/
 
 function ShenzenDiagram(props) {
   const { docId } = useParams();
+  const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
@@ -36,7 +39,7 @@ function ShenzenDiagram(props) {
   }, []);
 
   const selectType = (typeId) => {
-    //console.log(typeId)
+    ////console.log(typeId)
     /*if(typeId==1){  //direct consequence
       return "solid"
     }else if(typeId==2){  //indirect consequence
@@ -80,7 +83,7 @@ function ShenzenDiagram(props) {
   const selectDate = (date) => {
     if (date.split("/").length == 1) {  //only year
       return date + "/01/01"  //add month and day
-    } else if (date.split("/").length == 1) {  //only month and year
+    } else if (date.split("/").length == 2) {  //only month and year
       return date + "/01" //add day
     } else {
       return date //complete date
@@ -141,7 +144,7 @@ function ShenzenDiagram(props) {
       if (!fixed.includes(n.category) && n.category.startsWith("1:")) { //architectural scales
         archScale.push(n.category)
       } else if (!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")) {  //others category
-        //console.log(n.category)
+        ////console.log(n.category)
         others.push(n.category)
       }
     })
@@ -150,7 +153,7 @@ function ShenzenDiagram(props) {
       const numB = parseInt(b.split(":")[1], 10);
       return numB - numA; // Ordine decrescente
     });
-    //console.log(others)
+    ////console.log(others)
     result = result.concat(sortedArcScale)
     result = result.concat(others)
     return result
@@ -162,8 +165,10 @@ function ShenzenDiagram(props) {
   const [nodesPosition, setNodesPosition] = useState({})
 
   /************ COMPUTING NODE POSITIONS *****************************/
-  const computeNodePositions = () => {
-    const groupedNodes = nodes.reduce((acc, node) => {
+  // Funzione per calcolare posizioni solo per nodi nuovi
+  const computeNodePositionsForNewNodes = (Nodes, existingPositions) => {
+    //console.log("dentro la compute")
+    const groupedNodes = Nodes.reduce((acc, node) => {
       const year = new Date(node.date).getFullYear();
       const key = `${year}-${node.category}`;
       if (!acc[key]) acc[key] = [];
@@ -171,61 +176,72 @@ function ShenzenDiagram(props) {
       return acc;
     }, {});
 
-    let positions = {}
-
+    let positions = {}; // Memorizza solo nuove posizioni
+    ////console.log(groupedNodes)
     Object.entries(groupedNodes).forEach(([groupKey, group]) => {
-      // Ordina i nodi nel gruppo per data (dal meno recente al più recente)
       group.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      // Distanza tra i nodi
-      const verticalOffsetStep = 21; // Distanza verticale massima alternata
-
-      // Coordinate base per il gruppo
-      const baseX = xScale(new Date(group[0].date)); // Primo nodo (minima data)
+      const verticalOffsetStep = 21;
+      /*//console.log(group[0].date)
+      //console.log(nodes)*/
+      //console.log("prima delle scale", xScale)
+      const baseX = xScale(new Date(group[0].date));
+      //console.log(baseX)
       const baseY = yScale(group[0].category);
-
+      //console.log("dopo le scale")
       group.forEach((node, index) => {
-        // Calcola offset per evitare sovrapposizioni
-        const verticalOffset = (index % 2 === 0 ? 0 : verticalOffsetStep); // Alterna tra 0 e +20
+        const verticalOffset = index % 2 === 0 ? 0 : verticalOffsetStep;
+        let horizontalOffset = 0;
 
-        // Calcolo dell'offset orizzontale proporzionale alla distanza temporale
-        let horizontalOffset = 0; // Nessun offset orizzontale di default
         if (index > 0) {
           const previousDate = new Date(group[index - 1].date);
           const currentDate = new Date(node.date);
           if (currentDate.getTime() !== previousDate.getTime()) {
-            const timeDifference = currentDate - previousDate; // Differenza temporale in millisecondi
-            horizontalOffset = Math.max(11, timeDifference / (1000 * 60 * 60 * 24)); // Proporzionale ai giorni
+            const timeDifference = currentDate - previousDate;
+            horizontalOffset = Math.max(
+              11,
+              timeDifference / (1000 * 60 * 60 * 24)
+            );
           }
         }
 
         const x = baseX + horizontalOffset;
         const y = baseY - verticalOffset + 5;
 
-        // Aggiungi la posizione al array temporaneo
-        positions = { ...positions, [node.id]: { x, y } };
+        positions[node.id] = { x, y }; // Memorizza solo le nuove posizioni
       });
     });
-
-    setNodesPosition(positions)
-  }
+    //console.log("fine compute", positions)
+    return positions;
+  };
 
   /********************************************************************/
 
+  const [xScale, setXScale] = useState(null);
+  const [yScale, setYScale] = useState(null);
+
   useEffect(() => {
+    //console.log("inizio")
     const fetchData = async () => {
+      //console.log("fetcho i dati")
       const newNodes = [];
       const newLinks = [];
 
       props.documents.forEach((doc) => {
-        newNodes.push({
+        const node = {
           id: doc.docId,
           label: doc.title,
           category: doc.scale === "Architectural Scale" ? doc.ASvalue : doc.scale,
           date: selectDate(doc.issuanceDate),
           color: selectColor(doc.stakeholders),
-        });
+          draggable: doc.issuanceDate.split("/").length <= 2 ? true : false
+        };
+        newNodes.push(node);
+        //console.log(newNodes)
       });
+      //console.log("nodi pronti", newNodes)
+      //console.log("setto", newNodes)
+      setNodes(newNodes);
 
       props.allAssociations.forEach(async (link) => {
         newLinks.push({
@@ -233,35 +249,145 @@ function ShenzenDiagram(props) {
           target: link.doc2,
           type: selectType(link.typeId),
           color: selectLinkColor(link.typeId),
-          linkType: await associationAPI.getTypeByTypeId(link.typeId)
+          linkType: await associationAPI.getTypeByTypeId(link.typeId),
         });
       });
-
-      setNodes(newNodes);
+      //console.log("setto links", newLinks)
       setLinks(newLinks);
-    }
+
+    };
 
     fetchData();
-    computeNodePositions();
+    //console.log("finito di fetchare i dati")
+
   }, [props.documents, props.allAssociations]);
 
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   // Define the X scale with the full date range
-  const xScale = scaleTime({
-    domain: findDateRange(nodes), // Include the full date range
-    range: [50 + marginLeft, dimensions.width - 50], // Applica il margine alla scala X
-  });
 
-  const yScale = scaleBand({
-    domain: findScaleRange(nodes),
-    range: [50, dimensions.height - 50],
-    padding: 0.5,
-  });
+
+  // useEffect per calcolare le scale quando `nodes` è pronto
+  useEffect(() => {
+    //console.log("dentro use effect scale")
+    if (nodes && nodes.length > 0) {
+      // Calcolo della scala X (time scale)
+      //console.log("definisco scale giuste")
+
+      const newXScale = () => scaleTime()
+        .domain(findDateRange(nodes))  // Assicurati che findDateRange restituisca un array con il range di date
+        .range([50 + marginLeft, dimensions.width - 50]);
+      //console.log("scalaX", newXScale)
+      setXScale(newXScale);
+      //console.log("scala settata")
+
+      // Calcolo della scala Y (band scale)
+      const newYScale = () => scaleBand()
+        .domain(findScaleRange(nodes)) // Assicurati che findScaleRange restituisca i valori per l'asse Y
+        .range([50, dimensions.height - 50])
+        .padding(0.5);
+      //console.log("scala Y", newYScale)
+
+      // Imposta le scale calcolate nello stato
+      setYScale(newYScale);
+      //console.log("scala settata")
+    }
+  }, [nodes/*, dimensions*/]);
+
+  let isUpdating = false
+
+  useEffect(() => {
+    //console.log("inizio posizioni con scale", xScale, yScale)
+    const computePositions = async () => {
+      if (nodes && nodes.length > 0 && xScale && yScale) {
+        if (isUpdating) {
+          console.log("Update in progress, skipping...");
+          return;
+        }
+
+        isUpdating = true; // Imposta il lock
+        try {
+          const xValues = xScale?.ticks(d3.timeYear.every(1)).map((ts) => `${ts.getFullYear()}`);
+          const yValues = [...new Set(nodes.map((node) => node.category))];
+          const oldXValues = await diagramAPI.getXValues();
+          const oldYValues = await diagramAPI.getYValues();
+
+          console.log(xValues);
+          console.log(oldXValues);
+
+          let xToAdd = xValues.filter((element) => !oldXValues.includes(element));
+          let yToAdd = yValues.filter((element) => !oldYValues.includes(element));
+
+          console.log(xToAdd);
+          console.log(yToAdd);
+
+          if (xToAdd.length > 0 || yToAdd.length > 0) {
+            console.log("sono dentro");
+            // Forza il ricalcolo di tutte le posizioni dei nodi
+            await diagramAPI.clearAllPositions();
+
+            if (xToAdd.length > 0) {
+              await diagramAPI.addNewX(xToAdd);
+              xToAdd = [];
+            }
+            if (yToAdd.length > 0) {
+              await diagramAPI.addNewY(yToAdd);
+              yToAdd = [];
+            }
+            console.log("chiamo yToAdd");
+          }
+        } catch (error) {
+          console.error("Errore durante l'aggiornamento:", error);
+        } finally {
+          isUpdating = false; // Rimuovi il lock
+        }
+
+
+
+        //console.log("entro posizioni")
+        const nodePositionsFromDB = await diagramAPI.getNodesPosition(); // Funzione per recuperare posizioni
+        console.log("posizioni",nodePositionsFromDB)
+
+        const updatedPositions = { ...nodePositionsFromDB }; // Inizializza con posizioni esistenti
+        const nodesWithoutPosition = []; // Per raccogliere i nodi nuovi
+
+        nodes?.forEach((node) => {
+          if (!nodePositionsFromDB[node.id]) {
+            nodesWithoutPosition.push(node);
+          }
+        })
+
+        // Calcola posizioni per i nodi senza posizione
+        let newPositions = {};
+        //console.log("prima delle posizioni")
+        if (nodesWithoutPosition.length > 0) {
+          //console.log("dentro le posizioni")
+          ////console.log(nodesWithoutPosition)
+          newPositions = computeNodePositionsForNewNodes(
+            nodesWithoutPosition,
+            updatedPositions
+          );
+          //console.log("dopo la compute")
+          // Salva solo le nuove posizioni nel database
+          //console.log("salvo", newPositions)
+          ////console.log("prima",updatedPositions)
+          await diagramAPI.saveNodesPositions(newPositions);
+
+          // Aggiorna lo stato con le nuove posizioni
+          Object.assign(updatedPositions, newPositions);
+          ////console.log("dopo",updatedPositions)
+          //console.log("dentro", updatedPositions)
+        }
+        //console.log("fuori", updatedPositions)
+        setNodesPosition(updatedPositions); // Combina posizioni dal DB e nuove calcolate
+      }
+    }
+    computePositions()
+  }, [xScale, yScale, nodes])
 
   // Generate ticks for the grid
-  const xTicks = xScale.ticks(d3.timeYear.every(1)); // Generate year ticks
-  const yTicks = yScale.domain();
+  const xTicks = xScale?.ticks(d3.timeYear.every(1)); // Generate year ticks
+  const yTicks = yScale?.domain();
 
   const svgRef = useRef(null);
   const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity); // Stato per il zoom
@@ -276,8 +402,11 @@ function ShenzenDiagram(props) {
       .translateExtent([
         [0, 0],
         [dimensions.width, dimensions.height],
-        //[extendedWidth, dimensions.height],
       ])
+      .filter((event) => {
+        // Disabilita lo zoom sui nodi (solo click o trascinamento sui nodi)
+        return !event.target.closest("circle");
+      })
       .on("zoom", (event) => {
         setZoomTransform(event.transform);
         svg.select("g.chart-container").attr("transform", event.transform);
@@ -285,12 +414,19 @@ function ShenzenDiagram(props) {
 
     svg.call(zoom);
     svg.call(zoom.transform, d3.zoomIdentity);
-    computeNodePositions();
 
     return () => svg.on(".zoom", null);
   }, [dimensions]);
-  console.log(docId)
-  console.log(nodesPosition[docId])
+  /*//console.log(docId)
+  //console.log(nodesPosition[docId])*/
+
+  const updateNodePosition = async (id, newPosition) => {
+    setNodesPosition((prevPositions) => ({
+      ...prevPositions,
+      [id]: newPosition,
+    }));
+    await diagramAPI.updateNodePositions({ docId: id, x: newPosition.x, y: newPosition.y })
+  };
 
   return (
     <>
@@ -304,7 +440,7 @@ function ShenzenDiagram(props) {
         <rect width={dimensions.width} height={dimensions.height} fill="white" />
 
         <g className="chart-container">
-          {xTicks.map((tick, i) => (
+          {xTicks?.map((tick, i) => (
             <line
               key={i}
               x1={xScale(tick)}
@@ -316,7 +452,7 @@ function ShenzenDiagram(props) {
             />
           ))}
 
-          {yTicks.map((category, i) => (
+          {yTicks?.map((category, i) => (
             <line
               key={i}
               x1={50 + marginLeft}
@@ -329,7 +465,7 @@ function ShenzenDiagram(props) {
             />
           ))}
 
-          {xTicks.map((tick, i) => (
+          {xTicks?.map((tick, i) => (
             <text
               key={i}
               x={xScale(tick)}
@@ -341,7 +477,7 @@ function ShenzenDiagram(props) {
             </text>
           ))}
 
-          {yTicks.map((category, i) => (
+          {yTicks?.map((category, i) => (
             <text
               key={i}
               x={10}
@@ -356,12 +492,6 @@ function ShenzenDiagram(props) {
         </g>
 
         <g className="chart-container" transform={zoomTransform.toString()}>
-          <Nodes
-            nodes={nodes}
-            xScale={(date) => xScale(new Date(date))}
-            yScale={yScale}
-            nodePositions={nodesPosition}
-          />
           <Links
             links={links}
             nodes={nodes}
@@ -371,7 +501,14 @@ function ShenzenDiagram(props) {
             horizontalSpacing={30}
             nodePositions={nodesPosition}
           />
-
+          <Nodes
+            nodes={nodes}
+            xScale={(date) => xScale(new Date(date))}
+            yScale={yScale}
+            nodePositions={nodesPosition}
+            updateNodePosition={updateNodePosition}
+            isUrbanPlanner={props.isUrbanPlanner}
+          />
           {/*docId && nodesPosition[docId]!=undefined &&(
             <HandPointer nodesPositions={nodesPosition} nodeId={docId} />
           )*/}

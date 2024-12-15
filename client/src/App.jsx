@@ -424,10 +424,11 @@ function App() {
                 />
 
                 <Route
-                    path="/diagram/:docId"
+                    path="/diagram/:docId?"
                     element={<ShenzenDiagram
                         documents={documents}
                         allAssociations={allAssociations}
+                        isUrbanPlanner={isUrbanPlanner}
                     />}
                 />
 
