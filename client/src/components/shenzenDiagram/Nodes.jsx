@@ -7,7 +7,7 @@ import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 
 // Component to draw the nodes
-const Nodes = ({ nodes, xScale, yScale }) => {
+const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
     // Raggruppa i nodi con la stessa data e categoria
     const groupedNodes = nodes.reduce((acc, node) => {
         const key = `${node.date}-${node.category}`;
@@ -15,6 +15,10 @@ const Nodes = ({ nodes, xScale, yScale }) => {
         acc[key].push(node);
         return acc;
     }, {});
+
+    const handleClickNode = (node) =>{
+        setSelectedNode(node)
+    }
 
     /*let diagramNodes=[]
     let previous=1*/
@@ -54,6 +58,8 @@ const Nodes = ({ nodes, xScale, yScale }) => {
                             fill={node.color}
                             stroke="black"
                             strokeWidth={1}
+                            onClick={() => handleClickNode(node)}
+                            style={{ cursor: "pointer" }}
                         />
                     );
                 });

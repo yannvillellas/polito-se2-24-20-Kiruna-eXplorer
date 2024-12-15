@@ -1,9 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
+import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay, Modal, Button} from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -14,6 +15,15 @@ import * as d3 from "d3"
 const height = 600;*/
 
 function ShenzenDiagram(props) {
+
+  //create data for diagram from documents and links
+  const [nodes, setNodes] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null); 
+  const [files, setFiles] = useState(); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )  
+  const [linkedDocuments, setLinkedDocuments] = useState([]); // Call API (getAssociationBy_DOC_ID), but here is easier (same concept of files) where each element will have structure: {aId: 1, title: "title", type: "type", doc1: doc1Id, doc2: doc2Id}
+  const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
@@ -153,10 +163,6 @@ function ShenzenDiagram(props) {
     return result
   }
 
-  //create data for diagram from documents and links
-  const [nodes, setNodes] = useState([]);
-  const [links, setLinks] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       const newNodes = [];
@@ -188,8 +194,6 @@ function ShenzenDiagram(props) {
 
     fetchData();
   }, [props.documents, props.allAssociations]);
-
-  const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   // Define the X scale with the full date range
   const xScale = scaleTime({
@@ -248,6 +252,119 @@ function ShenzenDiagram(props) {
 
     return () => svg.on(".zoom", null);
   }, [dimensions]);
+
+
+
+
+  useEffect(() => {
+    const fetchDocumentDetails = async () => {
+      try {
+        if (!selectedDoc) {
+          setShowDocumentModal(false);
+          return;
+        }
+
+        console.warn("Documentz:", props.documents);
+        console.warn("SelectedDoc:", selectedDoc);
+
+  
+        // Trova il documento corrispondente
+        const document = props.documents.find((doc) => doc.docId == selectedDoc.id);
+        if (!document) {
+
+          console.warn("Document not found with id:", selectedDoc);
+          setShowDocumentModal(false);
+          return;
+        }
+  
+        setSelectedDoc(document);
+  
+        // Fetch linked documents (associations)
+        await handleShowTitleAllLinkedDocument(document.docId);
+        console.log("Fetched linked documents for:", document.docId);
+  
+        // Fetch files
+        await handleGetFiles(document.docId);
+        console.log("Fetched files for:", document.docId);
+  
+        setShowDocumentModal(true);
+      } catch (error) {
+        console.error("Error fetching document details:", error);
+      }
+    };
+  
+    fetchDocumentDetails();
+  }, [selectedDoc]); // Aggiorna quando cambia selectedDoc o props.documents
+  
+  const handleShowTitleAllLinkedDocument = async (docId) => {
+
+    if (!docId) { // Se non è stato selezionato nessun documento
+      console.log("Sono in handleShowTitleAllLinkedDocument, non c'è nessun docId");
+      setLinkedDocuments([]);
+      return;
+    }
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    let titleList = [];
+    let title = "";
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        // se il titolo non è già presente in titleList aggiuggilo
+        title = props.documents.filter(doc => doc.docId === association.doc2)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc2 });
+        }
+      } else {
+        title = props.documents.filter(doc => doc.docId === association.doc1)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc1 });
+        }
+      }
+    }
+    console.log("Ecco i documenti associati: ", titleList);
+    setLinkedDocuments(titleList);
+  }
+
+  const handleGetFiles = async (docId) => {
+    try {
+      const files = await DocumentAPI.getFiles(docId); // Risolvi la Promise
+      console.log("Ecco i files: ", files);
+      if (files) {
+        setFiles(Array.from(files));
+      } else {
+        setFiles([]); // Inizializza con array vuoto se non ci sono file
+      }
+
+      console.log("Ecco i files: ", files);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      setFiles([]); // Fallback in caso di errore
+    }
+  };
+
+  const handleDownload = (file) => {
+    const URL = `http://localhost:3001/${file.path.slice(1)}`
+
+    const aTag = document.createElement("a");
+    aTag.href = URL
+    aTag.setAttribute("download", file.name)
+    document.body.appendChild(aTag)
+    aTag.click();
+    aTag.remove();
+  }
+
+  const handleConnectionClick = async (docId) => {
+    const doc = nodes.find((doc) => doc.id === Number(docId));
+    if(doc){
+      console.log("Sono in handleConnectionClick, ecco il documento selezionato: ", doc);
+      setSelectedDoc(doc);
+    }
+  };
+
+
+
+
+
+
 
   return (
     <>
@@ -326,6 +443,7 @@ function ShenzenDiagram(props) {
           nodes={nodes}
           xScale={(date) => xScale(new Date(date))}
           yScale={yScale}
+          setSelectedNode={setSelectedDoc}
         />
         <Links
           links={links}
@@ -337,6 +455,78 @@ function ShenzenDiagram(props) {
         />
       </g>
     </svg>
+
+    <Modal show={showDocumentModal} onHide={() => setSelectedDoc(null)} size="xl">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedDoc ? (
+              selectedDoc.title
+            ) : (
+              <p>Select a marker for visualize the details.</p>
+            )}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDoc ? (
+            <>
+              {Object.entries(selectedDoc)
+                .filter(([key, value]) =>
+                  key !== "docId" &&
+                  key !== "title" &&
+                  key !== "lat" &&
+                  key !== "lng" &&
+                  key !== "connections" &&
+                  value !== null &&
+                  value !== undefined &&
+                  value !== "" // esclude stringhe vuote
+                )
+                .map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                  </p>
+                ))}
+
+              <div key={"connections"}>
+                <p>
+                  <strong>Connections:</strong>
+                </p>
+                {linkedDocuments.length > 0 ? linkedDocuments.map((connection) => (
+                  <p
+                    key={connection.docTitle}
+                    style={{
+                      marginBottom: '8px',  // Spazio tra i paragrafi
+                    }}
+                  >
+                    <span
+                      onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                      style={{
+                        color: 'blue',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {connection.docTitle}
+                    </span>
+                  </p>
+                )) : "This file has no connections"}
+              </div>
+
+              <div className="download-buttons-container">
+                {(files && files.length > 0) ? files.map((f, index) => (
+                  <div key={f.name || index} className="download-btns">
+                    <Button onClick={() => handleDownload(f)} className="files">
+                      <i className="bi bi-file-earmark-text-fill"></i>
+                    </Button>
+                    <p className="file-name">{f.name}</p>
+                  </div>
+                )) : ""}
+              </div> 
+            </>
+          ) : (
+            <p>Select a marker for visualize the details.</p>
+          )}
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
