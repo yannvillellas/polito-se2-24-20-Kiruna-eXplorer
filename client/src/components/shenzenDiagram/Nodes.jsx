@@ -7,7 +7,9 @@ import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 
 // Component to draw the nodes
-const Nodes = ({ nodes, nodePositions, updateNodePosition, isUrbanPlanner}) => {
+
+const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNodePosition, isUrbanPlanner }) => {
+    
     const [draggedNode, setDraggedNode] = useState(null); // Nodo attualmente trascinato
     const [offset, setOffset] = useState({ x: 0, y: 0 }); // Offset per il trascinamento
 
@@ -38,6 +40,47 @@ const Nodes = ({ nodes, nodePositions, updateNodePosition, isUrbanPlanner}) => {
         setDraggedNode(null); // Fine del trascinamento
     };
 
+    const handleClickNode = (node) =>{
+        setSelectedNode(node)
+    }
+
+    //---------------icon part------------------------------
+    const validDocTypes = [
+        "Design document",
+        "Informative document",
+        "Material effects",
+        "Prescriptive document",
+        "Technical document"
+      ];
+      
+      const validStakeholders = [
+        "LKAB",
+        "Municipality",
+        "Regional authority",
+        "Architecture firms",
+        "Citizens"
+      ];
+      
+      const getIcon = (docType, stakeholders) => {
+        const formattedDocType = validDocTypes.includes(docType)
+          ? docType.toLowerCase().replace(' ', '-')
+          : "other-document";
+      
+        const formattedStakeholder = validStakeholders.includes(stakeholders)
+          ? stakeholders.toLowerCase().replace(' ', '-')
+          : "others";
+      
+        const iconUrl = `icons/${formattedDocType}_${formattedStakeholder}.png`;
+      
+        return {
+          iconUrl,
+          iconSize: [32, 32],
+        };
+      };
+    
+  //---------------icon part------------------------------
+
+
     return (
         <g
             onMouseMove={handleMouseMove} // Gestisci il trascinamento
@@ -49,19 +92,35 @@ const Nodes = ({ nodes, nodePositions, updateNodePosition, isUrbanPlanner}) => {
 
                 const { x, y } = position;
 
-                return (
-                    <circle
-                        className={node.label}
-                        key={node.id}
-                        cx={x}
-                        cy={y}
-                        r={10}
-                        fill={node.color}
-                        stroke="black"
-                        strokeWidth={1}
-                        onMouseDown={(event) => handleMouseDown(event, node)} // Inizia il trascinamento
-                    />
-                );
+                    const { iconUrl } = getIcon(node.docType, node.stakeholders);
+
+                    return (
+                        <OverlayTrigger
+                            key={node.id}
+                            placement="top"
+                            overlay={
+                                <Tooltip id={`tooltip-${node.id}`}>
+                                    {node.label || "No title available"}
+                                </Tooltip>
+                            }
+                        >
+                            <g
+                                key={node.id}
+                                transform={`translate(${x}, ${y})`}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleClickNode(node)}
+                                onMouseDown={(event) => handleMouseDown(event, node)} // Inizia il trascinamento
+                            >
+                                <image
+                                    href={iconUrl}
+                                    width={32} 
+                                    height={32}
+                                    x={x} 
+                                    y={y} 
+                                />
+                            </g>
+                        </OverlayTrigger>
+                    );
             })}
         </g>
     );

@@ -2,24 +2,32 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./ShenzenDiagram.css"
 import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
+import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay, Modal, Button} from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-//import { scaleLinear } from 'd3-scale';
 import Nodes from "./Nodes";
 import Links from "./Links";
 import diagramAPI from "../../api/diagramAPI";
-
 import * as d3 from "d3"
 import { use } from "react";
-
-/*const width = 1100;
-const height = 600;*/
 
 function ShenzenDiagram(props) {
   const { docId } = useParams();
   const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
+
+  //create data for diagram from documents and links
+  const [nodes, setNodes] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null); 
+  const [files, setFiles] = useState(); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )  
+  const [linkedDocuments, setLinkedDocuments] = useState([]); // Call API (getAssociationBy_DOC_ID), but here is easier (same concept of files) where each element will have structure: {aId: 1, title: "title", type: "type", doc1: doc1Id, doc2: doc2Id}
+  const [nodesPosition, setNodesPosition] = useState({})
+  const [xScale, setXScale] = useState(null);
+  const [yScale, setYScale] = useState(null);
+  const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
@@ -39,20 +47,6 @@ function ShenzenDiagram(props) {
   }, []);
 
   const selectType = (typeId) => {
-    ////console.log(typeId)
-    /*if(typeId==1){  //direct consequence
-      return "solid"
-    }else if(typeId==2){  //indirect consequence
-      return "wavy"
-    }else if(typeId==3){  //collateral consequence
-      return "dashed"
-    }else if(typeId==4){  //projection
-      return "dotted"
-    }else if(typeId==5){  //update
-      return "dash-dotted"
-    }else{  //other types
-      return "double-dotted"
-    }*/
     if (typeId == 1 || typeId == 2) {  //direct and indirect consequence
       return "solid"
     } else if (typeId == 3 || typeId == 4) {  //projection and collateral consequence
@@ -144,7 +138,6 @@ function ShenzenDiagram(props) {
       if (!fixed.includes(n.category) && n.category.startsWith("1:")) { //architectural scales
         archScale.push(n.category)
       } else if (!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")) {  //others category
-        ////console.log(n.category)
         others.push(n.category)
       }
     })
@@ -153,21 +146,15 @@ function ShenzenDiagram(props) {
       const numB = parseInt(b.split(":")[1], 10);
       return numB - numA; // Ordine decrescente
     });
-    ////console.log(others)
     result = result.concat(sortedArcScale)
     result = result.concat(others)
     return result
   }
 
-  //create data for diagram from documents and links
-  const [nodes, setNodes] = useState([]);
-  const [links, setLinks] = useState([]);
-  const [nodesPosition, setNodesPosition] = useState({})
 
   /************ COMPUTING NODE POSITIONS *****************************/
   // Funzione per calcolare posizioni solo per nodi nuovi
   const computeNodePositionsForNewNodes = (Nodes, existingPositions) => {
-    //console.log("dentro la compute")
     const groupedNodes = Nodes.reduce((acc, node) => {
       const year = new Date(node.date).getFullYear();
       const key = `${year}-${node.category}`;
@@ -177,18 +164,12 @@ function ShenzenDiagram(props) {
     }, {});
 
     let positions = {}; // Memorizza solo nuove posizioni
-    ////console.log(groupedNodes)
     Object.entries(groupedNodes).forEach(([groupKey, group]) => {
       group.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       const verticalOffsetStep = 21;
-      /*//console.log(group[0].date)
-      //console.log(nodes)*/
-      //console.log("prima delle scale", xScale)
       const baseX = xScale(new Date(group[0].date));
-      //console.log(baseX)
       const baseY = yScale(group[0].category);
-      //console.log("dopo le scale")
       group.forEach((node, index) => {
         const verticalOffset = index % 2 === 0 ? 0 : verticalOffsetStep;
         let horizontalOffset = 0;
@@ -211,19 +192,14 @@ function ShenzenDiagram(props) {
         positions[node.id] = { x, y }; // Memorizza solo le nuove posizioni
       });
     });
-    //console.log("fine compute", positions)
     return positions;
   };
 
   /********************************************************************/
 
-  const [xScale, setXScale] = useState(null);
-  const [yScale, setYScale] = useState(null);
 
   useEffect(() => {
-    //console.log("inizio")
     const fetchData = async () => {
-      //console.log("fetcho i dati")
       const newNodes = [];
       const newLinks = [];
 
@@ -234,13 +210,13 @@ function ShenzenDiagram(props) {
           category: doc.scale === "Architectural Scale" ? doc.ASvalue : doc.scale,
           date: selectDate(doc.issuanceDate),
           color: selectColor(doc.stakeholders),
+          docType: doc.type,
+          stakeholders: doc.stakeholders,
           draggable: doc.issuanceDate.split("/").length <= 2 ? true : false
         };
-        newNodes.push(node);
-        //console.log(newNodes)
+        newNodes.push(node);    
       });
-      //console.log("nodi pronti", newNodes)
-      //console.log("setto", newNodes)
+
       setNodes(newNodes);
 
       props.allAssociations.forEach(async (link) => {
@@ -252,52 +228,39 @@ function ShenzenDiagram(props) {
           linkType: await associationAPI.getTypeByTypeId(link.typeId),
         });
       });
-      //console.log("setto links", newLinks)
+
       setLinks(newLinks);
-
     };
-
+    
     fetchData();
-    //console.log("finito di fetchare i dati")
-
   }, [props.documents, props.allAssociations]);
-
-  const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   // Define the X scale with the full date range
 
 
   // useEffect per calcolare le scale quando `nodes` è pronto
   useEffect(() => {
-    //console.log("dentro use effect scale")
     if (nodes && nodes.length > 0) {
       // Calcolo della scala X (time scale)
-      //console.log("definisco scale giuste")
-
       const newXScale = () => scaleTime()
         .domain(findDateRange(nodes))  // Assicurati che findDateRange restituisca un array con il range di date
         .range([50 + marginLeft, dimensions.width - 50]);
-      //console.log("scalaX", newXScale)
       setXScale(newXScale);
-      //console.log("scala settata")
 
       // Calcolo della scala Y (band scale)
       const newYScale = () => scaleBand()
         .domain(findScaleRange(nodes)) // Assicurati che findScaleRange restituisca i valori per l'asse Y
         .range([50, dimensions.height - 50])
         .padding(0.5);
-      //console.log("scala Y", newYScale)
 
       // Imposta le scale calcolate nello stato
       setYScale(newYScale);
-      //console.log("scala settata")
     }
   }, [nodes, dimensions]);
 
   let isUpdating = false
 
   useEffect(() => {
-    //console.log("inizio posizioni con scale", xScale, yScale)
     const computePositions = async () => {
       if (nodes && nodes.length > 0 && xScale && yScale) {
         if (isUpdating) {
@@ -312,27 +275,12 @@ function ShenzenDiagram(props) {
           const oldXValues = await diagramAPI.getXValues();
           const oldYValues = await diagramAPI.getYValues();
 
-          //console.log(xValues);
-          //console.log(oldXValues);
-
           let xToAdd = xValues.filter((element) => !oldXValues.includes(element));
           let yToAdd = yValues.filter((element) => !oldYValues.includes(element));
 
-          /*const oldWidth= await diagramAPI.getWidth()
-          const oldHeight = await diagramAPI.getHeight()*/
           const { width: oldWidth, height: oldHeight } = await diagramAPI.getDimensions()
 
-          //console.log(xToAdd);
-          //console.log(yToAdd);
-
           if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width != oldWidth || dimensions.height != oldHeight) {
-            /*console.log("sono dentro");
-            console.log(xToAdd.length > 0)
-            console.log(yToAdd.length > 0)
-            console.log(dimensions.width!=oldWidth)
-            console.log("attuale",dimensions.width)
-            console.log("vecchia",oldWidth)
-            console.log(dimensions.height!=oldHeight)*/
             // Forza il ricalcolo di tutte le posizioni dei nodi
             await diagramAPI.clearAllPositions();
 
@@ -364,9 +312,7 @@ function ShenzenDiagram(props) {
 
 
 
-        //console.log("entro posizioni")
         const nodePositionsFromDB = await diagramAPI.getNodesPosition(); // Funzione per recuperare posizioni
-        //console.log("posizioni",nodePositionsFromDB)
 
         const updatedPositions = { ...nodePositionsFromDB }; // Inizializza con posizioni esistenti
         const nodesWithoutPosition = []; // Per raccogliere i nodi nuovi
@@ -379,26 +325,17 @@ function ShenzenDiagram(props) {
 
         // Calcola posizioni per i nodi senza posizione
         let newPositions = {};
-        //console.log("prima delle posizioni")
         if (nodesWithoutPosition.length > 0) {
-          //console.log("dentro le posizioni")
-          ////console.log(nodesWithoutPosition)
+
           newPositions = computeNodePositionsForNewNodes(
             nodesWithoutPosition,
             updatedPositions
           );
-          //console.log("dopo la compute")
-          // Salva solo le nuove posizioni nel database
-          //console.log("salvo", newPositions)
-          ////console.log("prima",updatedPositions)
           await diagramAPI.saveNodesPositions(newPositions);
 
           // Aggiorna lo stato con le nuove posizioni
           Object.assign(updatedPositions, newPositions);
-          ////console.log("dopo",updatedPositions)
-          //console.log("dentro", updatedPositions)
         }
-        //console.log("fuori", updatedPositions)
         setNodesPosition(updatedPositions); // Combina posizioni dal DB e nuove calcolate
       }
     }
@@ -437,8 +374,6 @@ function ShenzenDiagram(props) {
 
     return () => svg.on(".zoom", null);
   }, [dimensions]);
-  /*//console.log(docId)
-  //console.log(nodesPosition[docId])*/
 
   const updateNodePosition = async (id, newPosition) => {
     setNodesPosition((prevPositions) => ({
@@ -449,6 +384,110 @@ function ShenzenDiagram(props) {
   };
 
   const { k, x, y } = zoomTransform;
+
+  useEffect(() => {
+    const fetchDocumentDetails = async () => {
+      try {
+        if (!selectedDoc) {
+          setShowDocumentModal(false);
+          return;
+        }
+
+        console.warn("Documentz:", props.documents);
+        console.warn("SelectedDoc:", selectedDoc);
+
+  
+        // Trova il documento corrispondente
+        const document = props.documents.find((doc) => doc.docId == selectedDoc.id);
+        if (!document) {
+
+          console.warn("Document not found with id:", selectedDoc);
+          setShowDocumentModal(false);
+          return;
+        }
+  
+        setSelectedDoc(document);
+  
+        // Fetch linked documents (associations)
+        await handleShowTitleAllLinkedDocument(document.docId);
+        console.log("Fetched linked documents for:", document.docId);
+  
+        // Fetch files
+        await handleGetFiles(document.docId);
+        console.log("Fetched files for:", document.docId);
+  
+        setShowDocumentModal(true);
+      } catch (error) {
+        console.error("Error fetching document details:", error);
+      }
+    };
+  
+    fetchDocumentDetails();
+  }, [selectedDoc]); // Aggiorna quando cambia selectedDoc o props.documents
+  
+  const handleShowTitleAllLinkedDocument = async (docId) => {
+
+    if (!docId) { // Se non è stato selezionato nessun documento
+      console.log("Sono in handleShowTitleAllLinkedDocument, non c'è nessun docId");
+      setLinkedDocuments([]);
+      return;
+    }
+    let assciationToShow = await associationAPI.getAssociationsByDocId(docId);
+    let titleList = [];
+    let title = "";
+    for (let association of assciationToShow) {
+      if (association.doc1 === docId) {
+        // se il titolo non è già presente in titleList aggiuggilo
+        title = props.documents.filter(doc => doc.docId === association.doc2)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc2 });
+        }
+      } else {
+        title = props.documents.filter(doc => doc.docId === association.doc1)[0].title;
+        if (!titleList.some(item => item.docTitle === title)) {
+          titleList.push({ docTitle: title, otherDocumentId: association.doc1 });
+        }
+      }
+    }
+    console.log("Ecco i documenti associati: ", titleList);
+    setLinkedDocuments(titleList);
+  }
+
+  const handleGetFiles = async (docId) => {
+    try {
+      const files = await DocumentAPI.getFiles(docId); // Risolvi la Promise
+      console.log("Ecco i files: ", files);
+      if (files) {
+        setFiles(Array.from(files));
+      } else {
+        setFiles([]); // Inizializza con array vuoto se non ci sono file
+      }
+
+      console.log("Ecco i files: ", files);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      setFiles([]); // Fallback in caso di errore
+    }
+  };
+
+  const handleDownload = (file) => {
+    const URL = `http://localhost:3001/${file.path.slice(1)}`
+
+    const aTag = document.createElement("a");
+    aTag.href = URL
+    aTag.setAttribute("download", file.name)
+    document.body.appendChild(aTag)
+    aTag.click();
+    aTag.remove();
+  }
+
+  const handleConnectionClick = async (docId) => {
+    const doc = nodes.find((doc) => doc.id === Number(docId));
+    if(doc){
+      console.log("Sono in handleConnectionClick, ecco il documento selezionato: ", doc);
+      setSelectedDoc(doc);
+    }
+  };
 
   return (
     <>
