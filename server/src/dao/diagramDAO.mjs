@@ -157,3 +157,82 @@ export const addNewY = (yToAdd) => {
             .catch((err) => reject(err));
     });
 };
+
+export const getDimensions = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT name, value FROM Dimension WHERE name IN ("width", "height")';
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                const result = rows.reduce((acc, row) => {
+                    acc[row.name] = parseInt(row.value, 10);
+                    return acc;
+                }, {});
+                resolve(result);
+            }
+        });
+    });
+};
+
+// Aggiungi o aggiorna width e height
+export const addDimensions = (width, height) => {
+    return new Promise((resolve, reject) => {
+        const sql = `
+            INSERT INTO Dimension (name, value) VALUES (?, ?)
+            ON CONFLICT(name) DO UPDATE SET value = excluded.value
+        `;
+        const insertPromises = [
+            new Promise((innerResolve, innerReject) => {
+                db.run(sql, ['width', width], (err) => {
+                    if (err) {
+                        innerReject(err);
+                    } else {
+                        innerResolve();
+                    }
+                });
+            }),
+            new Promise((innerResolve, innerReject) => {
+                db.run(sql, ['height', height], (err) => {
+                    if (err) {
+                        innerReject(err);
+                    } else {
+                        innerResolve();
+                    }
+                });
+            }),
+        ];
+
+        Promise.all(insertPromises)
+            .then(() => resolve())
+            .catch((err) => reject(err));
+    });
+};
+
+// Aggiorna solo la larghezza
+export const updateWidth = (width) => {
+    return new Promise((resolve, reject) => {
+        const sql = `UPDATE Dimension SET value = ? WHERE name = 'width'`;
+        db.run(sql, [width], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+// Aggiorna solo l'altezza
+export const updateHeight = (height) => {
+    return new Promise((resolve, reject) => {
+        const sql = `UPDATE Dimension SET value = ? WHERE name = 'height'`;
+        db.run(sql, [height], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};

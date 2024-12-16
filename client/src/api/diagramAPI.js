@@ -12,21 +12,18 @@ const getNodesPosition = async () => {
 }
 
 const saveNodesPositions = async (positions) => {
-    console.log("passo", positions)
     try {
-        const response = await fetch(SERVER_URL, {
+            await fetch(SERVER_URL, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(positions),
         });
-        if (!response.ok) throw new Error('Failed to create node positions');
-        return await response.json(); // Return the created association data
     } catch (error) {
-        console.error("Error creating association:", error);
+        console.error("Error saving node positions:", error);
         throw error;
     }
-}
+};
 
 const updateNodePositions = async (position) => {
     try {
@@ -36,7 +33,6 @@ const updateNodePositions = async (position) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(position),
         });
-        return
     } catch (error) {
         console.error("Error creating association:", error);
         throw error;
@@ -79,14 +75,17 @@ const getYValues = async () => {
 
 const addNewX = async (xToAdd) => {
     try {
-        const response = await fetch('http://localhost:3001/api/diagram/xScale/add', {
+        const response =await fetch('http://localhost:3001/api/diagram/xScale/add', {
             method: 'POST',
             //credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(xToAdd),
         });
-        if (!response.ok) throw new Error('Failed to create node positions');
-        return await response.json(); // Return the created association data
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.status === 204) { // No Content
+            return null; // o qualche valore simbolico
+        }
+        return await response.json();
     } catch (error) {
         console.error("Error creating association:", error);
         throw error;
@@ -95,15 +94,74 @@ const addNewX = async (xToAdd) => {
 
 const addNewY = async (yToAdd) => {
     try {
-        console.log("chiamo api")
-        const response = await fetch('http://localhost:3001/api/diagram/yScale/add', {
+        const response =await fetch('http://localhost:3001/api/diagram/yScale/add', {
             method: 'POST',
             //credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(yToAdd),
         });
-        if (!response.ok) throw new Error('Failed to create node positions');
-        return await response.json(); // Return the created association data
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.status === 204) { // No Content
+            return null; // o qualche valore simbolico
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error creating association:", error);
+        throw error;
+    }
+}
+
+const getDimensions = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/api/diagram/dimensions', { method: 'GET' });
+        if (!response.ok) throw new Error('Failed to fetch y scale');
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching x scale:", error);
+        throw error;
+    }
+}
+
+const addDimensions = async (width,height)=>{
+    try {
+        const response =await fetch('http://localhost:3001/api/diagram/dimensions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({width:width, height:height}),
+        });
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.status === 204) { // No Content
+            return null; // o qualche valore simbolico
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error creating association:", error);
+        throw error;
+    }
+}
+
+const updateWidth = async (width) => {
+    console.log(width)
+    try {
+        await fetch('http://localhost:3001/api/diagram/width', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({width:width}),
+        });
+    } catch (error) {
+        console.error("Error creating association:", error);
+        throw error;
+    }
+}
+
+const updateHeight = async (height) => {
+    try {
+        await fetch('http://localhost:3001/api/diagram/height', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({height:height}),
+        });
+
     } catch (error) {
         console.error("Error creating association:", error);
         throw error;
@@ -111,6 +169,7 @@ const addNewY = async (yToAdd) => {
 }
 
 
-const diagramAPI = { getNodesPosition, saveNodesPositions, updateNodePositions,getXValues,getYValues, addNewY, addNewX,clearAllPositions };
+const diagramAPI = { getNodesPosition, saveNodesPositions, updateNodePositions,getXValues,getYValues,
+    addNewY, addNewX,clearAllPositions,getDimensions,addDimensions, updateHeight, updateWidth };
 
 export default diagramAPI;

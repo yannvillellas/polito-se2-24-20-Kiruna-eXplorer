@@ -292,7 +292,7 @@ function ShenzenDiagram(props) {
       setYScale(newYScale);
       //console.log("scala settata")
     }
-  }, [nodes/*, dimensions*/]);
+  }, [nodes, dimensions]);
 
   let isUpdating = false
 
@@ -312,17 +312,27 @@ function ShenzenDiagram(props) {
           const oldXValues = await diagramAPI.getXValues();
           const oldYValues = await diagramAPI.getYValues();
 
-          console.log(xValues);
-          console.log(oldXValues);
+          //console.log(xValues);
+          //console.log(oldXValues);
 
           let xToAdd = xValues.filter((element) => !oldXValues.includes(element));
           let yToAdd = yValues.filter((element) => !oldYValues.includes(element));
 
-          console.log(xToAdd);
-          console.log(yToAdd);
+          /*const oldWidth= await diagramAPI.getWidth()
+          const oldHeight = await diagramAPI.getHeight()*/
+          const {width:oldWidth, height:oldHeight} = await diagramAPI.getDimensions()
 
-          if (xToAdd.length > 0 || yToAdd.length > 0) {
+          //console.log(xToAdd);
+          //console.log(yToAdd);
+
+          if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width!=oldWidth || dimensions.height!=oldHeight) {
             console.log("sono dentro");
+            console.log(xToAdd.length > 0)
+            console.log(yToAdd.length > 0)
+            console.log(dimensions.width!=oldWidth)
+            console.log("attuale",dimensions.width)
+            console.log("vecchia",oldWidth)
+            console.log(dimensions.height!=oldHeight)
             // Forza il ricalcolo di tutte le posizioni dei nodi
             await diagramAPI.clearAllPositions();
 
@@ -334,7 +344,17 @@ function ShenzenDiagram(props) {
               await diagramAPI.addNewY(yToAdd);
               yToAdd = [];
             }
-            console.log("chiamo yToAdd");
+            if(!oldWidth && !oldHeight){
+              await diagramAPI.addDimensions(dimensions.width,dimensions.height)
+            }
+            if(dimensions.width!=oldWidth){
+              console.log("width", dimensions.width)
+              await diagramAPI.updateWidth(dimensions.width)
+            }
+
+            if(dimensions.height!=oldHeight){
+              await diagramAPI.updateHeight(dimensions.height)
+            }
           }
         } catch (error) {
           console.error("Errore durante l'aggiornamento:", error);
