@@ -320,19 +320,19 @@ function ShenzenDiagram(props) {
 
           /*const oldWidth= await diagramAPI.getWidth()
           const oldHeight = await diagramAPI.getHeight()*/
-          const {width:oldWidth, height:oldHeight} = await diagramAPI.getDimensions()
+          const { width: oldWidth, height: oldHeight } = await diagramAPI.getDimensions()
 
           //console.log(xToAdd);
           //console.log(yToAdd);
 
-          if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width!=oldWidth || dimensions.height!=oldHeight) {
-            console.log("sono dentro");
+          if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width != oldWidth || dimensions.height != oldHeight) {
+            /*console.log("sono dentro");
             console.log(xToAdd.length > 0)
             console.log(yToAdd.length > 0)
             console.log(dimensions.width!=oldWidth)
             console.log("attuale",dimensions.width)
             console.log("vecchia",oldWidth)
-            console.log(dimensions.height!=oldHeight)
+            console.log(dimensions.height!=oldHeight)*/
             // Forza il ricalcolo di tutte le posizioni dei nodi
             await diagramAPI.clearAllPositions();
 
@@ -344,15 +344,15 @@ function ShenzenDiagram(props) {
               await diagramAPI.addNewY(yToAdd);
               yToAdd = [];
             }
-            if(!oldWidth && !oldHeight){
-              await diagramAPI.addDimensions(dimensions.width,dimensions.height)
+            if (!oldWidth && !oldHeight) {
+              await diagramAPI.addDimensions(dimensions.width, dimensions.height)
             }
-            if(dimensions.width!=oldWidth){
+            if (dimensions.width != oldWidth) {
               console.log("width", dimensions.width)
               await diagramAPI.updateWidth(dimensions.width)
             }
 
-            if(dimensions.height!=oldHeight){
+            if (dimensions.height != oldHeight) {
               await diagramAPI.updateHeight(dimensions.height)
             }
           }
@@ -366,7 +366,7 @@ function ShenzenDiagram(props) {
 
         //console.log("entro posizioni")
         const nodePositionsFromDB = await diagramAPI.getNodesPosition(); // Funzione per recuperare posizioni
-        console.log("posizioni",nodePositionsFromDB)
+        //console.log("posizioni",nodePositionsFromDB)
 
         const updatedPositions = { ...nodePositionsFromDB }; // Inizializza con posizioni esistenti
         const nodesWithoutPosition = []; // Per raccogliere i nodi nuovi
@@ -448,6 +448,8 @@ function ShenzenDiagram(props) {
     await diagramAPI.updateNodePositions({ docId: id, x: newPosition.x, y: newPosition.y })
   };
 
+  const { k, x, y } = zoomTransform;
+
   return (
     <>
       <svg
@@ -484,31 +486,6 @@ function ShenzenDiagram(props) {
               strokeDasharray="4"
             />
           ))}
-
-          {xTicks?.map((tick, i) => (
-            <text
-              key={i}
-              x={xScale(tick)}
-              y={dimensions.height - 30}
-              fontSize={10}
-              textAnchor="middle"
-            >
-              {tick.getFullYear()}
-            </text>
-          ))}
-
-          {yTicks?.map((category, i) => (
-            <text
-              key={i}
-              x={10}
-              y={yScale(category) + yScale.bandwidth() / 2 - 30}
-              fontSize={10}
-              textAnchor="start"
-              dominantBaseline="middle"
-            >
-              {category}
-            </text>
-          ))}
         </g>
 
         <g className="chart-container" transform={zoomTransform.toString()}>
@@ -544,6 +521,65 @@ function ShenzenDiagram(props) {
             </g>
           )}
         </g>
+        {/* Etichette della scala Y, fisse ai bordi, si muovono con il pan verticale */}
+        <g
+          className="y-axis-labels"
+          transform={`translate(0, ${y}) scale(1, ${k})`} // Zoom verticale
+          style={{ backgroundColor: "white" }}
+        >
+          <rect
+            x={0} // Posizione del rettangolo
+            y={0} // Posizione verticale (sotto la linea dell'asse)
+            width={85} // Larghezza del rettangolo
+            height={dimensions.height} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
+          
+          {yTicks?.map((category, i) => (
+            <text
+              key={i}
+              x={10}
+              y={yScale(category) + yScale.bandwidth() / 2 - 30}
+              fontSize={10 * k} // Applica la scala del zoom
+              textAnchor="start"
+              dominantBaseline="middle"
+            >
+              {category}
+            </text>
+          ))}
+        </g>
+
+        {/* Etichette della scala X, fisse ai bordi, si muovono con il pan orizzontale */}
+        <g
+          className="x-axis-labels"
+          transform={`translate(${x}, 0) scale(${k}, 1)`} // Zoom orizzontale
+        >
+          <rect
+            x={0} // Posizione del rettangolo
+            y={dimensions.height - 60} // Posizione verticale (sotto la linea dell'asse)
+            width={dimensions.width} // Larghezza del rettangolo
+            height={100} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
+          {xTicks?.map((tick, i) => (
+            <text
+              key={i}
+              x={xScale(tick)} // Posizione su scala X
+              y={dimensions.height - 30}
+              fontSize={10 * k} // Applica la scala del zoom
+              textAnchor="middle"
+            >
+              {tick.getFullYear()}
+            </text>
+          ))}
+        </g>
+        <rect
+            x={0} // Posizione del rettangolo
+            y={dimensions.height-60} // Posizione verticale (sotto la linea dell'asse)
+            width={80} // Larghezza del rettangolo
+            height={100} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
       </svg>
     </>
   );
