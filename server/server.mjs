@@ -17,7 +17,7 @@ import {
   addPosition,
   updatePosition,
 } from "./src/dao/positionDAO.mjs";
-import { getLinksType, getTypeByTypeId} from "./src/dao/linkTypeDAO.mjs";
+import { getLinksType, getTypeByTypeId } from "./src/dao/linkTypeDAO.mjs";
 import {
   addArea,
   listAreas,
@@ -41,6 +41,9 @@ import {
   getDocumentTypes,
   addDocumentType,
 } from "./src/dao/documentTypeDAO.mjs";
+
+import { saveNodesPosition,getNodesPositions,updateNodePosition,getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
+  getDimensions, addDimensions,updateHeight,updateWidth } from "./src/dao/diagramDAO.mjs";
 
 const __dirname = path.resolve();
 const app = express();
@@ -256,7 +259,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
   const subfolder = req.params.docId;
   const uploadDir = path.join(__dirname, "uploads");
   const folderPath = path.join(uploadDir, subfolder);
-  
+
   try {
     // Controlla se la sottocartella esiste
     if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
@@ -266,7 +269,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
 
     // Legge i file nella sottocartella specificata
     const files = fs.readdirSync(folderPath);
-    
+
     // Se non ci sono file, restituisce un array vuoto
     if (files.length === 0) { // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
       return res.json([]);
@@ -645,6 +648,133 @@ app.get("/api/linkTypes/:id", [], async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+//diagram API
+app.get("/api/diagram/nodes", [], async (req, res) => {
+  try {
+    const positions = await getNodesPositions();
+    res.status(200).json(positions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      console.log("ricevo",req.body)
+      await saveNodesPosition(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving nodes positions", e);
+      res.status(500).json({ error: "Error saving nodes positions" });
+  }
+});
+
+app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
+  try {
+      await updateNodePosition(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+app.delete("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      await clearAllPositions(); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error deleteing node positions", e);
+      res.status(500).json({ error: "Error deleteing node positions" });
+  }
+});
+
+app.get("/api/diagram/xScale", [], async (req, res) => {
+  try {
+    const scale = await getXValues();
+    res.status(200).json(scale);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.get("/api/diagram/yScale", [], async (req, res) => {
+  try {
+    const scale = await getYValues();
+    res.status(200).json(scale);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/xScale/add",[], async (req, res) => {
+  try {
+      
+      await addNewX(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving x scale", e);
+      res.status(500).json({ error: "Error saving x scale" });
+  }
+});
+
+app.post("/api/diagram/yScale/add",[], async (req, res) => {
+  try {
+    //console.log("aggiungo",req.body)
+      await addNewY(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving y scale", e);
+      res.status(500).json({ error: "Error saving y scale" });
+  }
+});
+
+app.get("/api/diagram/dimensions", [], async (req, res) => {
+  try {
+    const dimensions = await getDimensions();
+    //console.log("ottengo", dimensions)
+    res.status(200).json(dimensions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/dimensions",[], async (req, res) => {
+  try {
+      //console.log("salvo le dimensioni",req.body.width, req.body.height)
+      await addDimensions(req.body.width, req.body.height);
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving y scale", e);
+      res.status(500).json({ error: "Error saving y scale" });
+  }
+});
+
+app.put("/api/diagram/width",[], async (req, res) => {
+  try {
+      //console.log("update width", req.body.width)
+      await updateWidth(req.body.width); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+app.put("/api/diagram/height",[], async (req, res) => {
+  try {
+      //console.log("update height", req.body.height)
+      await updateHeight(req.body.height); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
 //if (require.main === module) {

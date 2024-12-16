@@ -1,20 +1,21 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./ShenzenDiagram.css"
 import React, { useEffect, useState, useRef } from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
 import { OverlayTrigger, Tooltip, Overlay, Modal, Button} from "react-bootstrap";
-//import { scaleLinear } from 'd3-scale';
+import { useNavigate, useParams } from "react-router-dom";
 import Nodes from "./Nodes";
 import Links from "./Links";
-
+import diagramAPI from "../../api/diagramAPI";
 import * as d3 from "d3"
-
-/*const width = 1100;
-const height = 600;*/
+import { use } from "react";
 
 function ShenzenDiagram(props) {
+  const { docId } = useParams();
+  const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
 
   //create data for diagram from documents and links
   const [nodes, setNodes] = useState([]);
@@ -23,18 +24,21 @@ function ShenzenDiagram(props) {
   const [selectedDoc, setSelectedDoc] = useState(null); 
   const [files, setFiles] = useState(); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )  
   const [linkedDocuments, setLinkedDocuments] = useState([]); // Call API (getAssociationBy_DOC_ID), but here is easier (same concept of files) where each element will have structure: {aId: 1, title: "title", type: "type", doc1: doc1Id, doc2: doc2Id}
+  const [nodesPosition, setNodesPosition] = useState({})
+  const [xScale, setXScale] = useState(null);
+  const [yScale, setYScale] = useState(null);
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
-    height: window.innerHeight-150,
+    height: window.innerHeight - 150,
   });
 
   useEffect(() => {
     const handleResize = () => {
       setDimensions({
         width: window.innerWidth,
-        height: window.innerHeight-150,
+        height: window.innerHeight - 150,
       });
     };
 
@@ -43,20 +47,6 @@ function ShenzenDiagram(props) {
   }, []);
 
   const selectType = (typeId) => {
-    //console.log(typeId)
-    /*if(typeId==1){  //direct consequence
-      return "solid"
-    }else if(typeId==2){  //indirect consequence
-      return "wavy"
-    }else if(typeId==3){  //collateral consequence
-      return "dashed"
-    }else if(typeId==4){  //projection
-      return "dotted"
-    }else if(typeId==5){  //update
-      return "dash-dotted"
-    }else{  //other types
-      return "double-dotted"
-    }*/
     if (typeId == 1 || typeId == 2) {  //direct and indirect consequence
       return "solid"
     } else if (typeId == 3 || typeId == 4) {  //projection and collateral consequence
@@ -87,7 +77,7 @@ function ShenzenDiagram(props) {
   const selectDate = (date) => {
     if (date.split("/").length == 1) {  //only year
       return date + "/01/01"  //add month and day
-    } else if (date.split("/").length == 1) {  //only month and year
+    } else if (date.split("/").length == 2) {  //only month and year
       return date + "/01" //add day
     } else {
       return date //complete date
@@ -148,7 +138,6 @@ function ShenzenDiagram(props) {
       if (!fixed.includes(n.category) && n.category.startsWith("1:")) { //architectural scales
         archScale.push(n.category)
       } else if (!others.includes(n.category) && !fixed.includes(n.category) && !n.category.startsWith("1:")) {  //others category
-        //console.log(n.category)
         others.push(n.category)
       }
     })
@@ -157,11 +146,57 @@ function ShenzenDiagram(props) {
       const numB = parseInt(b.split(":")[1], 10);
       return numB - numA; // Ordine decrescente
     });
-    //console.log(others)
     result = result.concat(sortedArcScale)
     result = result.concat(others)
     return result
   }
+
+
+  /************ COMPUTING NODE POSITIONS *****************************/
+  // Funzione per calcolare posizioni solo per nodi nuovi
+  const computeNodePositionsForNewNodes = (Nodes, existingPositions) => {
+    const groupedNodes = Nodes.reduce((acc, node) => {
+      const year = new Date(node.date).getFullYear();
+      const key = `${year}-${node.category}`;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(node);
+      return acc;
+    }, {});
+
+    let positions = {}; // Memorizza solo nuove posizioni
+    Object.entries(groupedNodes).forEach(([groupKey, group]) => {
+      group.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const verticalOffsetStep = 21;
+      const baseX = xScale(new Date(group[0].date));
+      const baseY = yScale(group[0].category);
+      group.forEach((node, index) => {
+        const verticalOffset = index % 2 === 0 ? 0 : verticalOffsetStep;
+        let horizontalOffset = 0;
+
+        if (index > 0) {
+          const previousDate = new Date(group[index - 1].date);
+          const currentDate = new Date(node.date);
+          if (currentDate.getTime() !== previousDate.getTime()) {
+            const timeDifference = currentDate - previousDate;
+            horizontalOffset = Math.max(
+              11,
+              timeDifference / (1000 * 60 * 60 * 24)
+            );
+          }
+        }
+
+        const x = baseX + horizontalOffset;
+        const y = baseY - verticalOffset + 5;
+
+        positions[node.id] = { x, y }; // Memorizza solo le nuove posizioni
+      });
+    });
+    return positions;
+  };
+
+  /********************************************************************/
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -169,7 +204,7 @@ function ShenzenDiagram(props) {
       const newLinks = [];
 
       props.documents.forEach((doc) => {
-        newNodes.push({
+        const node = {
           id: doc.docId,
           label: doc.title,
           category: doc.scale === "Architectural Scale" ? doc.ASvalue : doc.scale,
@@ -177,8 +212,12 @@ function ShenzenDiagram(props) {
           color: selectColor(doc.stakeholders),
           docType: doc.type,
           stakeholders: doc.stakeholders,
-        });
+          draggable: doc.issuanceDate.split("/").length <= 2 ? true : false
+        };
+        newNodes.push(node);    
       });
+
+      setNodes(newNodes);
 
       props.allAssociations.forEach(async (link) => {
         newLinks.push({
@@ -186,51 +225,129 @@ function ShenzenDiagram(props) {
           target: link.doc2,
           type: selectType(link.typeId),
           color: selectLinkColor(link.typeId),
-          linkType: await associationAPI.getTypeByTypeId(link.typeId)
+          linkType: await associationAPI.getTypeByTypeId(link.typeId),
         });
       });
 
-      setNodes(newNodes);
       setLinks(newLinks);
-    }
-
+    };
+    
     fetchData();
   }, [props.documents, props.allAssociations]);
 
   // Define the X scale with the full date range
-  const xScale = scaleTime({
-    domain: findDateRange(nodes), // Include the full date range
-    range: [50 + marginLeft, dimensions.width - 50], // Applica il margine alla scala X
-  });
-  /*const extendedWidth = dimensions.width * 3.2;
-  const xScale = scaleTime({
-    domain: findDateRange(props.nodes), 
-    range: [50, extendedWidth - 50], 
-  });*/
 
-  const yScale = scaleBand({
-    domain: findScaleRange(nodes),
-    range: [50, dimensions.height - 50],
-    padding: 0.5,
-  });
+
+  // useEffect per calcolare le scale quando `nodes` è pronto
+  useEffect(() => {
+    if (nodes && nodes.length > 0) {
+      // Calcolo della scala X (time scale)
+      const newXScale = () => scaleTime()
+        .domain(findDateRange(nodes))  // Assicurati che findDateRange restituisca un array con il range di date
+        .range([50 + marginLeft, dimensions.width - 50]);
+      setXScale(newXScale);
+
+      // Calcolo della scala Y (band scale)
+      const newYScale = () => scaleBand()
+        .domain(findScaleRange(nodes)) // Assicurati che findScaleRange restituisca i valori per l'asse Y
+        .range([50, dimensions.height - 50])
+        .padding(0.5);
+
+      // Imposta le scale calcolate nello stato
+      setYScale(newYScale);
+    }
+  }, [nodes, dimensions]);
+
+  let isUpdating = false
+
+  useEffect(() => {
+    const computePositions = async () => {
+      if (nodes && nodes.length > 0 && xScale && yScale) {
+        if (isUpdating) {
+          console.log("Update in progress, skipping...");
+          return;
+        }
+
+        isUpdating = true; // Imposta il lock
+        try {
+          const xValues = xScale?.ticks(d3.timeYear.every(1)).map((ts) => `${ts.getFullYear()}`);
+          const yValues = [...new Set(nodes.map((node) => node.category))];
+          const oldXValues = await diagramAPI.getXValues();
+          const oldYValues = await diagramAPI.getYValues();
+
+          let xToAdd = xValues.filter((element) => !oldXValues.includes(element));
+          let yToAdd = yValues.filter((element) => !oldYValues.includes(element));
+
+          const { width: oldWidth, height: oldHeight } = await diagramAPI.getDimensions()
+
+          if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width != oldWidth || dimensions.height != oldHeight) {
+            // Forza il ricalcolo di tutte le posizioni dei nodi
+            await diagramAPI.clearAllPositions();
+
+            if (xToAdd.length > 0) {
+              await diagramAPI.addNewX(xToAdd);
+              xToAdd = [];
+            }
+            if (yToAdd.length > 0) {
+              await diagramAPI.addNewY(yToAdd);
+              yToAdd = [];
+            }
+            if (!oldWidth && !oldHeight) {
+              await diagramAPI.addDimensions(dimensions.width, dimensions.height)
+            }
+            if (dimensions.width != oldWidth) {
+              console.log("width", dimensions.width)
+              await diagramAPI.updateWidth(dimensions.width)
+            }
+
+            if (dimensions.height != oldHeight) {
+              await diagramAPI.updateHeight(dimensions.height)
+            }
+          }
+        } catch (error) {
+          console.error("Errore durante l'aggiornamento:", error);
+        } finally {
+          isUpdating = false; // Rimuovi il lock
+        }
+
+
+
+        const nodePositionsFromDB = await diagramAPI.getNodesPosition(); // Funzione per recuperare posizioni
+
+        const updatedPositions = { ...nodePositionsFromDB }; // Inizializza con posizioni esistenti
+        const nodesWithoutPosition = []; // Per raccogliere i nodi nuovi
+
+        nodes?.forEach((node) => {
+          if (!nodePositionsFromDB[node.id]) {
+            nodesWithoutPosition.push(node);
+          }
+        })
+
+        // Calcola posizioni per i nodi senza posizione
+        let newPositions = {};
+        if (nodesWithoutPosition.length > 0) {
+
+          newPositions = computeNodePositionsForNewNodes(
+            nodesWithoutPosition,
+            updatedPositions
+          );
+          await diagramAPI.saveNodesPositions(newPositions);
+
+          // Aggiorna lo stato con le nuove posizioni
+          Object.assign(updatedPositions, newPositions);
+        }
+        setNodesPosition(updatedPositions); // Combina posizioni dal DB e nuove calcolate
+      }
+    }
+    computePositions()
+  }, [xScale, yScale, nodes])
 
   // Generate ticks for the grid
-  const xTicks = xScale.ticks(d3.timeYear.every(1)); // Generate year ticks
-  const yTicks = yScale.domain();
+  const xTicks = xScale?.ticks(d3.timeYear.every(1)); // Generate year ticks
+  const yTicks = yScale?.domain();
 
   const svgRef = useRef(null);
   const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity); // Stato per il zoom
-
-  // Funzione di gestione del zoom
-  const handleZoom = (event) => {
-    // Aggiorna lo stato con la trasformazione di zoom
-    setZoomTransform(event.transform);
-
-    // Applica la trasformazione al gruppo 'chart-container'
-    const svg = d3.select(svgRef.current);
-    svg.select('g.chart-container')
-      .attr('transform', event.transform);
-  };
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -242,8 +359,11 @@ function ShenzenDiagram(props) {
       .translateExtent([
         [0, 0],
         [dimensions.width, dimensions.height],
-        //[extendedWidth, dimensions.height],
       ])
+      .filter((event) => {
+        // Disabilita lo zoom sui nodi (solo click o trascinamento sui nodi)
+        return !event.target.closest("circle");
+      })
       .on("zoom", (event) => {
         setZoomTransform(event.transform);
         svg.select("g.chart-container").attr("transform", event.transform);
@@ -255,8 +375,15 @@ function ShenzenDiagram(props) {
     return () => svg.on(".zoom", null);
   }, [dimensions]);
 
+  const updateNodePosition = async (id, newPosition) => {
+    setNodesPosition((prevPositions) => ({
+      ...prevPositions,
+      [id]: newPosition,
+    }));
+    await diagramAPI.updateNodePositions({ docId: id, x: newPosition.x, y: newPosition.y })
+  };
 
-
+  const { k, x, y } = zoomTransform;
 
   useEffect(() => {
     const fetchDocumentDetails = async () => {
@@ -362,173 +489,137 @@ function ShenzenDiagram(props) {
     }
   };
 
-
-
-
-
-
-
   return (
     <>
-    {/*<div style={{ width: "100%", overflowX: "auto" }} ref={containerRef}>
       <svg
         ref={svgRef}
-        width={extendedWidth}
-        height={dimensions.height}
-        viewBox={`0 0 ${extendedWidth} ${dimensions.height}`}
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         style={{ background: "white" }}
       >
-        <rect width={extendedWidth} height={dimensions.height} fill="white" />*/}
-    <svg
-      ref={svgRef}
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-      style={{ background: "white" }}
-    >
-      <rect width={dimensions.width} height={dimensions.height} fill="white" />
+        <rect width={dimensions.width} height={dimensions.height} fill="white" />
 
-      <g className="chart-container">
-        {xTicks.map((tick, i) => (
-          <line
-            key={i}
-            x1={xScale(tick)}
-            y1={50}
-            x2={xScale(tick)}
-            y2={dimensions.height - 50}
-            stroke="#e0e0e0"
-            strokeDasharray="4"
+        <g className="chart-container">
+          {xTicks?.map((tick, i) => (
+            <line
+              key={i}
+              x1={xScale(tick)}
+              y1={50}
+              x2={xScale(tick)}
+              y2={dimensions.height - 50}
+              stroke="#e0e0e0"
+              strokeDasharray="4"
+            />
+          ))}
+
+          {yTicks?.map((category, i) => (
+            <line
+              key={i}
+              x1={50 + marginLeft}
+              y1={yScale(category) + yScale.bandwidth() / 2}
+              x2={dimensions.width - 50 + marginLeft}
+              //x2={extendedWidth - 50 + marginLeft}
+              y2={yScale(category) + yScale.bandwidth() / 2}
+              stroke="#e0e0e0"
+              strokeDasharray="4"
+            />
+          ))}
+        </g>
+
+        <g className="chart-container" transform={zoomTransform.toString()}>
+          <Links
+            links={links}
+            nodes={nodes}
+            xScale={(date) => xScale(new Date(date))}
+            yScale={yScale}
+            verticalSpacing={-10}
+            horizontalSpacing={30}
+            nodePositions={nodesPosition}
           />
-        ))}
-
-        {yTicks.map((category, i) => (
-          <line
-            key={i}
-            x1={50 + marginLeft}
-            y1={yScale(category) + yScale.bandwidth() / 2}
-            x2={dimensions.width - 50 + marginLeft}
-            //x2={extendedWidth - 50 + marginLeft}
-            y2={yScale(category) + yScale.bandwidth() / 2}
-            stroke="#e0e0e0"
-            strokeDasharray="4"
+          <Nodes
+            nodes={nodes}
+            xScale={(date) => xScale(new Date(date))}
+            yScale={yScale}
+            nodePositions={nodesPosition}
+            updateNodePosition={updateNodePosition}
+            isUrbanPlanner={props.isUrbanPlanner}
           />
-        ))}
-
-        {xTicks.map((tick, i) => (
-          <text
-            key={i}
-            x={xScale(tick)}
-            y={dimensions.height - 30}
-            fontSize={10}
-            textAnchor="middle"
-          >
-            {tick.getFullYear()}
-          </text>
-        ))}
-
-        {yTicks.map((category, i) => (
-          <text
-            key={i}
-            x={10}
-            y={yScale(category) + yScale.bandwidth() / 2 - 30}
-            fontSize={10}
-            textAnchor="start"
-            dominantBaseline="middle"
-          >
-            {category}
-          </text>
-        ))}
-      </g>
-
-      <g className="chart-container" transform={zoomTransform.toString()}>
-        <Nodes
-          nodes={nodes}
-          xScale={(date) => xScale(new Date(date))}
-          yScale={yScale}
-          setSelectedNode={setSelectedDoc}
-        />
-        <Links
-          links={links}
-          nodes={nodes}
-          xScale={(date) => xScale(new Date(date))}
-          yScale={yScale}
-          verticalSpacing={-10}
-          horizontalSpacing={30}
-        />
-      </g>
-    </svg>
-
-    <Modal show={showDocumentModal} onHide={() => setSelectedDoc(null)} size="xl">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {selectedDoc ? (
-              selectedDoc.title
-            ) : (
-              <p>Select a marker for visualize the details.</p>
-            )}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedDoc ? (
-            <>
-              {Object.entries(selectedDoc)
-                .filter(([key, value]) =>
-                  key !== "docId" &&
-                  key !== "title" &&
-                  key !== "lat" &&
-                  key !== "lng" &&
-                  key !== "connections" &&
-                  value !== null &&
-                  value !== undefined &&
-                  value !== "" // esclude stringhe vuote
-                )
-                .map(([key, value]) => (
-                  <p key={key}>
-                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                  </p>
-                ))}
-
-              <div key={"connections"}>
-                <p>
-                  <strong>Connections:</strong>
-                </p>
-                {linkedDocuments.length > 0 ? linkedDocuments.map((connection) => (
-                  <p
-                    key={connection.docTitle}
-                    style={{
-                      marginBottom: '8px',  // Spazio tra i paragrafi
-                    }}
-                  >
-                    <span
-                      onClick={() => handleConnectionClick(connection.otherDocumentId)}
-                      style={{
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {connection.docTitle}
-                    </span>
-                  </p>
-                )) : "This file has no connections"}
-              </div>
-
-              <div className="download-buttons-container">
-                {(files && files.length > 0) ? files.map((f, index) => (
-                  <div key={f.name || index} className="download-btns">
-                    <Button onClick={() => handleDownload(f)} className="files">
-                      <i className="bi bi-file-earmark-text-fill"></i>
-                    </Button>
-                    <p className="file-name">{f.name}</p>
-                  </div>
-                )) : ""}
-              </div> 
-            </>
-          ) : (
-            <p>Select a marker for visualize the details.</p>
+          {/*docId && nodesPosition[docId]!=undefined &&(
+            <HandPointer nodesPositions={nodesPosition} nodeId={docId} />
+          )*/}
+          {nodesPosition[docId] && (
+            <g>
+              {/* Freccia disegnata sopra il nodo */}
+              <polygon
+                points={`${nodesPosition[docId].x - 10},${nodesPosition[docId].y + 30} 
+                             ${nodesPosition[docId].x + 10},${nodesPosition[docId].y + 30} 
+                             ${nodesPosition[docId].x},${nodesPosition[docId].y + 10}`}
+                className="arrow-bounce"
+              />
+            </g>
           )}
-        </Modal.Body>
-      </Modal>
+        </g>
+        {/* Etichette della scala Y, fisse ai bordi, si muovono con il pan verticale */}
+        <g
+          className="y-axis-labels"
+          transform={`translate(0, ${y}) scale(1, ${k})`} // Zoom verticale
+          style={{ backgroundColor: "white" }}
+        >
+          <rect
+            x={0} // Posizione del rettangolo
+            y={0} // Posizione verticale (sotto la linea dell'asse)
+            width={85} // Larghezza del rettangolo
+            height={dimensions.height} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
+          
+          {yTicks?.map((category, i) => (
+            <text
+              key={i}
+              x={10}
+              y={yScale(category) + yScale.bandwidth() / 2 - 30}
+              fontSize={10 * k} // Applica la scala del zoom
+              textAnchor="start"
+              dominantBaseline="middle"
+            >
+              {category}
+            </text>
+          ))}
+        </g>
+
+        {/* Etichette della scala X, fisse ai bordi, si muovono con il pan orizzontale */}
+        <g
+          className="x-axis-labels"
+          transform={`translate(${x}, 0) scale(${k}, 1)`} // Zoom orizzontale
+        >
+          <rect
+            x={0} // Posizione del rettangolo
+            y={dimensions.height - 60} // Posizione verticale (sotto la linea dell'asse)
+            width={dimensions.width} // Larghezza del rettangolo
+            height={100} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
+          {xTicks?.map((tick, i) => (
+            <text
+              key={i}
+              x={xScale(tick)} // Posizione su scala X
+              y={dimensions.height - 30}
+              fontSize={10 * k} // Applica la scala del zoom
+              textAnchor="middle"
+            >
+              {tick.getFullYear()}
+            </text>
+          ))}
+        </g>
+        <rect
+            x={0} // Posizione del rettangolo
+            y={dimensions.height-60} // Posizione verticale (sotto la linea dell'asse)
+            width={80} // Larghezza del rettangolo
+            height={100} // Altezza del rettangolo
+            fill="white" // Colore di sfondo
+          />
+      </svg>
     </>
   );
 }

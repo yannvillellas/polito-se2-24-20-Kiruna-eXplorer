@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback} from "react";
 import { scaleTime, scaleBand } from "@visx/scale";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
@@ -8,34 +8,16 @@ import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
 
 
 // Component to draw the links
-const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing }) => {
-    // Raggruppa i nodi con la stessa data e categoria
-    const groupedNodes = nodes.reduce((acc, node) => {
-        const key = `${node.date}-${node.category}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(node);
-        return acc;
-    }, {});
-
-    // Calcola le posizioni dei nodi con offset
-    const nodePositions = {};
-    Object.values(groupedNodes).forEach((group) => {
-        const count = group.length;
-        const offsetStep = 20; // Distanza verticale tra i nodi
-        const baseY = yScale(group[0].category);
-
-        group.forEach((node, index) => {
-            const offset = (index - (count - 1) / 2) * offsetStep; // Calcola offset verticale
-            const x = xScale(new Date(node.date));
-            const y = baseY + offset;
-            nodePositions[node.id] = { x, y }; // Memorizza la posizione
-        });
-    });
+const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing, nodePositions }) => {
 
     // Funzione per controllare se un punto è vicino a un nodo
-    const isNearNode = (x, y, nodeRadius = 15) => {
+    const isNearNode = (x, y, nodeId = null, nodeRadius = 15) => {
         for (const node of nodes) {
+            if (node.id == nodeId) {
+                continue
+            }
             const { x: nx, y: ny } = nodePositions[node.id];
+            //console.log(nx,ny)
             if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2) {
                 if (ny >= y) {
                     return 1; // Nodo sopra
@@ -95,7 +77,7 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
         });
     });
 
-    const [tooltipData, setTooltipData] = useState({ show: false, x: 0, y: 0, content: "" });
+
     const virtualTarget = {
         getBoundingClientRect: () => ({
             top: tooltipData.y,
@@ -106,28 +88,73 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
             height: 0,
         }),
     };
+    const [tooltipData, setTooltipData] = useState({
+        show: false,
+        x: 0,
+        y: 0,
+        content: "",
+    });
+
+    // Riferimento per il timeout (debounce)
+    const timeoutRef = useRef(null);
+
+    // Funzione debounce per migliorare la performance
+    const debouncedSetTooltip = useCallback((x, y, content) => {
+        // Cancella il timeout precedente se c'è
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        timeoutRef.current = setTimeout(() => {
+            setTooltipData({ show: true, x, y, content });
+        }, 50); // Ritarda l'aggiornamento a 50ms
+    }, []);
+
     const handleMouseEnter = (event, linkType) => {
         const { clientX, clientY } = event; // Posizione del mouse
-        setTooltipData({
-            show: true,
-            x: clientX,
-            y: clientY,
-            content: `${linkType}`,
-        });
+        debouncedSetTooltip(clientX, clientY, `${linkType}`);
     };
 
     const handleMouseMove = (event) => {
         const { clientX, clientY } = event;
-        setTooltipData((prev) => ({
-            ...prev,
-            x: clientX,
-            y: clientY,
-        }));
+        debouncedSetTooltip(clientX, clientY, tooltipData.content); // Usa la funzione debounce
     };
 
     const handleMouseLeave = () => {
+        // Cancella il timeout se il mouse esce prima che il tooltip venga mostrato
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
         setTooltipData({ show: false, x: 0, y: 0, content: "" });
     };
+
+    const getPointAtDistance = (x1, y1, x2, y2, distance) => {
+        // Calcola la differenza tra le coordinate (direzione del vettore)
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        // Calcola la distanza tra i due punti (lunghezza del vettore)
+        const length = Math.sqrt(dx * dx + dy * dy);
+
+        // Normalizza il vettore (direzione unitaria)
+        const unitX = dx / length;
+        const unitY = dy / length;
+
+        // Calcola il punto alla distanza specificata (ad esempio, 20px da source)
+        const pointX = x1 + unitX * distance;
+        const pointY = y1 + unitY * distance;
+
+        return { x: pointX, y: pointY };
+    };
+
+    const isVerticalLink = (sourceX, targetX) => {
+        //console.log(targetX,sourceX)
+        if (Math.abs(sourceX - targetX) < 30) {
+            return true
+        } else {
+            return false
+        }
+    }
 
 
     return (
@@ -151,7 +178,10 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
                         // Calcola offset orizzontale per separare i link sovrapposti
                         const totalLinks = groupedLinks.length;
                         const step = horizontalSpacing / (totalLinks - 1 || 1); // Evita divisioni per 0
-                        const horizontalOffset = (index - (totalLinks - 1) / 2) * step;
+                        let horizontalOffset = (index - (totalLinks - 1) / 2) * step;
+                        if (isVerticalLink(x1, x2)) {
+                            horizontalOffset = index * step / 4;
+                        }
                         const stepV = verticalSpacing / (totalLinks - 1 || 1)
                         const verticalOffset = (index - (totalLinks - 1) / 2) * stepV;
 
@@ -159,11 +189,38 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
                         let midX = (x1 + x2) / 2 + horizontalOffset;
                         let midY = (y1 + y2) / 2 + verticalShift + verticalOffset;
 
-                        if (isNearNode(midX, midY) === 1) {
-                            midY -= 50;
-                        } else if (isNearNode(midX, midY) === -1) {
-                            midY += 50;
+                        let { x: pointFromSourceX, y: pointFromSourceY } = getPointAtDistance(x1, y1, x2, y2, 15); // Punto a 10px dalla source
+                        let { x: pointFromDestX, y: pointFromDestY } = getPointAtDistance(x2, y2, x1, y1, 15); // Punto a 10px dalla destination
+                        //console.log(x1, y2, pointFromSourceX, pointFromSourceY)
+
+                        if (isVerticalLink(x1, x2)) {
+                            // Se il link è verticale
+                            if (isNearNode(midX, midY) !== 0) {
+                                midX += 30; // Applica l'offset alla midX per separare il link
+                            }
+                        } else {
+                            // Se il link non è verticale
+                            if (isNearNode(midX, midY) === 1) {
+                                midY -= 50; // Nodo sopra
+                            } else if (isNearNode(midX, midY) === -1) {
+                                midY += 50; // Nodo sotto
+                            }
                         }
+                        //pointFromSourceY += 50;
+
+                        if (isNearNode(pointFromSourceX, pointFromSourceY, link.source) === 1) {
+                            pointFromSourceY -= 50;
+                        } else if (isNearNode(pointFromSourceX, pointFromSourceY, link.source) === -1) {
+                            pointFromSourceY += 50;
+                        }
+
+
+                        if (isNearNode(pointFromDestX, pointFromDestY, link.target) === 1) {
+                            pointFromDestY -= 50;
+                        } else if (isNearNode(pointFromDestX, pointFromDestY, link.target) === -1) {
+                            pointFromDestY += 50;
+                        }
+
 
                         // Linea curva
                         const curvedLine = line()
@@ -171,12 +228,24 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
                             .y((d) => d.y)
                             .curve(curveBasis)([
                                 { x: x1, y: y1 },
+                                { x: pointFromSourceX, y: pointFromSourceY },
                                 { x: midX, y: midY },
+                                { x: pointFromDestX, y: pointFromDestY },
                                 { x: x2, y: y2 },
                             ]);
 
                         return (
                             <>
+                                <path
+                                    key={`${key}-${index}-invisible`}
+                                    d={curvedLine}
+                                    fill="none"
+                                    stroke="transparent" // Rendi il path invisibile
+                                    strokeWidth={5} // Aumenta la larghezza per intercettare meglio il mouse
+                                    onMouseEnter={(e) => handleMouseEnter(e, link.linkType)}
+                                    onMouseLeave={handleMouseLeave}
+                                    //onMouseMove={handleMouseMove}
+                                />
                                 <path
                                     key={`${key}-${index}`}
                                     d={curvedLine}

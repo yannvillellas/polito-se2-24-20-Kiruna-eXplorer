@@ -7,14 +7,38 @@ import { OverlayTrigger, Tooltip, Overlay} from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 
 // Component to draw the nodes
-const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
-    // Raggruppa i nodi con la stessa data e categoria
-    const groupedNodes = nodes.reduce((acc, node) => {
-        const key = `${node.date}-${node.category}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(node);
-        return acc;
-    }, {});
+
+const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNodePosition, isUrbanPlanner }) => {
+    
+    const [draggedNode, setDraggedNode] = useState(null); // Nodo attualmente trascinato
+    const [offset, setOffset] = useState({ x: 0, y: 0 }); // Offset per il trascinamento
+
+    const handleMouseDown = (event, node) => {
+        console.log(node.draggable)
+        if (!isUrbanPlanner || !node.draggable) return;
+        const position = nodePositions[node.id];
+        if (!position) return;
+
+        setDraggedNode(node.id); // Imposta il nodo trascinato
+        setOffset({
+            x: event.clientX - position.x,
+            y: event.clientY - position.y,
+        });
+    };
+
+    const handleMouseMove = (event) => {
+        if (!draggedNode) return; // Se non c'è un nodo trascinato, ignora
+
+        const newX = event.clientX - offset.x;
+        const newY = event.clientY - offset.y;
+
+        // Aggiorna la posizione del nodo trascinato
+        updateNodePosition(draggedNode, { x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+        setDraggedNode(null); // Fine del trascinamento
+    };
 
     const handleClickNode = (node) =>{
         setSelectedNode(node)
@@ -56,35 +80,17 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
     
   //---------------icon part------------------------------
 
-    /*let diagramNodes=[]
-    let previous=1*/
 
     return (
-        <g>
-            {Object.values(groupedNodes).flatMap((group) => {
-                const count = group.length; // Numero di nodi nel gruppo
-                const offsetStep = 22; // Distanza verticale tra i nodi
-                const baseY = yScale(group[0].category); // Coordinate Y del gruppo
+        <g
+            onMouseMove={handleMouseMove} // Gestisci il trascinamento
+            onMouseUp={handleMouseUp} // Rilascia il nodo
+        >
+            {nodes.map((node) => {
+                const position = nodePositions[node.id];
+                if (!position) return null; // Ignora se non c'è posizione
 
-                return group.map((node, index) => {
-                    const offset = (index - (count - 1) / 2) * offsetStep; // Calcola l'offset verticale
-                    const x = xScale(new Date(node.date));
-                    let y = baseY + offset; // Applica l'offset verticale
-                    /*for(let prevNode of diagramNodes){
-                        if(Math.abs(prevNode.x-x)<20 && prevNode.y===y){
-                            console.log(y)
-                            if(previous===-1){
-                                y=y+35
-                                previous=1
-                                break;
-                            }else{
-                                y=y-35
-                                previous=-1
-                                break;
-                            }
-                        }
-                    }
-                    diagramNodes.push({x:x,y:y})*/
+                const { x, y } = position;
 
                     const { iconUrl } = getIcon(node.docType, node.stakeholders);
 
@@ -99,24 +105,25 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode }) => {
                             }
                         >
                             <g
+                                key={node.id}
                                 transform={`translate(${x}, ${y})`}
                                 style={{ cursor: "pointer" }}
                                 onClick={() => handleClickNode(node)}
+                                onMouseDown={(event) => handleMouseDown(event, node)} // Inizia il trascinamento
                             >
                                 <image
                                     href={iconUrl}
                                     width={32} 
                                     height={32}
-                                    x={-16} 
-                                    y={-16} 
+                                    x={x} 
+                                    y={y} 
                                 />
                             </g>
                         </OverlayTrigger>
                     );
-                });
             })}
         </g>
     );
 };
 
-export default Nodes
+export default Nodes;
