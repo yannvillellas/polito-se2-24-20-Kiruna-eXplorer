@@ -312,7 +312,7 @@ function CustomMap(props) {
                 <Polygon
                   key={area.areaId}
                   positions={positions}
-                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                  pathOptions={{ color: '#5a83b5', fillOpacity: 0.5 }}
                   eventHandlers={{
                     click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
                   }}
@@ -336,7 +336,7 @@ function CustomMap(props) {
                 <Polygon
                   key={area.areaId}
                   positions={positions}
-                  pathOptions={{ color: 'blue', fillOpacity: 0.5 }}
+                  pathOptions={{ color: '#ce661f', fillOpacity: 0.5 }}
                   eventHandlers={{
                     click: () => console.log(`Clicked polygon ID: ${area.areaId}`),
                   }}
