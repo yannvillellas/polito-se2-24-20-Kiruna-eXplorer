@@ -435,6 +435,7 @@ function CustomMap(props) {
       {selectedDoc && <OffcanvasMarker
         selectedDoc={selectedDoc}
         documents={props.documents}
+        isUrbanPlanner={props.isUrbanPlanner}
 
         closeDocumentModal={closeDocumentModal}
 
