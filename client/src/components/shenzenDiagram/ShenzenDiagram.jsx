@@ -5,7 +5,7 @@ import { scaleTime, scaleBand } from "@visx/scale";
 import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay, Modal, Button} from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay, Modal, Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -21,7 +21,7 @@ function ShenzenDiagram(props) {
   const [nodes, setNodes] = useState([]);
   const [links, setLinks] = useState([]);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState(null); 
+  const [selectedDoc, setSelectedDoc] = useState(null);
   const [files, setFiles] = useState(); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )  
   const [linkedDocuments, setLinkedDocuments] = useState([]); // Call API (getAssociationBy_DOC_ID), but here is easier (same concept of files) where each element will have structure: {aId: 1, title: "title", type: "type", doc1: doc1Id, doc2: doc2Id}
   const [nodesPosition, setNodesPosition] = useState({})
@@ -214,7 +214,7 @@ function ShenzenDiagram(props) {
           stakeholders: doc.stakeholders,
           draggable: doc.issuanceDate.split("/").length <= 2 ? true : false
         };
-        newNodes.push(node);    
+        newNodes.push(node);
       });
 
       setNodes(newNodes);
@@ -231,7 +231,7 @@ function ShenzenDiagram(props) {
 
       setLinks(newLinks);
     };
-    
+
     fetchData();
   }, [props.documents, props.allAssociations]);
 
@@ -362,7 +362,7 @@ function ShenzenDiagram(props) {
       ])
       .filter((event) => {
         // Disabilita lo zoom sui nodi (solo click o trascinamento sui nodi)
-        return !event.target.closest("circle");
+        return !event.target.closest("g.exclude");
       })
       .on("zoom", (event) => {
         setZoomTransform(event.transform);
@@ -396,7 +396,7 @@ function ShenzenDiagram(props) {
         console.warn("Documentz:", props.documents);
         console.warn("SelectedDoc:", selectedDoc);
 
-  
+
         // Trova il documento corrispondente
         const document = props.documents.find((doc) => doc.docId == selectedDoc.id);
         if (!document) {
@@ -405,26 +405,26 @@ function ShenzenDiagram(props) {
           setShowDocumentModal(false);
           return;
         }
-  
+
         setSelectedDoc(document);
-  
+
         // Fetch linked documents (associations)
         await handleShowTitleAllLinkedDocument(document.docId);
         console.log("Fetched linked documents for:", document.docId);
-  
+
         // Fetch files
         await handleGetFiles(document.docId);
         console.log("Fetched files for:", document.docId);
-  
+
         setShowDocumentModal(true);
       } catch (error) {
         console.error("Error fetching document details:", error);
       }
     };
-  
+
     fetchDocumentDetails();
   }, [selectedDoc]); // Aggiorna quando cambia selectedDoc o props.documents
-  
+
   const handleShowTitleAllLinkedDocument = async (docId) => {
 
     if (!docId) { // Se non è stato selezionato nessun documento
@@ -483,7 +483,7 @@ function ShenzenDiagram(props) {
 
   const handleConnectionClick = async (docId) => {
     const doc = nodes.find((doc) => doc.id === Number(docId));
-    if(doc){
+    if (doc) {
       console.log("Sono in handleConnectionClick, ecco il documento selezionato: ", doc);
       setSelectedDoc(doc);
     }
@@ -544,6 +544,7 @@ function ShenzenDiagram(props) {
             nodePositions={nodesPosition}
             updateNodePosition={updateNodePosition}
             isUrbanPlanner={props.isUrbanPlanner}
+            setSelectedNode={setSelectedDoc}
           />
           {/*docId && nodesPosition[docId]!=undefined &&(
             <HandPointer nodesPositions={nodesPosition} nodeId={docId} />
@@ -573,7 +574,7 @@ function ShenzenDiagram(props) {
             height={dimensions.height} // Altezza del rettangolo
             fill="white" // Colore di sfondo
           />
-          
+
           {yTicks?.map((category, i) => (
             <text
               key={i}
@@ -613,13 +614,84 @@ function ShenzenDiagram(props) {
           ))}
         </g>
         <rect
-            x={0} // Posizione del rettangolo
-            y={dimensions.height-60} // Posizione verticale (sotto la linea dell'asse)
-            width={80} // Larghezza del rettangolo
-            height={100} // Altezza del rettangolo
-            fill="white" // Colore di sfondo
-          />
+          x={0} // Posizione del rettangolo
+          y={dimensions.height - 60} // Posizione verticale (sotto la linea dell'asse)
+          width={80} // Larghezza del rettangolo
+          height={100} // Altezza del rettangolo
+          fill="white" // Colore di sfondo
+        />
       </svg>
+      <Modal show={showDocumentModal} onHide={() => setSelectedDoc(null)} size="xl">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedDoc ? (
+              selectedDoc.title
+            ) : (
+              <p>Select a marker for visualize the details.</p>
+            )}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDoc ? (
+            <>
+              {Object.entries(selectedDoc)
+                .filter(([key, value]) =>
+                  key !== "docId" &&
+                  key !== "title" &&
+                  key !== "lat" &&
+                  key !== "lng" &&
+                  key !== "connections" &&
+                  value !== null &&
+                  value !== undefined &&
+                  value !== "" // esclude stringhe vuote
+                )
+                .map(([key, value]) => (
+                  <p key={key}>
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                  </p>
+                ))}
+
+              <div key={"connections"}>
+                <p>
+                  <strong>Connections:</strong>
+                </p>
+                {linkedDocuments.length > 0 ? linkedDocuments.map((connection) => (
+                  <p
+                    key={connection.docTitle}
+                    style={{
+                      marginBottom: '8px',  // Spazio tra i paragrafi
+                    }}
+                  >
+                    <span
+                      onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                      style={{
+                        color: 'blue',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {connection.docTitle}
+                    </span>
+                  </p>
+                )) : "This file has no connections"}
+              </div>
+
+              <div className="download-buttons-container">
+                {(files && files.length > 0) ? files.map((f, index) => (
+                  <div key={f.name || index} className="download-btns">
+                    <Button onClick={() => handleDownload(f)} className="files">
+                      <i className="bi bi-file-earmark-text-fill"></i>
+                    </Button>
+                    <p className="file-name">{f.name}</p>
+                  </div>
+                )) : ""}
+              </div>
+            </>
+          ) : (
+            <p>Select a marker for visualize the details.</p>
+          )}
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
