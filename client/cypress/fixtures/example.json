@@ -1,5 +1,13 @@
 {
-  "name": "Using fixtures to represent data",
-  "email": "hello@cypress.io",
-  "body": "Fixtures are a great way to mock data for responses to routes"
+  "documents": [
+    {
+      "docId": 1,
+      "lat": 67.8558,
+      "lng": 20.2253,
+      "type": "Design document",
+      "stakeholders": "LKAB",
+      "title": "Document 1"
+    }
+  ],
+  "associations": []
 }
