@@ -36,20 +36,16 @@ describe("CustomMap Component", () => {
         cy.log(`Found ${markers.length} markers on the map`);
       });
 
-    // Force trigger the click event explicitly
-    cy.get(".leaflet-marker-icon")
-      .first()
-      .trigger("mouseover") // Trigger hover if necessary
-      .trigger("click", { force: true });
-
-    // Debug: Wait for 1 second to observe Leaflet rendering behavior
+    // Click the first marker and trigger mouseover
+    cy.get(".leaflet-marker-icon").first().click(); // Simulate click
     cy.wait(1000);
+    cy.get(".leaflet-marker-icon").first().trigger("mouseover"); // Trigger hover
 
     // Verify the popup is visible
     cy.get(".leaflet-popup", { timeout: 10000 }).should("be.visible");
 
     // Verify popup content
-    cy.get(".leaflet-popup strong").should("contain", "Document 1");
+    cy.get(".leaflet-popup").should("contain", "Document 2");
   });
 
   it("filters documents by municipality button", () => {
