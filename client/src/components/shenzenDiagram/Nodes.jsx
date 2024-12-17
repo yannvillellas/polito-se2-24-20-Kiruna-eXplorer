@@ -12,10 +12,12 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
 
     const [draggedNode, setDraggedNode] = useState(null); // Nodo attualmente trascinato
     const [offset, setOffset] = useState({ x: 0, y: 0 }); // Offset per il trascinamento
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleMouseDown = (event, node) => {
-        //console.log(node.draggable)
+        console.log(node.draggable)
         if (!isUrbanPlanner || !node.draggable) return;
+        setIsDragging(false);
         const position = nodePositions[node.id];
         if (!position) return;
 
@@ -28,6 +30,8 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
 
     const handleMouseMove = (event) => {
         if (!draggedNode) return; // Se non c'è un nodo trascinato, ignora
+        setIsDragging(true);
+
         const newX = event.clientX - offset.x;
         const newY = event.clientY - offset.y;
 
@@ -35,7 +39,11 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
         updateNodePosition(draggedNode, { x: newX, y: newY });
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (node) => {
+        if (!isDragging) {
+            handleClickNode(node)
+        }
+        setIsDragging(false);
         setDraggedNode(null); // Fine del trascinamento
     };
 
@@ -108,7 +116,9 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
                             transform={`translate(-11, -11)`}
                             style={{ cursor: "pointer", backgroundColor: "white" }}
                             onMouseDown={(event) => handleMouseDown(event, node)} // Inizia il trascinamento
-                            //onClick={() => handleClickNode(node)}
+                            onClick={() => handleClickNode(node)}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={()=>handleMouseUp(node)}
                         >
                             <circle cx={x} cy={y} r={11} fill="white" transform={`translate(11, 11)`}/>
                             <image

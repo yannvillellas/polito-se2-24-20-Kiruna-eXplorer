@@ -16,6 +16,24 @@ import { use } from "react";
 function ShenzenDiagram(props) {
   const { docId } = useParams();
   const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
+  const [isOpen, setIsOpen] = useState(false); //legend trigger
+  const associationsData = [
+    { type: "solid", color: "#000000", label: "Direct consequence" },
+    { type: "solid", color: "#0018a5", label: "Indirect consequence" },
+    { type: "dashed", color: "#da4700", label: "Collateral consequence" },
+    { type: "dashed", color: "#00920e", label: "Projection" },
+    { type: "dotted", color: "#bf21b2", label: "Update" },
+    { type: "dash-dotted", color: "#757575", label: "Others" },
+  ];
+
+  const validDocTypes = [
+    "Design document",
+    "Informative document",
+    "Material effect",
+    "Prescriptive document",
+    "Technical document",
+    "Other document"
+  ];
 
   //create data for diagram from documents and links
   const [nodes, setNodes] = useState([]);
@@ -27,7 +45,7 @@ function ShenzenDiagram(props) {
   const [nodesPosition, setNodesPosition] = useState({})
   const [xScale, setXScale] = useState(null);
   const [yScale, setYScale] = useState(null);
-  const [fixedPositions, setFixedPositions]=useState({})
+  const [fixedPositions, setFixedPositions] = useState({})
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   const [dimensions, setDimensions] = useState({
@@ -334,10 +352,10 @@ function ShenzenDiagram(props) {
     const traslatedNodes = await diagramAPI.getTraslatedNodes()
     console.log(Object.keys(traslatedNodes))
     if (Object.keys(traslatedNodes).includes(`${id}`)) {
-      console.log("update",{ docId: id, x: traslationX, y: traslationY })
+      console.log("update", { docId: id, x: traslationX, y: traslationY })
       await diagramAPI.updateNodeTraslation({ docId: id, x: traslationX, y: traslationY })
     } else {
-      console.log("add",{ docId: id, x: traslationX, y: traslationY })
+      console.log("add", { docId: id, x: traslationX, y: traslationY })
       await diagramAPI.addNodeTraslation({ docId: id, x: traslationX, y: traslationY })
     }
     console.log("fine")
@@ -452,7 +470,7 @@ function ShenzenDiagram(props) {
   };
 
   return (
-    <>
+    <div className="diagram-container">
       <svg
         ref={svgRef}
         width="100%"
@@ -568,7 +586,7 @@ function ShenzenDiagram(props) {
               key={i}
               x={xScale(tick)} // Posizione su scala X
               y={dimensions.height - 30}
-              fontSize={10 * k} // Applica la scala del zoom
+              fontSize={10 * (k + 1) / k} // Applica la scala del zoom
               textAnchor="middle"
             >
               {tick.getFullYear()}
@@ -654,7 +672,107 @@ function ShenzenDiagram(props) {
           )}
         </Modal.Body>
       </Modal>
-    </>
+
+      <div className={`legend-container ${isOpen ? "open" : ""}`}>
+        {/* Bottone per aprire/chiudere la legenda */}
+        <Button
+          className="toggle-button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle Legend"
+        >
+          <span className={`arrow ${isOpen ? "left" : "right"}`}></span>
+        </Button>
+
+        {/* Contenitore della legenda */}
+        {isOpen && (
+          <div className="legend-content">
+            <h2>LEGEND</h2>
+
+            {/* Sezione Documenti */}
+            <h3>Document types</h3>
+            <div className="legend-icons">
+              {validDocTypes.map((docType) => (
+                <div key={docType} className="legend-item">
+                  <img
+                    src={`icons/${docType.toLowerCase().replace(' ', '-')}_others.png`}
+                    alt={docType}
+                    className="legend-icon"
+                    style={{ width: "32px", height: "32px", marginRight: "10px" }}
+                  />
+                  <p className="legend-label">{docType}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Sezione Nodi */}
+            <h3>Stakeholders</h3>
+            <div className="legend-icons">
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#181a1b", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">LKAB</p>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#805f5b", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">Municipality</p>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#62222c", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">Regional authority</p>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#a8a19b", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">Architecture firms</p>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#a5cacc", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">Citizens</p>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "#819d9f", width: "20px", height: "20px", marginRight: "10px" }}
+                ></div>
+                <p className="legend-label">Others</p>
+              </div>
+            </div>
+
+            {/* Sezione Link */}
+            <h3>Associations</h3>
+            {associationsData.map((item, index) => (
+              <div key={index} className="legend-item">
+                <div
+                  className="legend-line"
+                  style={{
+                    borderTop: `2px ${item.type} ${item.color}`,
+                    width: "40px",
+                    marginRight: "10px",
+                  }}
+                ></div>
+                <p className="legend-label">{item.label}</p>
+              </div>
+            ))}
+
+          </div>
+        )}
+      </div>
+
+
+    </div>
   );
 }
 

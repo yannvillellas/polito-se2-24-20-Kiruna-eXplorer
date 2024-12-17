@@ -1,7 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100vh;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -12,6 +12,8 @@ html, body {
   --primary-color: #ffffff;
   --second-color: #d0d0d0;
   --black-color: #000000;
+  height: 100vh;
+  flex-grow: 1
 }
 
 body{
