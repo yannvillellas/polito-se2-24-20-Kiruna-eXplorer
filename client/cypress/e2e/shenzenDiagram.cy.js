@@ -42,26 +42,40 @@ describe("ShenzenDiagram Component Integration", () => {
     cy.get(".modal-title").should("contain", "Document 1");
   });
 
-  it("supports node dragging for urban planners", () => {
-    cy.get("g.exclude", { timeout: 10000 }) // Target the <g> element instead of <circle>
-      .first()
-      .trigger("mousedown", {
-        which: 1,
-        clientX: 100,
-        clientY: 100,
-        force: true,
-      }) // Start drag
-      .trigger("mousemove", { clientX: 300, clientY: 300, force: true }) // Move drag
-      .trigger("mouseup", { force: true }); // Release drag
-
-    // Verify the position has changed
-    cy.get("circle")
-      .first()
-      .then(($circle) => {
-        const position = $circle.position();
-        expect(position.left).to.be.greaterThan(150);
-        expect(position.top).to.be.greaterThan(150);
+  it("supports dragging only for nodes with incomplete issuance dates", () => {
+    cy.fixture("example.json").then((data) => {
+      const draggableNodes = data.documents.filter((doc) => {
+        // Check for incomplete issuance dates (missing day or month)
+        const parts = doc.issuanceDate.split("/");
+        return parts.length < 3; // Incomplete date has fewer than 3 parts
       });
+
+      if (draggableNodes.length > 0) {
+        // Target only the nodes that are draggable
+        cy.get("g.exclude", { timeout: 10000 })
+          .should("have.length", draggableNodes.length)
+          .first()
+          .trigger("mousedown", {
+            which: 1,
+            clientX: 100,
+            clientY: 100,
+            force: true,
+          }) // Start drag
+          .trigger("mousemove", { clientX: 300, clientY: 300, force: true }) // Move drag
+          .trigger("mouseup", { force: true }); // Release drag
+
+        // Verify the position has changed
+        cy.get("circle")
+          .first()
+          .then(($circle) => {
+            const position = $circle.position();
+            expect(position.left).to.be.greaterThan(150);
+            expect(position.top).to.be.greaterThan(150);
+          });
+      } else {
+        cy.log("No nodes with incomplete issuance dates are draggable.");
+      }
+    });
   });
 
   // ---------------- Links Testing ----------------

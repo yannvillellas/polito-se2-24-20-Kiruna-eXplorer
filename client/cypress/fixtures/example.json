@@ -8,7 +8,7 @@
       "stakeholders": "LKAB",
       "title": "Document 1",
       "scale": "Text",
-      "issuanceDate": "2022/01/01"
+      "issuanceDate": "2022/01" 
     },
     {
       "docId": 2,
@@ -18,14 +18,10 @@
       "stakeholders": "Municipality",
       "title": "Document 2",
       "scale": "Concept",
-      "issuanceDate": "2023/02/01"
+      "issuanceDate": "2023"  
     }
   ],
   "associations": [
     { "doc1": 1, "doc2": 2, "typeId": 1 }
-  ],
-  "files": [
-    { "name": "document1.pdf", "path": "/files/document1.pdf" },
-    { "name": "document2.pdf", "path": "/files/document2.pdf" }
   ]
 }
