@@ -6,8 +6,26 @@
       "lng": 20.2253,
       "type": "Design document",
       "stakeholders": "LKAB",
-      "title": "Document 1"
+      "title": "Document 1",
+      "scale": "Text",
+      "issuanceDate": "2022/01/01"
+    },
+    {
+      "docId": 2,
+      "lat": 67.8568,
+      "lng": 20.2263,
+      "type": "Blueprint",
+      "stakeholders": "Municipality",
+      "title": "Document 2",
+      "scale": "Concept",
+      "issuanceDate": "2023/02/01"
     }
   ],
-  "associations": []
+  "associations": [
+    { "doc1": 1, "doc2": 2, "typeId": 1 }
+  ],
+  "files": [
+    { "name": "document1.pdf", "path": "/files/document1.pdf" },
+    { "name": "document2.pdf", "path": "/files/document2.pdf" }
+  ]
 }
