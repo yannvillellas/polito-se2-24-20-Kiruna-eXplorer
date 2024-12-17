@@ -27,3 +27,17 @@ export const getTypeIdByType = (type) => {
         });
     });
 };
+
+export const getTypeByTypeId = (id) => {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT type FROM LinkType WHERE typeId = ?', [id], (err, row) => {
+            if (err) {
+                reject(err);
+            } else if (!row) {
+                reject(new Error("Type not found"));
+            } else {
+                resolve(row.type);
+            }
+        });
+    });
+};
