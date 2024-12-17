@@ -27,6 +27,7 @@ function ShenzenDiagram(props) {
   const [nodesPosition, setNodesPosition] = useState({})
   const [xScale, setXScale] = useState(null);
   const [yScale, setYScale] = useState(null);
+  const [fixedPositions, setFixedPositions]=useState({})
   const marginLeft = 50; // Aggiungi un margine per spostare a destra il grafico
 
   const [dimensions, setDimensions] = useState({
@@ -263,80 +264,27 @@ function ShenzenDiagram(props) {
   useEffect(() => {
     const computePositions = async () => {
       if (nodes && nodes.length > 0 && xScale && yScale) {
-        if (isUpdating) {
-          console.log("Update in progress, skipping...");
-          return;
-        }
+        const traslatedNodes = await diagramAPI.getTraslatedNodes()  // object with {nodeId: {x: % traslation, y:%traslation}}
+        const newPositions = computeNodePositionsForNewNodes(nodes, {})
+        setFixedPositions(newPositions)
+        let updatedPositions = {}
+        for (let node of nodes) {
+          //console.log(node)
+          if (traslatedNodes[node.id]) {
+            //traslation
+            const currentPosition = newPositions[node.id];
+            const newPosition = {
+              x: currentPosition.x + (traslatedNodes[node.id].x / 100) * dimensions.width,
+              y: currentPosition.y + (traslatedNodes[node.id].y / 100) * dimensions.height,
+            };
+            updatedPositions[node.id] = newPosition;
 
-        isUpdating = true; // Imposta il lock
-        try {
-          const xValues = xScale?.ticks(d3.timeYear.every(1)).map((ts) => `${ts.getFullYear()}`);
-          const yValues = [...new Set(nodes.map((node) => node.category))];
-          const oldXValues = await diagramAPI.getXValues();
-          const oldYValues = await diagramAPI.getYValues();
-
-          let xToAdd = xValues.filter((element) => !oldXValues.includes(element));
-          let yToAdd = yValues.filter((element) => !oldYValues.includes(element));
-
-          const { width: oldWidth, height: oldHeight } = await diagramAPI.getDimensions()
-
-          if (xToAdd.length > 0 || yToAdd.length > 0 || dimensions.width != oldWidth || dimensions.height != oldHeight) {
-            // Forza il ricalcolo di tutte le posizioni dei nodi
-            await diagramAPI.clearAllPositions();
-
-            if (xToAdd.length > 0) {
-              await diagramAPI.addNewX(xToAdd);
-              xToAdd = [];
-            }
-            if (yToAdd.length > 0) {
-              await diagramAPI.addNewY(yToAdd);
-              yToAdd = [];
-            }
-            if (!oldWidth && !oldHeight) {
-              await diagramAPI.addDimensions(dimensions.width, dimensions.height)
-            }
-            if (dimensions.width != oldWidth) {
-              console.log("width", dimensions.width)
-              await diagramAPI.updateWidth(dimensions.width)
-            }
-
-            if (dimensions.height != oldHeight) {
-              await diagramAPI.updateHeight(dimensions.height)
-            }
+          } else {
+            //no traslation
+            updatedPositions[node.id] = newPositions[node.id]
           }
-        } catch (error) {
-          console.error("Errore durante l'aggiornamento:", error);
-        } finally {
-          isUpdating = false; // Rimuovi il lock
         }
-
-
-
-        const nodePositionsFromDB = await diagramAPI.getNodesPosition(); // Funzione per recuperare posizioni
-
-        const updatedPositions = { ...nodePositionsFromDB }; // Inizializza con posizioni esistenti
-        const nodesWithoutPosition = []; // Per raccogliere i nodi nuovi
-
-        nodes?.forEach((node) => {
-          if (!nodePositionsFromDB[node.id]) {
-            nodesWithoutPosition.push(node);
-          }
-        })
-
-        // Calcola posizioni per i nodi senza posizione
-        let newPositions = {};
-        if (nodesWithoutPosition.length > 0) {
-
-          newPositions = computeNodePositionsForNewNodes(
-            nodesWithoutPosition,
-            updatedPositions
-          );
-          await diagramAPI.saveNodesPositions(newPositions);
-
-          // Aggiorna lo stato con le nuove posizioni
-          Object.assign(updatedPositions, newPositions);
-        }
-        setNodesPosition(updatedPositions); // Combina posizioni dal DB e nuove calcolate
+        setNodesPosition(updatedPositions);
       }
     }
     computePositions()
@@ -375,12 +323,26 @@ function ShenzenDiagram(props) {
     return () => svg.on(".zoom", null);
   }, [dimensions]);
 
-  const updateNodePosition = async (id, newPosition) => {
+  const updateNodePosition = async (id, newPosition/*,startPosition*/) => {
+    const traslationX = ((newPosition.x - fixedPositions[id].x) / dimensions.width) * 100
+    const traslationY = ((newPosition.y - fixedPositions[id].y) / dimensions.height) * 100
     setNodesPosition((prevPositions) => ({
       ...prevPositions,
       [id]: newPosition,
     }));
-    await diagramAPI.updateNodePositions({ docId: id, x: newPosition.x, y: newPosition.y })
+    console.log("transformed state")
+    const traslatedNodes = await diagramAPI.getTraslatedNodes()
+    console.log(Object.keys(traslatedNodes))
+    if (Object.keys(traslatedNodes).includes(`${id}`)) {
+      console.log("update",{ docId: id, x: traslationX, y: traslationY })
+      await diagramAPI.updateNodeTraslation({ docId: id, x: traslationX, y: traslationY })
+    } else {
+      console.log("add",{ docId: id, x: traslationX, y: traslationY })
+      await diagramAPI.addNodeTraslation({ docId: id, x: traslationX, y: traslationY })
+    }
+    console.log("fine")
+    //await diagramAPI.updateNodePositions({ docId: id, x: newPosition.x, y: newPosition.y })
+
   };
 
   const { k, x, y } = zoomTransform;

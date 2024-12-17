@@ -42,8 +42,8 @@ import {
   addDocumentType,
 } from "./src/dao/documentTypeDAO.mjs";
 
-import { saveNodesPosition,getNodesPositions,updateNodePosition,getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
-  getDimensions, addDimensions,updateHeight,updateWidth } from "./src/dao/diagramDAO.mjs";
+import { /*saveNodesPosition,getNodesPositions,updateNodePosition,*/getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
+  getDimensions, addDimensions,updateHeight,updateWidth,addNodeTraslation,updateNodeTraslation,getTraslatedNodes } from "./src/dao/diagramDAO.mjs";
 
 const __dirname = path.resolve();
 const app = express();
@@ -651,7 +651,7 @@ app.get("/api/linkTypes/:id", [], async (req, res) => {
 
 
 //diagram API
-app.get("/api/diagram/nodes", [], async (req, res) => {
+/*app.get("/api/diagram/nodes", [], async (req, res) => {
   try {
     const positions = await getNodesPositions();
     res.status(200).json(positions);
@@ -674,6 +674,35 @@ app.post("/api/diagram/nodes",[], async (req, res) => {
 app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
   try {
       await updateNodePosition(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});*/
+
+app.get("/api/diagram/nodes", [], async (req, res) => {
+  try {
+    const positions = await getTraslatedNodes();
+    res.status(200).json(positions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      await addNodeTraslation(req.body);
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving nodes positions", e);
+      res.status(500).json({ error: "Error saving nodes positions" });
+  }
+});
+
+app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
+  try {
+      await updateNodeTraslation(req.body); // Assicurati che req.body abbia i dati corretti
       res.status(200).end();
   } catch (e) {
       console.error("Error updating node position", e);

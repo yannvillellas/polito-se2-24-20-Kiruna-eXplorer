@@ -1,6 +1,78 @@
 import { db } from "../database/db.mjs"
 
-export const getNodesPositions = () => {
+export const getTraslatedNodes = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM TraslatedNode';
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                const result = rows.reduce((acc, row) => {
+                    acc[row.docId] = { x: row.x, y: row.y };
+                    return acc;
+                }, {}); // Usa reduce per costruire il dizionario
+                resolve(result);
+            }
+        });
+    });
+};
+
+export const addNodeTraslation = (node)=>{
+    return new Promise((resolve, reject) => {
+        const sql = 'INSERT INTO TraslatedNode (docId,x,y) VALUES (?,?,?)'
+        db.run(sql,[node.docId,node.x,node.y],(err, rows)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+
+export const updateNodeTraslation = (node)=>{
+    return new Promise((resolve, reject) => {
+        const sql = 'UPDATE TraslatedNode SET x=?, y=? WHERE docId=?'
+        db.run(sql,[node.x,node.y,node.docId],(err, rows)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+
+/*export const updateNodeTraslation = (node) => {
+    return new Promise((resolve, reject) => {
+        const selectSql = 'SELECT x, y FROM TraslatedNode WHERE docId = ?';
+        db.get(selectSql, [node.docId], (err, row) => {
+            if (err) {
+                return reject(err);
+            }
+
+            if (!row) {
+                return reject(new Error(`Node with docId ${node.docId} not found`));
+            }
+
+            // Calcola i nuovi valori sommando le traslazioni
+            const newX = row.x + node.x;
+            const newY = row.y + node.y;
+
+            const updateSql = 'UPDATE TraslatedNode SET x = ?, y = ? WHERE docId = ?';
+            db.run(updateSql, [newX, newY, node.docId], (updateErr) => {
+                if (updateErr) {
+                    return reject(updateErr);
+                }
+                resolve();
+            });
+        });
+    });
+};*/
+
+
+
+/*export const getNodesPositions = () => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM NodesPositions';
         db.all(sql, [], (err, rows) => {
@@ -16,6 +88,7 @@ export const getNodesPositions = () => {
         });
     });
 };
+
 
 export const saveNodesPosition = (positions) => {
     return new Promise((resolve, reject) => {
@@ -41,7 +114,7 @@ export const saveNodesPosition = (positions) => {
             .then(() => resolve())
             .catch((err) => reject(err));
     });
-};
+};*/
 
 export const clearAllPositions = () => {
     return new Promise((resolve, reject) => {
@@ -56,7 +129,7 @@ export const clearAllPositions = () => {
     });
 };
 
-export const updateNodePosition = (position) => {
+/*export const updateNodePosition = (position) => {
     return new Promise(async (resolve, reject) => {
         try {
             const updateSql = 'UPDATE NodesPositions SET x=?, y=? WHERE docId=?';
@@ -71,7 +144,7 @@ export const updateNodePosition = (position) => {
             reject(err);
         }
     });
-};
+};*/
 
 
 
