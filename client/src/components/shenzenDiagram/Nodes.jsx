@@ -43,12 +43,15 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
         if (!isDragging) {
             handleClickNode(node)
         }
-        setIsDragging(false);
+        
+        setTimeout(() => {
+            setIsDragging(false);
+        }, 300)        
         setDraggedNode(null); // Fine del trascinamento
     };
 
     const handleClickNode = (node) => {
-        setSelectedNode(node)
+       if(!isDragging){ setSelectedNode(node)}
     }
 
     //---------------icon part------------------------------
