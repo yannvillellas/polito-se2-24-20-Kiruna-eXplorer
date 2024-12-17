@@ -1,224 +1,185 @@
-import { test, expect, jest } from "@jest/globals";
-import { 
-    getNodesPositions, 
-    saveNodesPosition, 
-    clearAllPositions, 
-    updateNodePosition, 
-    getXValues, 
-    getYValues, 
-    addNewX, 
-    addNewY 
+import { test, expect, jest, describe, beforeEach } from "@jest/globals";
+import { db } from "../../src/database/db.mjs";
+import {
+  getTraslatedNodes,
+  addNodeTraslation,
+  updateNodeTraslation,
+  clearAllPositions,
+  getXValues,
+  getYValues,
+  addNewX,
+  addNewY,
+  getDimensions,
+  addDimensions,
+  updateWidth,
+  updateHeight,
 } from "../../src/dao/diagramDAO.mjs";
-import sqlite3 from "sqlite3";
-const { Database } = sqlite3.verbose();
 
-describe("Diagram DAO Tests", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-        jest.resetAllMocks();
+jest.mock("../../src/database/db.mjs");
+
+describe("diagramDAO Tests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  describe("getTraslatedNodes", () => {
+    test("should return translated nodes as a dictionary", async () => {
+      const mockRows = [{ docId: 1, x: 10, y: 20 }];
+      db.all.mockImplementationOnce((sql, params, callback) =>
+        callback(null, mockRows)
+      );
+
+      const result = await getTraslatedNodes();
+      expect(result).toEqual({ 1: { x: 10, y: 20 } });
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
 
-    // Testing getNodesPositions function
-    describe("getNodesPositions", () => {
-        test("should return a dictionary of node positions", async () => {
-            const mockRows = [
-                { docId: 1, x: 10, y: 20 },
-                { docId: 2, x: 30, y: 40 }
-            ];
+    test("should reject on database error", async () => {
+      db.all.mockImplementationOnce((sql, params, callback) =>
+        callback(new Error("DB Error"), null)
+      );
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, mockRows); // Simulate fetching node positions
-            });
+      await expect(getTraslatedNodes()).rejects.toThrow("DB Error");
+      expect(db.all).toHaveBeenCalledTimes(1);
+    });
+  });
 
-            const result = await getNodesPositions();
-            expect(result).toEqual({
-                1: { x: 10, y: 20 },
-                2: { x: 30, y: 40 }
-            });
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
+  describe("addNodeTraslation", () => {
+    test("should resolve when node is added successfully", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
 
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simulate error
-            });
-
-            await expect(getNodesPositions()).rejects.toThrow("Database error");
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
+      const node = { docId: 1, x: 10, y: 20 };
+      await expect(addNodeTraslation(node)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
     });
 
-    // Testing saveNodesPosition function
-    describe("saveNodesPosition", () => {
-        test("should save node positions", async () => {
-            const positions = {
-                1: { x: 10, y: 20 },
-                2: { x: 30, y: 40 }
-            };
+    test("should reject on database error", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) =>
+        callback(new Error("Insert Error"))
+      );
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful save
-            });
+      const node = { docId: 1, x: 10, y: 20 };
+      await expect(addNodeTraslation(node)).rejects.toThrow("Insert Error");
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
 
-            const result = await saveNodesPosition(positions);
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(2); // Two inserts
-        });
+  describe("updateNodeTraslation", () => {
+    test("should resolve when node is updated successfully", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
 
-        test("should reject on insert error", async () => {
-            const positions = {
-                1: { x: 10, y: 20 }
-            };
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Insert error")); // Simulate error
-            });
-
-            await expect(saveNodesPosition(positions)).rejects.toThrow("Insert error");
-        });
+      const node = { docId: 1, x: 30, y: 40 };
+      await expect(updateNodeTraslation(node)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
     });
 
-    // Testing clearAllPositions function
-    describe("clearAllPositions", () => {
-        test("should clear all positions", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful clear
-            });
+    test("should reject on database error", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) =>
+        callback(new Error("Update Error"))
+      );
 
-            const result = await clearAllPositions();
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on delete error", async () => {
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Delete error")); // Simulate error
-            });
-
-            await expect(clearAllPositions()).rejects.toThrow("Delete error");
-        });
+      const node = { docId: 1, x: 30, y: 40 };
+      await expect(updateNodeTraslation(node)).rejects.toThrow("Update Error");
+      expect(db.run).toHaveBeenCalledTimes(1);
     });
+  });
 
-    // Testing updateNodePosition function
-    describe("updateNodePosition", () => {
-        test("should update node position", async () => {
-            const position = { docId: 1, x: 50, y: 60 };
+  describe("clearAllPositions", () => {
+    test("should resolve when all positions are cleared", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful update
-            });
-
-            const result = await updateNodePosition(position);
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on update error", async () => {
-            const position = { docId: 1, x: 50, y: 60 };
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Update error")); // Simulate error
-            });
-
-            await expect(updateNodePosition(position)).rejects.toThrow("Update error");
-        });
+      await expect(clearAllPositions()).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
     });
+  });
 
-    // Testing getXValues function
-    describe("getXValues", () => {
-        test("should return x values", async () => {
-            const mockRows = [{ value: 10 }, { value: 20 }];
+  describe("getXValues", () => {
+    test("should return X values", async () => {
+      const mockRows = [{ value: 10 }, { value: 20 }];
+      db.all.mockImplementationOnce((sql, params, callback) =>
+        callback(null, mockRows)
+      );
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, mockRows); // Simulate fetching x values
-            });
-
-            const result = await getXValues();
-            expect(result).toEqual([10, 20]);
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simulate error
-            });
-
-            await expect(getXValues()).rejects.toThrow("Database error");
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
+      const result = await getXValues();
+      expect(result).toEqual([10, 20]);
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
+  });
 
-    // Testing getYValues function
-    describe("getYValues", () => {
-        test("should return y values", async () => {
-            const mockRows = [{ value: 100 }, { value: 200 }];
+  describe("getYValues", () => {
+    test("should return Y values", async () => {
+      const mockRows = [{ value: 30 }, { value: 40 }];
+      db.all.mockImplementationOnce((sql, params, callback) =>
+        callback(null, mockRows)
+      );
 
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(null, mockRows); // Simulate fetching y values
-            });
-
-            const result = await getYValues();
-            expect(result).toEqual([100, 200]);
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
-
-        test("should reject on database error", async () => {
-            jest.spyOn(Database.prototype, "all").mockImplementation((sql, params, callback) => {
-                callback(new Error("Database error"), null); // Simulate error
-            });
-
-            await expect(getYValues()).rejects.toThrow("Database error");
-            expect(Database.prototype.all).toHaveBeenCalledTimes(1);
-        });
+      const result = await getYValues();
+      expect(result).toEqual([30, 40]);
+      expect(db.all).toHaveBeenCalledTimes(1);
     });
+  });
 
-    // Testing addNewX function
-    describe("addNewX", () => {
-        test("should add new x values", async () => {
-            const xToAdd = [10, 20];
+  describe("addNewX", () => {
+    test("should add new X values", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(null));
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful insert
-            });
-
-            const result = await addNewX(xToAdd);
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(2); // Two inserts
-        });
-
-        test("should reject on insert error", async () => {
-            const xToAdd = [10, 20];
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Insert error")); // Simulate error
-            });
-
-            await expect(addNewX(xToAdd)).rejects.toThrow("Insert error");
-        });
+      const xValues = [10, 20];
+      await expect(addNewX(xValues)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(2);
     });
+  });
 
-    // Testing addNewY function
-    describe("addNewY", () => {
-        test("should add new y values", async () => {
-            const yToAdd = [30, 40];
+  describe("addNewY", () => {
+    test("should add new Y values", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(null));
 
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(null); // Simulate successful insert
-            });
-
-            const result = await addNewY(yToAdd);
-            expect(result).toBeUndefined();
-            expect(Database.prototype.run).toHaveBeenCalledTimes(2); // Two inserts
-        });
-
-        test("should reject on insert error", async () => {
-            const yToAdd = [30, 40];
-
-            jest.spyOn(Database.prototype, "run").mockImplementation((sql, params, callback) => {
-                callback(new Error("Insert error")); // Simulate error
-            });
-
-            await expect(addNewY(yToAdd)).rejects.toThrow("Insert error");
-        });
+      const yValues = [30, 40];
+      await expect(addNewY(yValues)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(2);
     });
+  });
+
+  describe("getDimensions", () => {
+    test("should return dimensions as an object", async () => {
+      const mockRows = [
+        { name: "width", value: 100 },
+        { name: "height", value: 200 },
+      ];
+      db.all.mockImplementationOnce((sql, params, callback) =>
+        callback(null, mockRows)
+      );
+
+      const result = await getDimensions();
+      expect(result).toEqual({ width: 100, height: 200 });
+      expect(db.all).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("addDimensions", () => {
+    test("should add dimensions successfully", async () => {
+      db.run.mockImplementation((sql, params, callback) => callback(null));
+
+      await expect(addDimensions(100, 200)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("updateWidth", () => {
+    test("should update width successfully", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
+
+      await expect(updateWidth(300)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("updateHeight", () => {
+    test("should update height successfully", async () => {
+      db.run.mockImplementationOnce((sql, params, callback) => callback(null));
+
+      await expect(updateHeight(400)).resolves.toBeUndefined();
+      expect(db.run).toHaveBeenCalledTimes(1);
+    });
+  });
 });
