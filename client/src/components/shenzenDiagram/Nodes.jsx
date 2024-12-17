@@ -109,7 +109,7 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
                             transform={`translate(-11, -11)`}
                             style={{ cursor: "pointer", backgroundColor: "white" }}
                             onMouseDown={(event) => handleMouseDown(event, node)} // Inizia il trascinamento
-                            //onClick={() => handleClickNode(node)}
+                            onClick={() => handleClickNode(node)}
                         >
                             <circle cx={x} cy={y} r={11} fill="white" transform={`translate(11, 11)`}/>
                             <image
