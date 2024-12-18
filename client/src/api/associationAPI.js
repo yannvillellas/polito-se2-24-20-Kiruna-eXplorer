@@ -58,6 +58,17 @@ const getLinkTypes = async () => {
   }
 };
 
+const getTypeByTypeId = async (id) => {
+  try { 
+    const response = await fetch(`http://localhost:3001/api/linkTypes/${id}`, { method: 'GET'});
+    if (!response.ok) throw new Error('Failed to fetch link types');
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching link type:", error);
+    throw error;
+  }
+};
+
 // Get Association by docId:
 const getAssociationsByDocId = async (docId) => {
   try {
@@ -74,6 +85,6 @@ const getAssociationsByDocId = async (docId) => {
 
 
 
-const associationAPI={ createAssociation, getAllAssociations, getLinkTypes, getAssociationsByDocId };
+const associationAPI={ createAssociation, getAllAssociations, getLinkTypes, getAssociationsByDocId, getTypeByTypeId };
 
 export default associationAPI;
