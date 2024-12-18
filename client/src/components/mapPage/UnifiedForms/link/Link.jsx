@@ -174,8 +174,16 @@ function Link(props) {
             </Form.Label>
             <Col sm="8">
               <Select
-                options={props.documents
-                  .filter((d) => !doc1.some((doc) => doc.value === d.docId))
+                options={
+                  props.documents
+                  .filter((d) => { 
+                    console.log("d.docId", d.docId)
+                    console.log(`props.docId, ${props.docId} titolo: ${props.title}`)
+                    console.log(`props.doc1Id, ${props.doc1Id} titolo: ${props.title}`)
+                    const res=(props.docId != undefined && d.docId != props.docId ) || 
+                              (props.doc1Id != undefined && d.docId != props.doc1Id)
+                    console.log("res", res)
+                    return (res)} ) 
                   .map((d) => {
                     return { value: d.docId, label: d.title };
                   })}
