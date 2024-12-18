@@ -5,7 +5,7 @@ import { scaleTime, scaleBand } from "@visx/scale";
 import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay, Modal, Button } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay, Modal, Button, Row } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -15,6 +15,7 @@ import { use } from "react";
 
 function ShenzenDiagram(props) {
   const { docId } = useParams();
+  const navigate = useNavigate();
   const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
   const [isOpen, setIsOpen] = useState(false); //legend trigger
   const associationsData = [
@@ -656,16 +657,27 @@ function ShenzenDiagram(props) {
                 )) : "This file has no connections"}
               </div>
 
-              <div className="download-buttons-container">
-                {(files && files.length > 0) ? files.map((f, index) => (
-                  <div key={f.name || index} className="download-btns">
-                    <Button onClick={() => handleDownload(f)} className="files">
-                      <i className="bi bi-file-earmark-text-fill"></i>
-                    </Button>
-                    <p className="file-name">{f.name}</p>
-                  </div>
-                )) : ""}
+              <div className="modal-row">
+
+                <div className="download-buttons-container">
+                  {(files && files.length > 0) ? files.map((f, index) => (
+                    <div key={f.name || index} className="download-btns">
+                      <Button onClick={() => handleDownload(f)} className="files">
+                        <i className="bi bi-file-earmark-text-fill"></i>
+                      </Button>
+                      <p className="file-name">{f.name}</p>
+                    </div>
+                  )) : ""}
+                </div>
+
+                <Button 
+                  className="btn-visualize-on-map" 
+                  onClick={() => {navigate(`/mapPage/${selectedDoc.docId}`)}}>
+                    Visualize on Map
+                </Button>
+                {console.log("sel:", selectedDoc)}
               </div>
+
             </>
           ) : (
             <p>Select a marker for visualize the details.</p>

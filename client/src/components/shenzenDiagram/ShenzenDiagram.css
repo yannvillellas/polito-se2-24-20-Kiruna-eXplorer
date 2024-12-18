@@ -27,6 +27,16 @@
     animation: bounce 0.8s ease-in-out infinite, fadeOut 0.5s ease-in-out 2.5s forwards; /* Ritardo di 2.5 secondi prima di iniziare a scomparire */
   }
 
+  .modal-row{
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .btn-visualize-on-map{
+    height: 50px;
+    width: 150px;
+  }
+
   .diagram-container{
     display: flex;
     /*height:100vh;*/
