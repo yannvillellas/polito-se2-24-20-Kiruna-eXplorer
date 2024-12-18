@@ -7,6 +7,13 @@ import { OverlayTrigger, Tooltip, Overlay } from "react-bootstrap";
 //import { scaleLinear } from 'd3-scale';
 
 
+// Compare function to avoid sorting elements alphabetically
+const compare = (a, b) => {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+};
+
 // Component to draw the links
 const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacing, nodePositions }) => {
 
@@ -33,7 +40,7 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
     // Raggruppa i link tra gli stessi nodi (indipendentemente dall'ordine)
     const groupedLinks = links.reduce((acc, link) => {
         // Ordina source e target per normalizzare la chiave
-        const key = [link.source, link.target].sort().join("-");
+        const key = [link.source, link.target].sort(compare).join("-");
         if (!acc[key]) acc[key] = [];
         acc[key].push(link);
         return acc;

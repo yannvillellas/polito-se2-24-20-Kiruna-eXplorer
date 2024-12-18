@@ -115,7 +115,7 @@ function App() {
         const fetchLinksType = async () => {
             try {
                 const linksType = await associationAPI.getLinkTypes();
-                ("Sono in App.jsx, fetchLinksType, ho ricevuto linksType:", linksType);
+                console.log("Sono in App.jsx, fetchLinksType, ho ricevuto linksType:", linksType);
                 setLinksType(linksType);
             } catch (error) {
                 console.error("Error fetching link types:", error);
@@ -157,7 +157,7 @@ function App() {
 
     const handleAddArea = async (document) => {
         try {
-            ("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
+            console.log("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
             const areaId = await areaAPI.addArea(document.docId, document.area);
             
             handleForceRefresh(); 

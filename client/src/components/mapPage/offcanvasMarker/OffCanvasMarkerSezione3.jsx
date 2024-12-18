@@ -172,6 +172,8 @@ function OffCanvasMarkerSezione3(props) {
                                 >
                                     <span
                                         onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                                        onKeyDown={() => handleConnectionClick(connection.otherDocumentId)}
+                                        tabIndex="0"
                                         style={{
                                             color: 'blue',
                                             textDecoration: 'underline',
