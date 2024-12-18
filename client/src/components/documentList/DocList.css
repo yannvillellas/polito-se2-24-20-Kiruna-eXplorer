@@ -1,26 +1,19 @@
-
 .highlighted-row {
   background-color: #3e5168 !important; /* Colore evidenziato */
 }
-
-
-/*.custom-table-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow-y: auto;
-  border: 2px solid #ddd
-}*/ 
-
-
-
-/**/
-
 
 .custom-table thead th {
   position: sticky;
   top: 0; /* Fissa l'header in alto */
   z-index: 0; /* Mantiene l'header sopra il corpo */
+}
+
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2){
+  width: 20%;
+  max-width: 350px;
+  word-wrap: break-word;
+  overflow: hidden;
 }
 
 

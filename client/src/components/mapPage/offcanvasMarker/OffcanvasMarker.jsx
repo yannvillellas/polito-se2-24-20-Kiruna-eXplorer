@@ -46,7 +46,7 @@ function OffcanvasMarker(props) {
                 show={showDocumentModal}
                 onHide={props.closeDocumentModal}
                 placement="end"
-                style={{ width: '600px' }}
+                style={{ width: '600px'}}
             >
                 <Offcanvas.Header
                     closeButton
@@ -57,7 +57,7 @@ function OffcanvasMarker(props) {
                 >
 
                 </Offcanvas.Header>
-                <Offcanvas.Body>
+                <Offcanvas.Body style={{overflowX:"hidden"}}>
                     {props.selectedDoc ? (
                         <>
                             <OffCanvasMarkerSezione0

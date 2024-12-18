@@ -147,7 +147,7 @@ function DocumentTable(props) {
   return (
     <Container fluid >
       <div className="custom-table-wrapper-main">
-        <div className="table-scroll-main" style={{ overflowY: 'auto', maxHeight: '1000px' }}>
+        <div className="table-scroll-main">
           <Table striped bordered hover className="custom-table shadow-sm">
             <thead style={{ backgroundColor: "#007bff", color: "white" }}>
               <tr>
@@ -186,13 +186,31 @@ function DocumentRow(props) {
 }
 function DocumentData(props) {
   const numberOfConnectionsForThisDocument = props.allAssociations.filter(association => association.doc1 === props.document.docId || association.doc2 === props.document.docId).length;
+  const [isCompact, setIsCompact] = useState(false);
+  //const [truncatedDescription, setTruncatedDescription] = useState(props.document.description ? props.document.description.split(" ").slice(0, 3).join(" ") + "..." : "");
 
+  // Stato per tracciare se la descrizione è espansa
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Troncamento della descrizione
+  const truncatedDescription = props.document.description
+    ? (props.document.description.split(" ").length>30? props.document.description.split(" ").slice(0, 30).join(" ") + "..." : props.document.description)
+    : "";
+
+    const displayedDescription = isExpanded
+    ? props.document.description
+    : truncatedDescription;
 
   return (
     <>
       <td>{props.document.title}</td>
-      <td>
-        {props.document.description}
+      <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
+        {displayedDescription}
+        {props.document.description.split(" ").length > 30 && (
+          <span style={{ color: "blue", textDecoration: "underline" }}>
+            {isExpanded ? " Reduce" : " Show all"}
+          </span>
+        )}
       </td>
       <td>{props.document.stakeholders}</td>
       <td>

@@ -766,7 +766,9 @@ function ShenzenDiagram(props) {
 
             {/* Sezione Link */}
             <h3>Associations</h3>
-            {associationsData.map((item, index) => (
+            {associationsData
+              .filter((a)=>{return a.label !== "Others"})
+              .map((item, index) => (
               <div key={index} className="legend-item">
                 <div
                   className="legend-line"
