@@ -54,6 +54,7 @@ function OffCanvasMarkerSezione2(props) {
         if (props.selectedDoc) {
             setStakeholders(props.selectedDoc.stakeholders);
             setOldStakeholders(props.selectedDoc.stakeholders);
+            setSelectedOption(props.selectedDoc.stakeholders.split(", ").map((s) => { return { value: s, label: s } }));
 
             setIssuanceDate(props.selectedDoc.issuanceDate);
             setNewIssuanceDate(props.selectedDoc.issuanceDate);
