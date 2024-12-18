@@ -28,7 +28,7 @@ function OffCanvasMakerFooter(props) {
 
     useEffect(() => {
         console.log("location vale: ", location);
-    }), [location, props.selectedDoc];
+    }, [location, props.selectedDoc]);
 
 
     // Controlla se l'URL corrisponde a /mapPage o /mapPage/:docId

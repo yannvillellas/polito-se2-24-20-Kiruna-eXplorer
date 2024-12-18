@@ -646,6 +646,7 @@ function ShenzenDiagram(props) {
                   >
                     <span
                       onClick={() => handleConnectionClick(connection.otherDocumentId)}
+                      onKeyDown={() => handleConnectionClick(connection.otherDocumentId)}
                       style={{
                         color: 'blue',
                         textDecoration: 'underline',
