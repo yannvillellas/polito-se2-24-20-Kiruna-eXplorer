@@ -29,8 +29,8 @@
 
   .diagram-container{
     display: flex;
-    height: 100vh;
-
+    /*height:100vh;*/
+    height: 99.5%;
     .legend-container {
       position: fixed;
       top: 50%;

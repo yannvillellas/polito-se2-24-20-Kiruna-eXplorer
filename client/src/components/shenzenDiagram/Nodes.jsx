@@ -80,7 +80,7 @@ const Nodes = ({ nodes, xScale, yScale, setSelectedNode, nodePositions, updateNo
             ? stakeholders.toLowerCase().replace(' ', '-')
             : "others";
 
-        const iconUrl = `icons/${formattedDocType}_${formattedStakeholder}.png`;
+        const iconUrl = `/icons/${formattedDocType}_${formattedStakeholder}.png`;
 
         return {
             iconUrl,
