@@ -79,32 +79,32 @@ function Link(props) {
         props.setErrorMsg(errors);
         props.handleClose(); // Close modal after submission
       } else {
+        console.log("sono nell'else dell'alone")
+        console.log("doc1id", props.doc1Id)
         for (let link of selectedTypes) {
-          for (let dId1 of doc1) {
-            for (let dId2 of doc2) {
-              let association = {
-                doc1: dId1.value, //doc1
-                type: link,
-                doc2: dId2.value,
-              };
-              const response = await associationAPI.createAssociation(
-                association
+          for (let dId2 of doc2) {
+            let association = {
+              doc1: props.doc1Id, //doc1
+              type: link,
+              doc2: dId2.value,
+            };
+            const response = await associationAPI.createAssociation(
+              association
+            );
+            if (response.msg) {
+              const doc1Title = props.documents.find(
+                (doc) => doc.docId === association.doc1
               );
-              if (response.msg) {
-                const doc1Title = props.documents.find(
-                  (doc) => doc.docId === association.doc1
-                );
-                const doc2Title = props.documents.find(
-                  (doc) => doc.docId === association.doc2
-                );
-                errors.push(
-                  <>
-                    The link of type <strong>{link}</strong> between documents{" "}
-                    <strong>{doc1Title.title}</strong> and{" "}
-                    <strong>{doc2Title.title}</strong> already exists
-                  </>
-                );
-              }
+              const doc2Title = props.documents.find(
+                (doc) => doc.docId === association.doc2
+              );
+              errors.push(
+                <>
+                  The link of type <strong>{link}</strong> between documents{" "}
+                  <strong>{doc1Title.title}</strong> and{" "}
+                  <strong>{doc2Title.title}</strong> already exists
+                </>
+              );
             }
           }
         }
@@ -129,36 +129,9 @@ function Link(props) {
               Source Document
             </Form.Label>
             <Col sm="8">
-              {props.alone ? (
-                <Select
-                  options={props.documents
-                    .filter((d) => !doc2.some((doc) => doc.value === d.docId))
-                    .map((d) => {
-                      return { value: d.docId, label: d.title };
-                    })}
-                  isClearable
-                  placeholder="Select document"
-                  required={true}
-                  onChange={handleChangeDoc1}
-                  isMulti
-                  value={doc1}
-                  menuPlacement="auto"
-                  menuPosition="fixed"
-                  styles={{
-                    menu: (base) => ({
-                      ...base,
-                      zIndex: 9999,
-                    }),
-                    menuList: (base) => ({
-                      ...base,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                    }),
-                  }}
-                />
-              ) : (
-                <Form.Label  style={{border:"2px solid", width: "100%", padding:"8px 5px"}}>{props.title}</Form.Label>
-              )}
+
+              <Form.Label style={{ border: "2px solid", width: "100%", padding: "8px 5px" }}>{props.title}</Form.Label>
+
             </Col>
           </Form.Group>
 
@@ -235,14 +208,14 @@ function Link(props) {
             {props.alone ? (
               <Button
                 onClick={() => props.setOnlyLinkForm(false)}
-                style={{ backgroundColor: "white", color: "black", border:"2px solid", fontWeight: "bolder"}}
+                style={{ backgroundColor: "white", color: "black", border: "2px solid", fontWeight: "bolder" }}
               >
                 Close
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={() => props.handlePrev()}
-                style={{ backgroundColor: "white", color: "black", border:"2px solid", fontWeight: "bolder"}} 
+                style={{ backgroundColor: "white", color: "black", border: "2px solid", fontWeight: "bolder" }}
               >
                 ← Back
               </Button>
@@ -252,7 +225,7 @@ function Link(props) {
               selectedTypes.length > 0 &&
               doc2 !== "" && (
                 <Button
-                  style={{ backgroundColor: "#075293", fontWeight: "bolder"}}
+                  style={{ backgroundColor: "#075293", fontWeight: "bolder" }}
                   type="button"
                   onClick={() => setShowConfirmation(true)}
                 >

@@ -207,6 +207,8 @@ function OffCanvasMarkerSezione3(props) {
                                     <Link
                                         documents={props.documents}
                                         alone={true}
+                                        doc1Id={props.selectedDoc.docId}
+                                        title={props.selectedDoc.title}
                                         setOnlyLinkForm={setOnlyLinkForm}
                                         setErrorMsg={setErrorMsg}>
                                     </Link>
