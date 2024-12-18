@@ -11,7 +11,7 @@ export const addArea = (docId, areaType, coordinates) => {
                 reject(err);
             } else {
                 if (row) {
- 
+
                     // Ed aggiungi row.areaId a AreaAssociation
                     db.run("INSERT INTO AreaAssociation (areaId, docId) VALUES (?, ?)",
                         [
@@ -66,36 +66,68 @@ export const addArea = (docId, areaType, coordinates) => {
 
 
 export const listAreas = () => {
-        return new Promise((resolve, reject) => {
-            db.all("SELECT * FROM Area", (err, rows) => {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM Area", (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (rows) {
+                    const areas = rows.map(row => new Area(row.areaId, row.areaType, JSON.parse(row.coordinates)));
+                    resolve(areas);
+                } else {
+                    resolve([]);
+                }
+            }
+        });
+    });
+}
+
+
+export const listAreaAssociations = () => {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM AreaAssociation", (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (rows) {
+                    const associations = rows.map(row => new AreaAssociation(row.areaId, row.docId));
+                    resolve(associations);
+                } else {
+                    resolve([]);
+                }
+            }
+        });
+    });
+}
+
+
+export const addAreaAssociation = (areaId, docId) => {
+    return new Promise((resolve, reject) => {
+        db.run("INSERT INTO AreaAssociation (areaId, docId) VALUES (?, ?)",
+            [
+                areaId,
+                docId
+            ],
+            function (err) {
                 if (err) {
                     reject(err);
                 } else {
-                    if (rows) {
-                        const areas = rows.map(row => new Area(row.areaId, row.areaType, JSON.parse(row.coordinates)));
-                        resolve(areas);
-                    } else {
-                        resolve([]);
-                    }
+                    resolve();
                 }
-            });
-        });
-    }
+            }
+        );
+    });
+}
 
 
-    export const listAreaAssociations = () => {
-        return new Promise((resolve, reject) => {
-            db.all("SELECT * FROM AreaAssociation", (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    if (rows) {
-                        const associations = rows.map(row => new AreaAssociation(row.areaId, row.docId));
-                        resolve(associations);
-                    } else {
-                        resolve([]);
-                    }
-                }
-            });
+export const deleteAreaAssociation = (docId) => {
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM AreaAssociation WHERE  docId = ?", [docId], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
         });
-    }
+    });
+}

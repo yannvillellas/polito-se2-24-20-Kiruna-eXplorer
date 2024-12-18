@@ -11,6 +11,9 @@ import {
   listDocuments,
   addDocument,
   deleteDocument,
+  updateDocument,
+  updateDocumentStakeholder,
+
 } from "./src/dao/documentDAO.mjs";
 import {
   listPositions,
@@ -22,6 +25,8 @@ import {
   addArea,
   listAreas,
   listAreaAssociations,
+  addAreaAssociation,
+  deleteAreaAssociation,
 } from "./src/dao/areaDAO.mjs";
 import {
   getAssociations,
@@ -41,6 +46,7 @@ import {
   getDocumentTypes,
   addDocumentType,
 } from "./src/dao/documentTypeDAO.mjs";
+import { get } from "http";
 
 import { /*saveNodesPosition,getNodesPositions,updateNodePosition,*/getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
   getDimensions, addDimensions,updateHeight,updateWidth,addNodeTraslation,updateNodeTraslation,getTraslatedNodes } from "./src/dao/diagramDAO.mjs";
@@ -216,6 +222,94 @@ app.post(
     }
   }
 );
+
+// updateDocument
+app.put(
+  "/api/documents",
+  [
+    check("title").isString(),
+
+
+
+    check("issuanceDate").isString(),
+    check("connections").isInt(),
+    check("language").optional().isString(),
+    check("pages").optional().isString(),
+    check("description").isString(),
+
+    // Normalmente sono interi
+    check("type").isString(), // Gestito. Devo fare una query per ottenere l'id del tipo
+    check("scale").isString(),
+    check("ASvalue").optional(),
+
+    // Devono essere inseriti come interi in DocStakeholders:
+    check('stakeholders').isString(),
+
+
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
+      // Prendo tutti i document types
+      const allDocumentsType = await getDocumentTypes();
+      // docType row è fatta come (dtId, typeDescription) => dtId è l'id del tipo ceh mi serve per fare l'update
+      const docTypeId = allDocumentsType.find((docType) => docType.type === req.body.type).dtId;
+      console.log("docTypeId", docTypeId);
+
+      // Prendo tutti le scales
+      const allScales = await getScales();
+      // scale row è fatta come (scaleId, name) => sId è l'id della scala ceh mi serve per fare l'update
+      const scaleId = allScales.find((scale) => scale.name === req.body.scale).scaleId;
+      console.log("scaleId", scaleId);
+
+      // Prendo tutti i stakeholders
+      const allStakeholders = await getStakeholders();
+      console.log("allStakeholders", allStakeholders);
+      // stakeholder row è fatta come (shId, name) => shId è l'id dello stakeholder ceh mi serve per fare l'update
+      const stakeholders = req.body.stakeholders.split(', '); // rimuovo gli spazi prima e dopo di ogni stakeholder
+      console.log("stakeholders", stakeholders);
+      // Prendo gli id degli stakeholders
+      const stakeholdersId = allStakeholders.filter((sh) => stakeholders.includes(sh.name)).map((sh) => sh.shId);
+      console.log("stakeholdersId", stakeholdersId);
+      console.log("docId", req.body.docId);
+      const risposta = await updateDocumentStakeholder(req.body.docId, stakeholdersId);
+      console.log("Ho appena aggiornato gli stakeholder:", risposta);
+
+      const reformattedDocument = {
+        docId: req.body.docId,
+
+        title: req.body.title,
+        description: req.body.description,
+
+        scale: scaleId,
+        ASvalue: req.body.ASvalue,
+
+        issuanceDate: req.body.issuanceDate,
+        type: docTypeId,
+        connections: req.body.connections,
+        language: req.body.language,
+        pages: req.body.pages,
+      };
+
+      console.log("reformattedDocument", reformattedDocument);
+
+      const resultOfTheUpadate = await updateDocument(reformattedDocument);
+      console.log("resultOfTheUpadate", resultOfTheUpadate);
+
+      res.status(201).json(resultOfTheUpadate);
+
+    } catch (err) {
+      console.error("Error adding document:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+
 
 app.post("/api/documents/:docId/files", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -481,8 +575,24 @@ app.post(
 
     // Here i manage the (lat, long), float values
     const docId = req.body.docId;
-    const lat = req.body.lat;
-    const lng = req.body.lng;
+    let lat = Number(req.body.lat.toFixed(4));
+    let lng = Number(req.body.lng.toFixed(4));
+    console.log("Sono in server, /api/positions, ho ricevuto la richiesta di addPosition (fixed)", docId, lat, lng);
+    // Prendo tutte le posizioni, e se tra queste c'è una che ha le stesse coordinate allora aggiungo lat+0.00015 e lng+0.00015
+    const tutteLePosizioni = await listPositions();
+    console.log("tutteLePosizioni", tutteLePosizioni);
+    tutteLePosizioni.forEach(async (position) => {
+      const fixedLat = Number(position.latitude.toFixed(4));
+      const fixedLng = Number(position.longitude.toFixed(4));
+      if (fixedLat === lat && fixedLng === lng) {
+        console.log("Ho trovato una posizione con le stesse coordinate, aggiungo lat+0.00015 e lng+0.00015");
+        lat += 0.0002;
+        lng += 0.0002;
+
+        console.log("lat aggiornate, lng", lat, lng);
+      }
+    });
+    console.log("Sto inserendo: docId, lat, lng", docId, lat, lng);
     await addPosition(docId, lat, lng);
 
     res.status(201).end();
@@ -498,9 +608,31 @@ app.get("/api/positions", [], async (req, res) => {
   }
 });
 
+
+
+function calculateCenterOfPolygon(latlngs) {
+  let latSum = 0;
+  let lngSum = 0;
+  const numPoints = latlngs.length;
+
+  // Somma le coordinate
+  latlngs.forEach(latlng => {
+    latSum += latlng.lat;
+    lngSum += latlng.lng;
+  });
+
+  // Calcola la media delle coordinate
+  const centerLat = latSum / numPoints;
+  const centerLng = lngSum / numPoints;
+
+  return [centerLat, centerLng];
+}
+
+
+
+
 app.put(
   "/api/positions/:docId",
-  isUrbanPlanner,
   [check("lat").isFloat(), check("lng").isFloat()],
   async (req, res) => {
     const errors = validationResult(req);
@@ -508,11 +640,52 @@ app.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log("Sono in server, /api/positions/:docId, ho ricevuto la richiesta di updatePosition", req.body);
     // Here i manage the (lat, long), float values
     const docId = req.params.docId;
     const lat = req.body.lat;
     const lng = req.body.lng;
-    await updatePosition(docId, lat, lng);
+
+    let  flagFoundSameAreaAppartenance = false; // mi dovrebbe risolvere l'incubo dei cluster
+    
+    // Ora prendo tutte le aree, e ne calcolo il centroide, se il centroide coincide con queste coordinate che mi sono state passate
+    // allora aggiungo in areaAssociation docId e areaId
+    const tutteLeAree = await listAreas();
+    console.log("tutteLeAree", tutteLeAree);
+    // Calcolo il centroide di ciascuna area:
+    tutteLeAree.forEach(async (area) => {
+      const centroide = calculateCenterOfPolygon(JSON.parse(area.coordinates)[0]);
+      const clat = centroide[0].toFixed(4);
+      const clng = centroide[1].toFixed(4);
+      console.log("centroide", centroide, "clat", clat, "clng", clng);
+
+      if (clat === lat.toFixed(4) && clng === lng.toFixed(4)) {
+        flagFoundSameAreaAppartenance = true;
+        console.log("Sono uguali, aggiungo l'associazione");
+        // Aggiungo l'associazione
+        const areaId = area.areaId;
+        const areaAssociation = {
+          docId: Number(docId),
+          areaId: Number(areaId)
+        };
+        console.log("Ho trovato: areaAssociation", areaAssociation);
+
+        // Rimuovi tutte le vecchie area association:
+        const rispostaDaRemoveArea = await deleteAreaAssociation(Number(areaAssociation.docId));
+
+        console.log("Ho appena rimosso l'associazione:", rispostaDaRemoveArea,areaAssociation.areaId, areaAssociation.docId );
+        const risposta = await addAreaAssociation(areaAssociation.areaId, areaAssociation.docId);
+        // console.log("Ho appena aggiunto l'associazione:", risposta);
+      }
+    });
+
+    if(flagFoundSameAreaAppartenance){
+      await updatePosition(docId, lat + 0.00015, lng + 0.00015);
+    } else {
+      await updatePosition(docId, lat, lng);
+    }
+
+
 
     res.status(200).end();
   }

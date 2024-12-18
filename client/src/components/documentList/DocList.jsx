@@ -10,6 +10,12 @@ import PositionAPI from "../../api/positionAPI";
 import stakeholderAPI from "../../api/stakeholderAPI"
 import scaleAPI from "../../api/scaleAPI"
 import documentTypeAPI from "../../api/documentTypeAPI"
+import associationAPI from "../../api/associationAPI"
+
+
+// va importata da: client\src\components\assets\IconaModificaPosizione.png
+import IconaSearch from "../assets/IconaSearch.png";
+/**<img src={IconaModificaPosizione} alt="search" width="90" height="90" /> */
 
 /**
  * 
@@ -19,7 +25,9 @@ import documentTypeAPI from "../../api/documentTypeAPI"
  */
 
 function DocList(props) {
+
   const [documents, setDocuments] = useState([]);
+  const [allAssociations, setAllAssociations] = useState([]);
 
   const [searchedTitle, setSearchedTitle] = useState("");
   const [selectedStakeholder, setSelectedStakeholder] = useState(null);
@@ -46,9 +54,29 @@ function DocList(props) {
     applyFilters();
   }, [searchedTitle, selectedStakeholder, selectedType, selectedScale, selectedDescription]);
 
+
+  useEffect(() => {
+
+    const fetchAssociations = async () => {
+      console.log("DocList, documents: ", props.documents, props.allAssociations)
+      const listAllAssociations = await associationAPI.getAllAssociations();
+      setAllAssociations(listAllAssociations);
+      setDocuments(props.documents);
+    }
+
+    fetchAssociations();
+  }, [props.documents, props.allAssociations]);
+
+
   return (
     <>
-      <Row className="filters">
+      <Row className="filters" style={{ backgroundColor: '#9ebbd8', padding: '20px', borderRadius: '8px' }}>
+
+        <Col className="d-flex align-items-center" xs="auto">
+          <img src={IconaSearch} alt="search" width="60" height="60" />
+          {/* La classe 'fs-3' aumenta la dimensione dell'icona */}
+        </Col>
+
         <Col>
           <Form.Group>
             <Form.Label>Search by title</Form.Label>
@@ -107,7 +135,7 @@ function DocList(props) {
       </Row>
       <Container fluid >
         {/* Tabella dei documenti */}
-        <DocumentTable documents={documents} allPositions={props.positions} />
+        <DocumentTable documents={documents} allPositions={props.positions} allAssociations={allAssociations} />
       </Container>
     </>
   );
@@ -121,7 +149,7 @@ function DocumentTable(props) {
   return (
     <Container fluid >
       <div className="custom-table-wrapper-main">
-        <div className="table-scroll-main">
+        <div className="table-scroll-main" style={{ overflowY: 'auto', maxHeight: '1000px' }}>
           <Table striped bordered hover className="custom-table shadow-sm">
             <thead style={{ backgroundColor: "#007bff", color: "white" }}>
               <tr>
@@ -140,7 +168,7 @@ function DocumentTable(props) {
             </thead>
             <tbody>
               {documents.map((doc, index) => (
-                <DocumentRow key={index} document={doc} allPositions={props.allPositions} />
+                <DocumentRow key={index} document={doc} allPositions={props.allPositions} allAssociations={props.allAssociations} />
               ))}
             </tbody>
           </Table>
@@ -154,12 +182,15 @@ function DocumentRow(props) {
   console.log(props.document.title)
   return (
     <tr >
-      <DocumentData document={props.document} allPositions={props.allPositions} />
+      <DocumentData document={props.document} allPositions={props.allPositions} allAssociations={props.allAssociations} />
       <DocumentFile document={props.document} />
     </tr>
   );
 }
 function DocumentData(props) {
+  console.log("DocumentData, props: ", props.allAssociations);
+  const numberOfConnectionsForThisDocument = props.allAssociations.filter(association => association.doc1 === props.document.docId || association.doc2 === props.document.docId).length;
+
 
   return (
     <>
@@ -174,24 +205,47 @@ function DocumentData(props) {
       <td>{props.document.issuanceDate}</td>
       <td>{props.document.type}</td>
       <td>
-        {props.document.connections !== 0 &&
 
+        {numberOfConnectionsForThisDocument !== 0 &&
           <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
-            {props.document.connections}
+            {numberOfConnectionsForThisDocument}
+            <i className="bi bi-link-45deg" style={{ marginLeft: '9px' }}></i>
           </Link>
-
         }
 
-        {props.document.connections === 0 && <p>0</p>}
+        {numberOfConnectionsForThisDocument === 0 && <p>0</p>}
 
       </td>
       <td>{props.document.language}</td>
       <td>{props.document.pages}</td>
 
       <td>
-        <Link to={`/mapPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
-          Map
-        </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <Link to={`/mapPage/${props.document.docId}`} style={{
+            color: "blue",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px" // Aggiunge uno spazio tra il link e l'icona
+          }}>
+            Map
+            <i class="bi bi-arrow-right-circle"></i>
+          </Link>
+
+
+
+          <Link to={`/diagram/${props.document.docId}`} style={{
+            color: "blue",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px" // Aggiunge uno spazio tra il link e l'icona
+          }}>
+            Diagram
+            <i class="bi bi-arrow-right-circle"></i>
+          </Link>
+        </div>
+
       </td>
     </>
   );

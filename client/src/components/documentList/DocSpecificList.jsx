@@ -14,10 +14,14 @@ import { useParams } from "react-router-dom";
 
 function DocSpecificList(props) {
     const { docId } = useParams();
+
+    // const [docIdInt, setDocIdInt] = useState(docId ? parseInt(docId) : 0);
     const docIdInt = parseInt(docId);
     const [documentShown, setDocumentShown] = useState([]);
-
     const [highlightedDocId, setHighlightedDocId] = useState(null);
+
+
+
 
     useEffect(() => {
         const fetchDocuments = async () => {
@@ -31,8 +35,10 @@ function DocSpecificList(props) {
                         return association.doc1;
                     }
                 });
-                const documentsFiltered = props.documents.filter(doc => docIdGetFromAssociations.includes(doc.docId));
-                const docFromDocId = props.documents.find(doc => doc.docId === docIdInt);
+                const documentLists = await DocumentAPI.listDocuments();
+                const documentsFiltered = documentLists.filter(doc => docIdGetFromAssociations.includes(doc.docId));
+                const docFromDocId = documentLists.find(doc => doc.docId === docIdInt);
+
                 setHighlightedDocId(docIdInt);
                 setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
 
@@ -42,8 +48,7 @@ function DocSpecificList(props) {
         };
 
         fetchDocuments();
-
-    }, [docIdInt]);
+    }, [docIdInt, props.documents, props.positions, props.allAssociations]);
 
 
     return (
@@ -132,36 +137,111 @@ function DocumentData(props) {
         fetchPosition();
     }, [props.document.docId]);
 
+    useEffect(() => {
+        console.log("Sono in DocSpecificList, props.document.docId: isNumber? connecsiotn:", props.document.docId, typeof (props.document.docId), props.document.connections);
+    }, [props.document.docId]);
+
+
 
     return (
         <>
-            <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>
+
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.title}
+
+            </td >
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
                 {props.document.description}
             </td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.stakeholders}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}> 
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.stakeholders}
+            </td>
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
                 {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
             </td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.issuanceDate}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.type}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.issuanceDate}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.type}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+
                 {props.document.connections !== 0 &&
 
-                    <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+                    <Link to={`/documentPage/${props.document.docId}`} style={{ color: props.isHighlighted ? "white" : "blue", textDecoration: "none" }}>
                         {props.document.connections}
+                        <i className="bi bi-link-45deg" style={{ marginLeft: '9px' }}></i>
                     </Link>
 
                 }
 
                 {props.document.connections === 0 && <p>0</p>}
             </td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.language}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>{props.document.pages}</td>
-            <td className={props.isHighlighted ? "highlighted-row" : ""}>
-                <p>
-                    On the map
-                </p>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.language}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.pages}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                    <Link to={`/mapPage/${props.document.docId}`} style={{
+                        color: props.isHighlighted ? "white" : "blue", textDecoration: "none", display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px"
+                    }}>
+                        Map
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </Link>
+
+
+                    <Link to={`/diagram/${props.document.docId}`} style={{
+                        color: props.isHighlighted ? "white" : "blue", textDecoration: "none", display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px"
+                    }}>
+                        Diagram
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </Link>
+                </div>
+
+
             </td>
         </>
     );
@@ -206,7 +286,7 @@ function DocumentFile(props) {
                         <Button onClick={() => handleDownload(f)}>
                             <i className="bi bi-file-earmark-text-fill"></i>
                         </Button>
-                        <p>{f.name}</p>
+                        <p style={{ color: props.isHighlighted ? "white" : "blue", textDecoration: "none" }}>{f.name}</p>
                     </div>
                 ))
             ) : (
