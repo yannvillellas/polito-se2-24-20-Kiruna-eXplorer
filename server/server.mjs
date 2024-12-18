@@ -46,7 +46,6 @@ import {
   getDocumentTypes,
   addDocumentType,
 } from "./src/dao/documentTypeDAO.mjs";
-import { get } from "http";
 
 import { /*saveNodesPosition,getNodesPositions,updateNodePosition,*/getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
   getDimensions, addDimensions,updateHeight,updateWidth,addNodeTraslation,updateNodeTraslation,getTraslatedNodes } from "./src/dao/diagramDAO.mjs";
@@ -140,7 +139,7 @@ app.post(
       .withMessage("Username must be a string.")
       .isLength({ min: 3, max: 20 })
       .withMessage("Username must be between 3 and 20 characters.")
-      .matches(/^[a-zA-Z0-9_]+$/)
+      .matches(/^\w+$/)
       .withMessage(
         "Username can only contain letters, numbers, and underscores."
       ),
@@ -320,14 +319,11 @@ app.post("/api/documents/:docId/files", (req, res) => {
     ? req.files.files
     : [req.files.files];
 
+  const docId = path.basename(req.params.docId); // Sanitize docId
+  const uploadPath = path.join(__dirname, "uploads", docId);
+  createFolder(uploadPath);
+
   files.forEach((file) => {
-    // choose the subfolder based on the document associated with the file
-    let subfolder = `${req.params.docId}`;
-
-    const uploadPath = path.join(__dirname, "uploads", subfolder);
-    createFolder(uploadPath);
-
-    //save the file in the choosen subfolder
     const filePath = path.join(uploadPath, file.name);
     file.mv(filePath, (err) => {
       if (err) {
@@ -337,7 +333,7 @@ app.post("/api/documents/:docId/files", (req, res) => {
     });
   });
 
-  res.send("Files uploaded succesfully!");
+  res.send("Files uploaded successfully!");
 });
 
 app.get("/api/documents", [], async (req, res) => {
@@ -350,14 +346,13 @@ app.get("/api/documents", [], async (req, res) => {
 });
 
 app.get("/api/documents/:docId/files", (req, res) => {
-  const subfolder = req.params.docId;
+  const docId = req.params.docId.replace(/[^a-zA-Z0-9_-]/g, ""); // Sanitize docId
   const uploadDir = path.join(__dirname, "uploads");
-  const folderPath = path.join(uploadDir, subfolder);
+  const folderPath = path.join(uploadDir, docId);
 
   try {
     // Controlla se la sottocartella esiste
     if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
-      // return res.status(400).send("Sottocartella non valida o non trovata.");
       return res.json([]); // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
     }
 
@@ -372,7 +367,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
     // Se ci sono file, restituisce i dettagli dei file
     const fileDetails = files.map((file) => ({
       name: file,
-      path: `/uploads/${subfolder}/${file}`,
+      path: `/uploads/${docId}/${file}`,
     }));
 
     res.json(fileDetails);
@@ -526,11 +521,6 @@ app.post("/api/:docId/areas", isUrbanPlanner, async (req, res) => {
     /** type: 'circlemarker',
             center: '{"lat":67.85314055429082,"lng":20.229291919386018}' 
         */
-    const coordinates = JSON.stringify(area.center);
-    const areaType = "circlemarker";
-    /*const areaId = await addArea(docId, areaType, coordinates);
-        console.log("Sono in serve.mjs, :docId/areas, ho aggiunto un'area di tipo circlemarker il DB mi ha ritornato id: ", areaId);
-        res.status(201).json(areaId); */
   } else {
     res.status(400).json({ error: "Invalid area type" });
   }
@@ -674,8 +664,6 @@ app.put(
         const rispostaDaRemoveArea = await deleteAreaAssociation(Number(areaAssociation.docId));
 
         console.log("Ho appena rimosso l'associazione:", rispostaDaRemoveArea,areaAssociation.areaId, areaAssociation.docId );
-        const risposta = await addAreaAssociation(areaAssociation.areaId, areaAssociation.docId);
-        // console.log("Ho appena aggiunto l'associazione:", risposta);
       }
     });
 
@@ -815,44 +803,13 @@ app.get("/api/linkTypes", [], async (req, res) => {
 
 app.get("/api/linkTypes/:id", [], async (req, res) => {
   try {
-    const type = await getTypeByTypeId(req.params.id);
+    const typeId = req.params.id.replace(/[^a-zA-Z0-9_-]/g, ""); // Sanitize id
+    const type = await getTypeByTypeId(typeId);
     res.status(200).json(type);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-//diagram API
-/*app.get("/api/diagram/nodes", [], async (req, res) => {
-  try {
-    const positions = await getNodesPositions();
-    res.status(200).json(positions);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-})
-
-app.post("/api/diagram/nodes",[], async (req, res) => {
-  try {
-      console.log("ricevo",req.body)
-      await saveNodesPosition(req.body); // Assicurati che req.body abbia i dati corretti
-      res.status(200).end();
-  } catch (e) {
-      console.error("Error saving nodes positions", e);
-      res.status(500).json({ error: "Error saving nodes positions" });
-  }
-});
-
-app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
-  try {
-      await updateNodePosition(req.body); // Assicurati che req.body abbia i dati corretti
-      res.status(200).end();
-  } catch (e) {
-      console.error("Error updating node position", e);
-      res.status(500).json({ error: "Error updating node position" });
-  }
-});*/
 
 app.get("/api/diagram/nodes", [], async (req, res) => {
   try {
