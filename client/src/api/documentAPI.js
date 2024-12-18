@@ -2,7 +2,6 @@ const SERVER_URL = 'http://localhost:3001/api/documents/'
 
 const listDocuments = async () => {
     try {
-        console.log('sono in documentAPI, listDocuments, ho ricevuto la richiesta di listDocuments');
         const response = await fetch(SERVER_URL, {
             method: 'GET',
             credentials: 'include'
@@ -10,7 +9,6 @@ const listDocuments = async () => {
 
         if (!response.ok) throw new Error('Failed to fetch documents');
         const documents = await response.json();
-        console.log('sono in documentAPI, listDocuments, ho ricevuto la risposta di listDocuments', documents);
 
         return documents;
     } catch (err) {
@@ -20,7 +18,6 @@ const listDocuments = async () => {
 
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
-    console.log('sono in documentAPI ', document);
     const response = await fetch(`${SERVER_URL}`, {
 
         method: 'POST',
@@ -48,7 +45,6 @@ const addDocument = async (document) => {
 
 
 const updateDocument = async (document) => {
-    console.log('sono in documentAPI, updateDocument, ho ricevuto document:', document);
     const response = await fetch(`${SERVER_URL}`, {
 
         method: 'PUT',

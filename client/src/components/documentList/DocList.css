@@ -1,6 +1,48 @@
-
 .highlighted-row {
   background-color: #3e5168 !important; /* Colore evidenziato */
 }
 
+.custom-table thead th {
+  position: sticky;
+  top: 0; /* Fissa l'header in alto */
+  z-index: 0; /* Mantiene l'header sopra il corpo */
+}
 
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2){
+  width: 20%;
+  max-width: 350px;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
+
+.custom-table-wrapper-main {
+  position: relative;
+  max-height: calc(100vh); /* Imposta un'altezza massima per il wrapper */
+}
+
+.table {
+  width: 100%; /* La tabella si adatta alla larghezza del contenitore */
+  table-layout: fixed; /* Forza una larghezza uniforme per le colonne */
+  word-wrap: break-word; /* Le parole lunghe andranno a capo */
+}
+
+.custom-table th, .custom-table td {
+  padding: 8px; /* Padding per le celle */
+  text-align: left; /* Allineamento del testo a sinistra */
+}
+
+/* Media Query per schermi piccoli */
+@media (max-width: 768px) {
+  .custom-table th, .custom-table td {
+    font-size: 12px;
+    padding: 6px; /* Riduci il padding su schermi piccoli */
+  }
+
+  .custom-table th:nth-child(3), .custom-table td:nth-child(3),
+  .custom-table th:nth-child(4), .custom-table td:nth-child(4),
+  .custom-table th:nth-child(5), .custom-table td:nth-child(5) {
+    display: none; /* Nascondi colonne non necessarie su schermi piccoli */
+  }
+}

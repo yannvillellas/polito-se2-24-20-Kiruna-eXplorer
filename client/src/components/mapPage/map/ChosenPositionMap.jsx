@@ -69,7 +69,6 @@ function ChosenPositionMap(props) {
             click(e) {
                 setPosition(e.latlng);
 
-                console.log("e.latlng: ", e.latlng);
                 props.handleSavePosition(e.latlng.lat, e.latlng.lng);
                
             },

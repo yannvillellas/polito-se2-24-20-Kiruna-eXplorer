@@ -27,12 +27,24 @@
     animation: bounce 0.8s ease-in-out infinite, fadeOut 0.5s ease-in-out 2.5s forwards; /* Ritardo di 2.5 secondi prima di iniziare a scomparire */
   }
 
+  .modal-row{
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .btn-visualize-on-map{
+    height: 50px;
+    width: 150px;
+  }
+
   .diagram-container{
     display: flex;
     /*height:100vh;*/
     height: 99.5%;
+
     .legend-container {
       position: fixed;
+      max-height: 80vh;
       top: 50%;
       right: 0;
       transform: translateY(-50%);
@@ -86,13 +98,16 @@
     }
     
     .legend-content {
-      background-color: #ddd;
+      background-color: #eee;
       border: 1px solid #ccc;
       border-radius: 15px;
       padding: 10px;
       width: 250px;
       box-shadow: -4px 0 5px rgba(0, 0, 0, 0.2);
       margin: 0 20px;
+      overflow-y: auto;
+      max-height: 75vh;
+
     }
     
     .legend-item {

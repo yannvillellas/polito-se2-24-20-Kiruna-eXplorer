@@ -99,7 +99,6 @@ function App() {
                 const documents = await DocumentAPI.listDocuments();
 
 
-                console.log("Sono in App.jsx, fetchDocuments, ho ricevuto documents:", documents);
 
                 const positions = await PositionAPI.listPositions();
                 const updatedDocuments = updateDocumentsWithPositions(documents, positions);
@@ -116,7 +115,7 @@ function App() {
         const fetchLinksType = async () => {
             try {
                 const linksType = await associationAPI.getLinkTypes();
-                console.log("Sono in App.jsx, fetchLinksType, ho ricevuto linksType:", linksType);
+                ("Sono in App.jsx, fetchLinksType, ho ricevuto linksType:", linksType);
                 setLinksType(linksType);
             } catch (error) {
                 console.error("Error fetching link types:", error);
@@ -128,9 +127,6 @@ function App() {
     const handleForceRefresh = () => {
         setForceRefresh(!forceRefresh);
     };
-
-
-
 
 
     const updateDocumentsWithPositions = (documents, positions) => {
@@ -161,9 +157,8 @@ function App() {
 
     const handleAddArea = async (document) => {
         try {
-            console.log("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
+            ("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
             const areaId = await areaAPI.addArea(document.docId, document.area);
-            console.log("Sono in Homepage.jsx, handleAddArea, ho ricevuto dalle API areaId:", areaId);
             
             handleForceRefresh(); 
 
@@ -177,7 +172,6 @@ function App() {
     const handleAddDocument = async (document) => {
 
         try {
-            console.log("Sono in App.jsx, handleAddDocument, sto aggiungendo il documento:", document);
             // fix document.pages as blank string
             if (document.pages === "") {
                 document.pages = "-";
@@ -189,7 +183,6 @@ function App() {
 
 
             const docId = await DocumentAPI.addDocument(document);
-            console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento, docId:", document, docId);
             const position = {
                 docId: docId,
                 lat: document.lat,
@@ -232,10 +225,8 @@ function App() {
             setDocuments([...documents, stateDocument]);
 
 
-            console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento:", stateDocument);
             // adding files to the document
             if (document.files.length > 0) {
-                console.log("file ", document.files)
                 handleUpload({ ...document, docId: docId });
             }
 
@@ -245,12 +236,6 @@ function App() {
             console.error("Error adding document:", error);
         }
     }
-
-    // Si viene aggiunto alla lista correttaemtne (va modificato il conenctions perchè viene aggiunto al file solo al refresh della pagina)
-    useEffect(() => {
-        console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento, documents:", documents);
-    }, [documents, forceRefresh]);
-
 
 
     const handleModifyPosition = async (docId, lat, lng) => {
@@ -276,22 +261,6 @@ function App() {
 
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -418,6 +387,8 @@ function App() {
 
                         areas={areas}
                         areaAssociations={areaAssociations}
+                        allAssociations={allAssociations}
+                        setAllAssociations={setAllAssociations}
 
                     />} />
                 <Route
@@ -449,6 +420,7 @@ function App() {
                         documents={documents}
                         allAssociations={allAssociations}
                         isUrbanPlanner={isUrbanPlanner}
+                        forceRefresh={handleForceRefresh}
                     />}
                 />
 

@@ -138,7 +138,6 @@ function DocumentData(props) {
     }, [props.document.docId]);
 
     useEffect(() => {
-        console.log("Sono in DocSpecificList, props.document.docId: isNumber? connecsiotn:", props.document.docId, typeof (props.document.docId), props.document.connections);
     }, [props.document.docId]);
 
 

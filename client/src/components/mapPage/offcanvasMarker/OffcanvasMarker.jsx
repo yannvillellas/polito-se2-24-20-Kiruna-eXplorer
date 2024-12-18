@@ -46,7 +46,7 @@ function OffcanvasMarker(props) {
                 show={showDocumentModal}
                 onHide={props.closeDocumentModal}
                 placement="end"
-                style={{ width: '600px' }}
+                style={{ width: '600px'}}
             >
                 <Offcanvas.Header
                     closeButton
@@ -57,7 +57,7 @@ function OffcanvasMarker(props) {
                 >
 
                 </Offcanvas.Header>
-                <Offcanvas.Body>
+                <Offcanvas.Body style={{overflowX:"hidden"}}>
                     {props.selectedDoc ? (
                         <>
                             <OffCanvasMarkerSezione0
@@ -81,14 +81,17 @@ function OffcanvasMarker(props) {
                                 documents={props.documents}
                                 handleChangeMapViewBasedOnDocId={props.handleChangeMapViewBasedOnDocId}
                                 handleForceRefresh={props.handleForceRefresh}
+                                setErrorMsg={props.setErrorMsg}
+                                allAssociations={props.allAssociations}
+                                setAllAssociations={props.setAllAssociations}
                             />
                             <br />
                             <OffCanvasMakerFooter
-                                selectedDoc={props.selectedDoc} 
-                                handleShowAllLinkedDocument={props.handleShowAllLinkedDocument} 
-                                closeDocumentModal={props.closeDocumentModal} 
+                                selectedDoc={props.selectedDoc}
+                                handleShowAllLinkedDocument={props.handleShowAllLinkedDocument}
+                                closeDocumentModal={props.closeDocumentModal}
                                 handleForceRefresh={props.handleForceRefresh}
-                                />
+                            />
                         </>
                     ) : (
                         <p>Select a marker for visualize the details.</p>

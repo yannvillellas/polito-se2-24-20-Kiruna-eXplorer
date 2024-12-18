@@ -5,7 +5,7 @@ import { scaleTime, scaleBand } from "@visx/scale";
 import DocumentAPI from "../../api/documentAPI";
 import { line, curveBasis } from "d3-shape";
 import associationAPI from "../../api/associationAPI";
-import { OverlayTrigger, Tooltip, Overlay, Modal, Button } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Overlay, Modal, Button, Row } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import Nodes from "./Nodes";
 import Links from "./Links";
@@ -15,6 +15,7 @@ import { use } from "react";
 
 function ShenzenDiagram(props) {
   const { docId } = useParams();
+  const navigate = useNavigate();
   const [isUrbanPlanner] = useState(props.role === 'urbanPlanner');
   const [isOpen, setIsOpen] = useState(false); //legend trigger
   const associationsData = [
@@ -61,6 +62,7 @@ function ShenzenDiagram(props) {
       });
     };
 
+    props.forceRefresh()
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -559,8 +561,8 @@ function ShenzenDiagram(props) {
             <text
               key={i}
               x={10}
-              y={yScale(category) + yScale.bandwidth() / 2 - 30}
-              fontSize={10 * k} // Applica la scala del zoom
+              y={yScale(category) + yScale.bandwidth() / 2 - 20}
+              fontSize={10} // Applica la scala del zoom
               textAnchor="start"
               dominantBaseline="middle"
             >
@@ -656,16 +658,27 @@ function ShenzenDiagram(props) {
                 )) : "This file has no connections"}
               </div>
 
-              <div className="download-buttons-container">
-                {(files && files.length > 0) ? files.map((f, index) => (
-                  <div key={f.name || index} className="download-btns">
-                    <Button onClick={() => handleDownload(f)} className="files">
-                      <i className="bi bi-file-earmark-text-fill"></i>
-                    </Button>
-                    <p className="file-name">{f.name}</p>
-                  </div>
-                )) : ""}
+              <div className="modal-row">
+
+                <div className="download-buttons-container">
+                  {(files && files.length > 0) ? files.map((f, index) => (
+                    <div key={f.name || index} className="download-btns">
+                      <Button onClick={() => handleDownload(f)} className="files">
+                        <i className="bi bi-file-earmark-text-fill"></i>
+                      </Button>
+                      <p className="file-name">{f.name}</p>
+                    </div>
+                  )) : ""}
+                </div>
+
+                <Button 
+                  className="btn-visualize-on-map" 
+                  onClick={() => {navigate(`/mapPage/${selectedDoc.docId}`)}}>
+                    Visualize on Map
+                </Button>
+                {console.log("sel:", selectedDoc)}
               </div>
+
             </>
           ) : (
             <p>Select a marker for visualize the details.</p>
@@ -694,7 +707,7 @@ function ShenzenDiagram(props) {
               {validDocTypes.map((docType) => (
                 <div key={docType} className="legend-item">
                   <img
-                    src={`icons/${docType.toLowerCase().replace(' ', '-')}_others.png`}
+                    src={`/icons/${docType.toLowerCase().replace(' ', '-')}_others.png`}
                     alt={docType}
                     className="legend-icon"
                     style={{ width: "32px", height: "32px", marginRight: "10px" }}
@@ -753,7 +766,9 @@ function ShenzenDiagram(props) {
 
             {/* Sezione Link */}
             <h3>Associations</h3>
-            {associationsData.map((item, index) => (
+            {associationsData
+              .filter((a)=>{return a.label !== "Others"})
+              .map((item, index) => (
               <div key={index} className="legend-item">
                 <div
                   className="legend-line"

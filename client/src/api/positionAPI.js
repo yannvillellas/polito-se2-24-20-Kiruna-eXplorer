@@ -3,7 +3,6 @@ const SERVER_URL = 'http://localhost:3001/api/positions'
 
 const listPositions = async () => {
   try {
-    console.log("Sono in positionAPI, ho ricevuto la richiesta di listPositions");
     const response = await fetch(SERVER_URL, {
       method: 'GET',
       credentials: 'include'
@@ -12,7 +11,6 @@ const listPositions = async () => {
     if (!response.ok) throw new Error('Failed to fetch positions');
 
     const positions = await response.json();
-    console.log("Sono in positionAPI, listPositions, ho ricevuto la risposta di listPositions", positions);
     return positions;
 
   } catch (err) {

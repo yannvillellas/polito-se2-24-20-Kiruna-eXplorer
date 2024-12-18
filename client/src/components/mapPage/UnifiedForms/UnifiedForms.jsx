@@ -98,8 +98,8 @@ function UnifiedForms(props) {
 
 
     useEffect(() => {
-        console.log("Sono in UnifiedForms, newDocument:", newDocument);
-    }, [newDocument]);
+        console.log("Sono in UnifiedForms, props.errorMsg:", props.errorMsg);
+    }, [props.errorMsg]);
 
 
     const handleNext = () => {
@@ -141,44 +141,8 @@ function UnifiedForms(props) {
                         <i className="bi bi-plus" style={{ fontSize: "2.5rem" }}></i>
                     </Button>
                 </OverlayTrigger>
-                {/*  <---------------------------------------------------------------------------------------------------------------------------------------- ADD LINK BUTTON 
-                <OverlayTrigger
-                    placement="top" // Posizione del tooltip rispetto al bottone
-                    delay={{ show: 500, hide: 0 }} // Ritardo di 500ms prima di mostrare il tooltip
-                    overlay={renderTooltip("Insert new Association")}
-                >
-                    <Button
-                        className=" rounded-circle d-flex align-items-center justify-content-center btn-add-link"
-                        variant="none"
-                        style={{ width: "50px", height: "50px" }}
-                        onClick={() => setOnlyLinkForm(true)}
-                    >
-                        <i className="bi bi-link-45deg" style={{ fontSize: "2rem" }}></i>
-                    </Button>
-                </OverlayTrigger>
-                */}
+
             </div>
-
-
-            {/*Modal only for link documents*/}
-            {/*  <---------------------------------------------------------------------------------------------------------------------------------------- ADD LINK BUTTON (MODAL)
-            <Modal show={onlyLinkForm} onHide={() => setOnlyLinkForm(false)} size="xl">
-                <Modal.Header closeButton>
-                    <Modal.Title className="modal-title"> <img src={link} alt="" /> Insert link</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    
-                    <Link 
-                        documents={props.documents} 
-                        alone={true} 
-                        setOnlyLinkForm={setOnlyLinkForm} 
-                        setErrorMsg={props.setErrorMsg}>
-                    </Link>
-                    
-                </Modal.Body>
-            </Modal>
-            */}
-            {/************************************/}
 
             <Modal show={showModalAdd} onHide={confirmClose} size="xl">
                 <Modal.Header closeButton>
@@ -294,6 +258,8 @@ function UnifiedForms(props) {
                                     newDocument={newDocument} docId={newDocument.docId} title={newDocument.title}
                                     confirmClose={confirmClose} handleAddDocument={props.handleAddDocument} alone={false}
                                     setErrorMsg={props.setErrorMsg}
+                                    allAssociations={props.allAssociations}
+                                    setAllAssociations={props.setAllAssociations}
                                 ></Link>
                             </Modal.Body>
                         </Carousel.Item>
