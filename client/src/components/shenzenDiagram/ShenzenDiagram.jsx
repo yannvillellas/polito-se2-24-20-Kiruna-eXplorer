@@ -586,7 +586,7 @@ function ShenzenDiagram(props) {
               key={i}
               x={xScale(tick)} // Posizione su scala X
               y={dimensions.height - 30}
-              fontSize={10 * (k + 1) / k} // Applica la scala del zoom
+              fontSize="1vw" // Applica la scala del zoom
               textAnchor="middle"
             >
               {tick.getFullYear()}
