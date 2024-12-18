@@ -33,6 +33,8 @@ function OffCanvasMarkerSezione2(props) {
     const [type, setType] = useState("");
     const [typeOptions, setTypeOptions] = useState([]); // Qui ci vanno i type che vengono dal server
     const [oldType, setOldType] = useState("");
+    const [showModalAddNewType, setShowModalAddNewType] = useState(false);
+    const [newType, setNewType] = useState("");
 
     const [language, setLanguage] = useState("");
     const languageOptions = [
@@ -121,7 +123,7 @@ function OffCanvasMarkerSezione2(props) {
             return;
         }
             */
-        if (selectedOption.length === 0 || type  === "" || language === "" || pages === "" || issuanceDate === "" || !isIssuanceDateValid) {
+        if (selectedOption.length === 0 || type === "" || language === "" || pages === "" || issuanceDate === "" || !isIssuanceDateValid) {
             alert("The fields cannot be empty or not in the correct format.");
             return;
         }
@@ -144,7 +146,7 @@ function OffCanvasMarkerSezione2(props) {
 
         console.log("offcanvaMarkerSezione2, lastVersionDocument: ", lastVersionDocument);
 
-        
+
         const updatedDocument = {
             docId: props.selectedDoc.docId,
             ...lastVersionDocument,
@@ -157,12 +159,12 @@ function OffCanvasMarkerSezione2(props) {
 
         console.log("offcanvaMarkerSezione2, sto spedendo ad updateDocument: ", updatedDocument);
         const res = await DocumentAPI.updateDocument(updatedDocument);
-        
+
         // Per avere un refresh del documento:
         props.handleForceRefresh();
     };
 
-    
+
 
 
 
@@ -309,6 +311,64 @@ function OffCanvasMarkerSezione2(props) {
                                     value={typeOptions.find(option => option.label === type)}
                                     onChange={(option) => setType(option.label)}
                                 />
+
+                                <>
+
+                                    <Button
+                                        variant="primary"
+                                        onClick={() => setShowModalAddNewType(true)}
+                                        style={{ backgroundColor: '#3e5168', border: 'none', marginTop: '4px' }}
+                                    >
+                                        Add new type
+                                    </Button>
+
+                                    <Modal show={showModalAddNewType} onHide={() => setShowModalAddNewType(false)}>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Please, add the new type</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>Type Name</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    required={true}
+                                                    placeholder="Enter scale name"
+                                                    onChange={(e) => setNewType(e.target.value)}
+                                                />
+                                            </Form.Group>
+                                        </Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="secondary" onClick={() => { setNewType(""); setShowModalAddNewType(false); }}>
+                                                Close
+                                            </Button>
+                                            <Button variant="primary" onClick={async () => {
+
+                                                // Se la scala non è già presente nell'elenco delle scale, aggiungila
+                                                if (!typeOptions.some(option => option.label === newType)) {
+                                                    typeOptions.push({ value: typeOptions.length + 1, label: newType });
+
+                                                    // Perchè non faccio aggiungere nuovi architectural scale, perchè si può modificare direttametne solo ASvalue
+                                                    setType(newType);
+                                                    setNewType("");
+                                                    setShowModalAddNewType(false);
+
+                                                    // Aggiungo la scala al db, così è riusabile
+                                                    const risposta = await documentTypeAPI.addDocumentType(newType);
+
+                                                } else {
+                                                    alert("The scale is already present in the list.");
+                                                }
+                                            }}>
+                                                Save Changes
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
+
+                                </>
+
+
+
+
                             </Card.Body>
                         </div>
                     </div>
