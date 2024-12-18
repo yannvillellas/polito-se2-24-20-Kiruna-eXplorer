@@ -4,12 +4,13 @@ import { Modal, Row, Col, Form, Button } from "react-bootstrap";
 import "./Link.css";
 import Select from "react-select";
 
+
 function Link(props) {
   const [linkTypes, setLinkTypes] = useState([]); // State for link types
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [doc2, setDoc2] = useState([]);
   const [doc1, setDoc1] = useState([]);
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
+  const [showCheckboxes, setShowCheckboxes] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false); // Stato per il modal di conferma
 
   // Funzione per gestire il cambiamento della checkbox
@@ -54,25 +55,15 @@ function Link(props) {
         for (let link of selectedTypes) {
           for (let dId2 of doc2) {
             let association = {
+              id: null,
               doc1: docId,
               type: link,
               doc2: parseInt(dId2.value, 10),
             };
             const response = await associationAPI.createAssociation(association);
-            if (response.msg) {
-              const doc1Title = props.documents.find(
-                (doc) => doc.docId === association.doc1
-              );
-              const doc2Title = props.documents.find(
-                (doc) => doc.docId === association.doc2
-              );
-              errors.push(
-                <>
-                  The link of type <strong>{link}</strong> between documents{" "}
-                  <strong>{doc1Title.title}</strong> and{" "}
-                  <strong>{doc2Title.title}</strong> already exists
-                </>
-              );
+            if(response){
+              association.id = response.id;
+              props.setAllAssociations([...props.allAssociations, association]);
             }
           }
         }
@@ -88,13 +79,14 @@ function Link(props) {
               type: link,
               doc2: dId2.value,
             };
+            console.log("association", association)
             const response = await associationAPI.createAssociation(
               association
             );
+            console.log("response", response)
             if (response.msg) {
-              const doc1Title = props.documents.find(
-                (doc) => doc.docId === association.doc1
-              );
+              console.log("response.msg", response.msg)
+              const doc1Title = props.title
               const doc2Title = props.documents.find(
                 (doc) => doc.docId === association.doc2
               );
@@ -105,12 +97,18 @@ function Link(props) {
                   <strong>{doc2Title.title}</strong> already exists
                 </>
               );
+              
+              console.log("errors1: ", errors)
+            }else{
+              association.id = response.id;
+              props.setAllAssociations([...props.allAssociations, association]);
             }
           }
         }
         props.setErrorMsg(errors);
         setDoc1([]);
         props.setOnlyLinkForm(false);
+        console.log("errors2: ", errors)
       }
       // Reset form fields after successful submission
       setLinkTypes([]);
@@ -140,17 +138,17 @@ function Link(props) {
               Connections Type
             </Form.Label>
             <Col sm="8" className="col-link">
-              <button
+              {/* <button
                 className="custom-dropdown-trigger"
                 onClick={() => setShowCheckboxes(!showCheckboxes)}
-              >
+              > */}
                 {selectedTypes.length > 0 ? (
                   `Selected: ${selectedTypes.join(", ")}`
                 ) : (
                   <span className="hint">Select connection(s)</span>
                 )}
                 <span className="arrow">&#9662;</span>
-              </button>
+              {/* </button> */}
 
               {showCheckboxes && (
                 <div className="checkbox-container">

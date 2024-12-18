@@ -31,7 +31,6 @@ const addArea = async (docId, area) => {
             throw new Error('Failed to add area');
         }
 
-        console.log("Area added successfully");
         return response.json();
     } catch (e) {
         console.error("Error adding an area:", e);

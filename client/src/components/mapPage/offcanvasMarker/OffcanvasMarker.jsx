@@ -81,14 +81,17 @@ function OffcanvasMarker(props) {
                                 documents={props.documents}
                                 handleChangeMapViewBasedOnDocId={props.handleChangeMapViewBasedOnDocId}
                                 handleForceRefresh={props.handleForceRefresh}
+                                setErrorMsg={props.setErrorMsg}
+                                allAssociations={props.allAssociations}
+                                setAllAssociations={props.setAllAssociations}
                             />
                             <br />
                             <OffCanvasMakerFooter
-                                selectedDoc={props.selectedDoc} 
-                                handleShowAllLinkedDocument={props.handleShowAllLinkedDocument} 
-                                closeDocumentModal={props.closeDocumentModal} 
+                                selectedDoc={props.selectedDoc}
+                                handleShowAllLinkedDocument={props.handleShowAllLinkedDocument}
+                                closeDocumentModal={props.closeDocumentModal}
                                 handleForceRefresh={props.handleForceRefresh}
-                                />
+                            />
                         </>
                     ) : (
                         <p>Select a marker for visualize the details.</p>

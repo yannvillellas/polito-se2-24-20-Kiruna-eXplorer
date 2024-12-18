@@ -58,7 +58,6 @@ function DocList(props) {
   useEffect(() => {
 
     const fetchAssociations = async () => {
-      console.log("DocList, documents: ", props.documents, props.allAssociations)
       const listAllAssociations = await associationAPI.getAllAssociations();
       setAllAssociations(listAllAssociations);
       setDocuments(props.documents);
@@ -145,7 +144,6 @@ function DocList(props) {
 
 function DocumentTable(props) {
   const { documents } = props;
-  console.log(documents)
   return (
     <Container fluid >
       <div className="custom-table-wrapper-main">
@@ -179,7 +177,6 @@ function DocumentTable(props) {
 }
 
 function DocumentRow(props) {
-  console.log(props.document.title)
   return (
     <tr >
       <DocumentData document={props.document} allPositions={props.allPositions} allAssociations={props.allAssociations} />
@@ -188,7 +185,6 @@ function DocumentRow(props) {
   );
 }
 function DocumentData(props) {
-  console.log("DocumentData, props: ", props.allAssociations);
   const numberOfConnectionsForThisDocument = props.allAssociations.filter(association => association.doc1 === props.document.docId || association.doc2 === props.document.docId).length;
 
 
@@ -259,7 +255,6 @@ function DocumentFile(props) {
     const fetchFiles = async () => {
       try {
         const files = await DocumentAPI.getFiles(props.document.docId);
-        console.log("DocumentFile, hot preso i file di docId: ", props.document.docId, files)
         if (files) {
           setFiles(Array.from(files));
         } else {

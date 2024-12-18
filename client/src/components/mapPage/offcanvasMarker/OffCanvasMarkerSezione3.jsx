@@ -22,7 +22,6 @@ function OffCanvasMarkerSezione3(props) {
     const [oldLinkedDocuments, setOldLinkedDocuments] = useState([]);
 
     const [onlyLinkForm, setOnlyLinkForm] = useState(false);
-    const [errorMsg, setErrorMsg] = useState("Erroer generico, arriva da OffCanvasMarkerSezione3");
 
     const [files, setFiles] = useState([]); // Got called here when a user press on the document (is bettere if is here? I think yes bc otherwise every time you have add/modify a new document in APP.jsx )
     const [isNeededAFileRefresh, setIsNeededAFileRefresh] = useState(false);
@@ -210,7 +209,9 @@ function OffCanvasMarkerSezione3(props) {
                                         doc1Id={props.selectedDoc.docId}
                                         title={props.selectedDoc.title}
                                         setOnlyLinkForm={setOnlyLinkForm}
-                                        setErrorMsg={setErrorMsg}>
+                                        setErrorMsg={props.setErrorMsg}
+                                        allAssociations={props.allAssociations}
+                                        setAllAssociations={props.setAllAssociations}>
                                     </Link>
 
                                 </Modal.Body>

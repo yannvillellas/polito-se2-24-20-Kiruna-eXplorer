@@ -26,12 +26,10 @@ function HomePage(props) {
         // This solution is due to the fact that for some reasons the map result as not-rendered so i cannot use the property og the map onCreate() to set the center of the map
         if (doc) {
             navigate('/mapPage'); // Naviga a /mapPage (refresh)
-            console.log("Sono in HomePage, navigo a /mapPage");
             setTimeout(() => {
                 setMapCenter([doc.lat, doc.lng]);
                 setIsDocId(true);
                 navigate(`/mapPage/${docId}`); // Dopo un breve ritardo, naviga a /mapPAge/:docId
-                console.log("Sono in HomePage, navigo a /mapPage/:docId");
             }, 100); // Usa un piccolo ritardo per garantire il re-render
         }
     };
@@ -45,12 +43,15 @@ function HomePage(props) {
             if (doc) {
                 setMapCenter([doc.lat, doc.lng]);
                 setIsDocId(true);
-                console.log("Sono in HomePage, docId: ", docId, doc.lat, doc.lng);
             }
         }
-    }, [docId, props.documents]);
 
+    }, [docId, props.documents, errorMsg]);
 
+    useEffect(() => {
+        console.log("Sono in HomePage, errorMsg: ", errorMsg);
+
+    }, [errorMsg]);
     return (
         <Container fluid>
             {/*toastCOntainer used to visualize errors messages*/}
@@ -81,6 +82,10 @@ function HomePage(props) {
                         areas={props.areas}
                         areaAssociations={props.areaAssociations}
                         handleModifyPosition={props.handleModifyPosition}
+                        setErrorMsg={setErrorMsg}
+                        allAssociations={props.allAssociations}
+                        setAllAssociations={props.setAllAssociations}
+
                     />}
                     {isDocId && <Map
                         highlightedDocId={Number(docId)} // docId as a promp
@@ -94,6 +99,9 @@ function HomePage(props) {
                         areas={props.areas}
                         areaAssociations={props.areaAssociations}
                         handleModifyPosition={props.handleModifyPosition}
+                        setErrorMsg={setErrorMsg}
+                        allAssociations={props.allAssociations}
+                        setAllAssociations={props.setAllAssociations}
                     />}
                     {isUrbanPlanner && (
                         <div className="add-document-container">
@@ -103,7 +111,10 @@ function HomePage(props) {
                                 scaleOptions={props.scaleOptions}
                                 typeOptions={props.typeOptions}
                                 setErrorMsg={setErrorMsg}
+                                errorMsg={errorMsg}
                                 handleAddDocument={props.handleAddDocument}
+                                allAssociations={props.allAssociations}
+                                setAllAssociations={props.setAllAssociations}
                             />
                         </div>
                     )}

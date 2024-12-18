@@ -62,6 +62,7 @@ function ShenzenDiagram(props) {
       });
     };
 
+    props.forceRefresh
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);

@@ -114,7 +114,6 @@ function CustomMap(props) {
 
     // Estrai l'ID o altre informazioni dalla feature
     const areaId = layer.feature.properties.stat_id; // O usa il campo che ti interessa, ad esempio stat_id o un altro campo
-    console.log("Clicked area ID:", areaId);
   };
 
   const geojsonStyle = {
@@ -180,7 +179,6 @@ function CustomMap(props) {
 
 
   const handleModifyPosition = async (newLan, newLng) => {
-    console.log("Sono in handleModifyPosition, ecco i parametri:", newLan, newLng);
     if (newLan === null || newLng === null) {
       alert("Latitude and longitude must be filled and should be numbers");
       return;
@@ -189,7 +187,6 @@ function CustomMap(props) {
       return;
     }
 
-    console.log("Sono in handleModifyPosition, ecco i parametri:", selectedDoc.docId, newLan, newLng);
     await DocumentAPI.updateDocumentPosition(selectedDoc.docId, newLan, newLng);
     closeDocumentModal();
   };
@@ -510,12 +507,14 @@ function CustomMap(props) {
         selectedDoc={selectedDoc}
         documents={props.documents}
         isUrbanPlanner={props.isUrbanPlanner}
-
+        setErrorMsg={props.setErrorMsg}
         closeDocumentModal={closeDocumentModal}
         handleForceRefresh={props.handleForceRefresh}
 
         handleChangeMapViewBasedOnDocId={props.handleChangeMapViewBasedOnDocId}
         handleShowAllLinkedDocument={handleShowAllLinkedDocument}
+        allAssociations={props.allAssociations}
+        setAllAssociations={props.setAllAssociations}
       />}
     </Container>
   );
@@ -531,6 +530,8 @@ CustomMap.propTypes = {
   handleChangeMapViewBasedOnDocId: PropTypes.func.isRequired,
   isUrbanPlanner: PropTypes.bool.isRequired,
   linksType: PropTypes.array.isRequired,
+  setErrorMsg: PropTypes.func.isRequired, 
 };
+
 
 export default CustomMap;
