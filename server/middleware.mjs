@@ -1,5 +1,6 @@
 import { getLinksType } from "./src/dao/linkTypeDAO.mjs";
 import fs from "fs";
+import path from "path";
 
 export const isUrbanPlanner = (req, res, next) => {
     if (req.isAuthenticated() && req.user.role === 'urbanPlanner') {
@@ -21,9 +22,11 @@ export const isValidType = async (req, res, next) => {
     }
 };
 
-// Middleware to create subfolfder that doesn't exist
+// Middleware to create subfolder that doesn't exist
 export const createFolder = (folderPath) => {
-    if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
+    const sanitizedPath = path.normalize(folderPath).replace(/^(\.\.(\/|\\|$))+/, ''); // Sanitize folderPath
+    const fullPath = path.join(__dirname, sanitizedPath);
+    if (!fs.existsSync(fullPath)) {
+        fs.mkdirSync(fullPath, { recursive: true });
     }
 };
