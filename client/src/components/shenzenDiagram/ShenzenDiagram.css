@@ -26,3 +26,111 @@
     fill:red;
     animation: bounce 0.8s ease-in-out infinite, fadeOut 0.5s ease-in-out 2.5s forwards; /* Ritardo di 2.5 secondi prima di iniziare a scomparire */
   }
+
+  .diagram-container{
+    display: flex;
+    height: 100vh;
+
+    .legend-container {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: row-reverse; /* Mantiene il bottone sempre a destra */
+      align-items: center;
+      transition: transform 0.3s ease-in-out;
+
+      h2{
+        text-align: center;
+        color: red;
+        margin-top: 15px;
+      }
+
+      h3{
+        color: #5F78A1;
+      }
+    }
+    
+    .legend-container.open {
+      transform: translateX(-10px) translateY(-50%); /* Si sposta a sinistra di 250px */
+    }
+    
+    .toggle-button {
+      width: 40px;
+      height: 40px;
+      background-color: #f0f0f0;
+      border: none;
+      border-radius: 5px 0 0 5px; /* Arrotonda solo il lato sinistro */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .arrow {
+      border: solid black;
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 5px;
+      transform: rotate(45deg);
+      transition: transform 0.2s;
+    }
+    
+    .arrow.right {
+      transform: rotate(-45deg); /* Freccia verso destra */
+    }
+    
+    .arrow.left {
+      transform: rotate(135deg); /* Freccia verso sinistra */
+    }
+    
+    .legend-content {
+      background-color: #ddd;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      padding: 10px;
+      width: 250px;
+      box-shadow: -4px 0 5px rgba(0, 0, 0, 0.2);
+      margin: 0 20px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .legend-line {
+      height: 2px;
+    }
+    
+    .legend-label {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .legend-icons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .legend-icon {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .legend-label {
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    
+  }
