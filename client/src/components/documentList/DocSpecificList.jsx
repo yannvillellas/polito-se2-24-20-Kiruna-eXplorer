@@ -12,30 +12,21 @@ import associationAPI from "../../api/associationAPI";
 
 import { useParams } from "react-router-dom";
 
-function DocSpecificList() {
+function DocSpecificList(props) {
     const { docId } = useParams();
+
+    // const [docIdInt, setDocIdInt] = useState(docId ? parseInt(docId) : 0);
     const docIdInt = parseInt(docId);
-    const [allDocuments, setAllDocuments] = useState([]);
     const [documentShown, setDocumentShown] = useState([]);
-    const [allPositions, setAllPositions] = useState([]);
     const [highlightedDocId, setHighlightedDocId] = useState(null);
+
+
+
 
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
-                console.log("Sono in DocSpecificList, useEffect, docId:", docIdInt);
-                const docs = await DocumentAPI.listDocuments();
-                setAllDocuments(docs);
-                console.log("Sono in DocSpecificList, useEffect, ecco i documenti:", docs);
-
-                const allPositions = await PositionAPI.listPositions();
-                console.log("Sono in DocSpecificList, useEffect, ecco le posizioni:", allPositions);
-                setAllPositions(allPositions);
-
-                const allAssociations = await associationAPI.getAllAssociations(); // Fetch all associations
-                console.log("Sono in DocSpecificList, useEffect, ecco le associazioni:", allAssociations);
-                const associations = allAssociations.filter(association => association.doc1 === docIdInt || association.doc2 === docIdInt);
-                console.log("Sono in DocSpecificList, useEffect, ecco le associazioni filtrate:", associations);
+                const associations = props.allAssociations.filter(association => association.doc1 === docIdInt || association.doc2 === docIdInt);
                 // Rendo una lista di id dei documenti associati ( enon tutte le associzioni)
                 const docIdGetFromAssociations = associations.map(association => {
                     if (association.doc1 === docIdInt) {
@@ -44,11 +35,10 @@ function DocSpecificList() {
                         return association.doc1;
                     }
                 });
-                console.log("Sono in DocSpecificList, useEffect, ecco gli id dei documenti associati:", docIdGetFromAssociations);
-                const documentsFiltered = docs.filter(doc => docIdGetFromAssociations.includes(doc.docId));
-                console.log("Sono in DocSpecificList, useEffect, ecco i documenti filtrati:", documentsFiltered);
-                const docFromDocId = docs.find(doc => doc.docId === docIdInt);
-                console.log("Sono in DocSpecificList, useEffect, ecco il documento con docId:", docFromDocId);
+                const documentLists = await DocumentAPI.listDocuments();
+                const documentsFiltered = documentLists.filter(doc => docIdGetFromAssociations.includes(doc.docId));
+                const docFromDocId = documentLists.find(doc => doc.docId === docIdInt);
+
                 setHighlightedDocId(docIdInt);
                 setDocumentShown([docFromDocId, ...documentsFiltered]); // Ci saranno errori per i documenti dovrebbe essere qui il problema
 
@@ -58,8 +48,7 @@ function DocSpecificList() {
         };
 
         fetchDocuments();
-
-    }, [docIdInt]);
+    }, [docIdInt, props.documents, props.positions, props.allAssociations]);
 
 
     return (
@@ -79,7 +68,7 @@ function DocSpecificList() {
                                 <th>Connections</th>
                                 <th>Language</th>
                                 <th>Pages</th>
-                                <th>(lat, lng)</th>
+                                <th>Map/Diagram</th>
                                 <th>Files</th>
                             </tr>
                         </thead>
@@ -88,7 +77,7 @@ function DocSpecificList() {
                                 <DocumentRow key={index}
                                     document={doc}
                                     isHighlighted={highlightedDocId !== null && highlightedDocId === doc.docId}
-                                    allPositions={allPositions}
+                                    allPositions={props.positions}
                                 />
                             ))}
                         </tbody>
@@ -114,6 +103,7 @@ function DocumentRow(props) {
             <DocumentFile
                 key={props.index}
                 document={props.document}
+                isHighlighted={props.isHighlighted}
             />
         </tr>
     );
@@ -147,43 +137,110 @@ function DocumentData(props) {
         fetchPosition();
     }, [props.document.docId]);
 
+    useEffect(() => {
+    }, [props.document.docId]);
+
+
 
     return (
         <>
-            <td className={props.isHighlighted ? "highlighted-row" : ""} >{props.document.title}</td>
-            <td onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: "pointer" }}>
-                {displayedDescription}
-                {props.document.description.split(" ").length > 10 && (
-                    <span style={{ color: "blue", textDecoration: "underline" }}>
-                        {isExpanded ? "Reduce" : " Show all "}
-                    </span>
-                )}
+
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.title}
+
+            </td >
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.description}
             </td>
-            <td>{props.document.stakeholders}</td>
-            <td>
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.stakeholders}
+            </td>
+
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
                 {props.document.ASvalue ? props.document.ASvalue : props.document.scale}
             </td>
-            <td>{props.document.issuanceDate}</td>
-            <td>{props.document.type}</td>
-            <td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.issuanceDate}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.type}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+
                 {props.document.connections !== 0 &&
 
-                    <Link to={`/documentPage/${props.document.docId}`} style={{ color: "blue", textDecoration: "none" }}>
+                    <Link to={`/documentPage/${props.document.docId}`} style={{ color: props.isHighlighted ? "white" : "blue", textDecoration: "none" }}>
                         {props.document.connections}
+                        <i className="bi bi-link-45deg" style={{ marginLeft: '9px' }}></i>
                     </Link>
 
                 }
 
                 {props.document.connections === 0 && <p>0</p>}
             </td>
-            <td>{props.document.language}</td>
-            <td>{props.document.pages}</td>
-            <td>
-                {position.lat === "N/A" || position.lng === "N/A" ?
-                    <td>N/A</td>
-                    :
-                    <td>{`${parseFloat(position.lat).toFixed(4)}, ${parseFloat(position.lng).toFixed(4)} `}</td>
-                }
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.language}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+                {props.document.pages}
+            </td>
+            <td style={{
+                backgroundColor: props.isHighlighted ? '#3e5168' : '',
+                color: props.isHighlighted ? 'white' : ''
+            }} >
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                    <Link to={`/mapPage/${props.document.docId}`} style={{
+                        color: props.isHighlighted ? "white" : "blue", textDecoration: "none", display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px"
+                    }}>
+                        Map
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </Link>
+
+
+                    <Link to={`/diagram/${props.document.docId}`} style={{
+                        color: props.isHighlighted ? "white" : "blue", textDecoration: "none", display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px"
+                    }}>
+                        Diagram
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </Link>
+                </div>
+
+
             </td>
         </>
     );
@@ -195,7 +252,7 @@ function DocumentFile(props) {
     useEffect(() => {
         const fetchFiles = async () => {
             try {
-                const files = await DocumentAPI.getFiles(props.document.docId);
+                const files = await DocumentAPI.getFiles(props.document.docId); // Will stay here, and not on App.jsx, for the same reason of the other times
                 if (files) {
                     setFiles(Array.from(files));
                 } else {
@@ -221,14 +278,14 @@ function DocumentFile(props) {
 
     return (
 
-        <td>
+        <td className={props.isHighlighted ? "highlighted-row" : ""}>
             {files.length > 0 ? (
                 files.map((f, index) => (
                     <div key={f.name || index}>
                         <Button onClick={() => handleDownload(f)}>
                             <i className="bi bi-file-earmark-text-fill"></i>
                         </Button>
-                        <p>{f.name}</p>
+                        <p style={{ color: props.isHighlighted ? "white" : "blue", textDecoration: "none" }}>{f.name}</p>
                     </div>
                 ))
             ) : (

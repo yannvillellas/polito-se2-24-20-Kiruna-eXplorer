@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "cypress": "^13.16.0"
+  },
+  "dependencies": {
+    "bootstrap-icons": "^1.11.3"
   }
 }

@@ -17,13 +17,7 @@ function MainPage(props) {
           the highest mountain in Sweden to the world's largest underground iron-one mine,
           ancient Sàmi culture to an angoing city trasformation.
         </p>
-        {!props.loggedIn && (
-            
-          <button className="btn-secondary" onClick={()=>{navigate('/registration')}}>
-            <img src={signup} alt="" />
-             Sign-Up
-          </button>
-        ) }
+
         
       </div>
     </div>

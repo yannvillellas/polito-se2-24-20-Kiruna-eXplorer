@@ -11,17 +11,22 @@ import {
   listDocuments,
   addDocument,
   deleteDocument,
+  updateDocument,
+  updateDocumentStakeholder,
+
 } from "./src/dao/documentDAO.mjs";
 import {
   listPositions,
   addPosition,
   updatePosition,
 } from "./src/dao/positionDAO.mjs";
-import { getLinksType } from "./src/dao/linkTypeDAO.mjs";
+import { getLinksType, getTypeByTypeId } from "./src/dao/linkTypeDAO.mjs";
 import {
   addArea,
   listAreas,
   listAreaAssociations,
+  addAreaAssociation,
+  deleteAreaAssociation,
 } from "./src/dao/areaDAO.mjs";
 import {
   getAssociations,
@@ -41,6 +46,10 @@ import {
   getDocumentTypes,
   addDocumentType,
 } from "./src/dao/documentTypeDAO.mjs";
+import { get } from "http";
+
+import { /*saveNodesPosition,getNodesPositions,updateNodePosition,*/getXValues,getYValues,addNewX,addNewY,clearAllPositions, 
+  getDimensions, addDimensions,updateHeight,updateWidth,addNodeTraslation,updateNodeTraslation,getTraslatedNodes } from "./src/dao/diagramDAO.mjs";
 
 const __dirname = path.resolve();
 const app = express();
@@ -214,6 +223,94 @@ app.post(
   }
 );
 
+// updateDocument
+app.put(
+  "/api/documents",
+  [
+    check("title").isString(),
+
+
+
+    check("issuanceDate").isString(),
+    check("connections").isInt(),
+    check("language").optional().isString(),
+    check("pages").optional().isString(),
+    check("description").isString(),
+
+    // Normalmente sono interi
+    check("type").isString(), // Gestito. Devo fare una query per ottenere l'id del tipo
+    check("scale").isString(),
+    check("ASvalue").optional(),
+
+    // Devono essere inseriti come interi in DocStakeholders:
+    check('stakeholders').isString(),
+
+
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
+      // Prendo tutti i document types
+      const allDocumentsType = await getDocumentTypes();
+      // docType row è fatta come (dtId, typeDescription) => dtId è l'id del tipo ceh mi serve per fare l'update
+      const docTypeId = allDocumentsType.find((docType) => docType.type === req.body.type).dtId;
+      console.log("docTypeId", docTypeId);
+
+      // Prendo tutti le scales
+      const allScales = await getScales();
+      // scale row è fatta come (scaleId, name) => sId è l'id della scala ceh mi serve per fare l'update
+      const scaleId = allScales.find((scale) => scale.name === req.body.scale).scaleId;
+      console.log("scaleId", scaleId);
+
+      // Prendo tutti i stakeholders
+      const allStakeholders = await getStakeholders();
+      console.log("allStakeholders", allStakeholders);
+      // stakeholder row è fatta come (shId, name) => shId è l'id dello stakeholder ceh mi serve per fare l'update
+      const stakeholders = req.body.stakeholders.split(', '); // rimuovo gli spazi prima e dopo di ogni stakeholder
+      console.log("stakeholders", stakeholders);
+      // Prendo gli id degli stakeholders
+      const stakeholdersId = allStakeholders.filter((sh) => stakeholders.includes(sh.name)).map((sh) => sh.shId);
+      console.log("stakeholdersId", stakeholdersId);
+      console.log("docId", req.body.docId);
+      const risposta = await updateDocumentStakeholder(req.body.docId, stakeholdersId);
+      console.log("Ho appena aggiornato gli stakeholder:", risposta);
+
+      const reformattedDocument = {
+        docId: req.body.docId,
+
+        title: req.body.title,
+        description: req.body.description,
+
+        scale: scaleId,
+        ASvalue: req.body.ASvalue,
+
+        issuanceDate: req.body.issuanceDate,
+        type: docTypeId,
+        connections: req.body.connections,
+        language: req.body.language,
+        pages: req.body.pages,
+      };
+
+      console.log("reformattedDocument", reformattedDocument);
+
+      const resultOfTheUpadate = await updateDocument(reformattedDocument);
+      console.log("resultOfTheUpadate", resultOfTheUpadate);
+
+      res.status(201).json(resultOfTheUpadate);
+
+    } catch (err) {
+      console.error("Error adding document:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+
+
 app.post("/api/documents/:docId/files", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send("No file uploaded.");
@@ -255,6 +352,40 @@ app.get("/api/documents", [], async (req, res) => {
 app.get("/api/documents/:docId/files", (req, res) => {
   const subfolder = req.params.docId;
   const uploadDir = path.join(__dirname, "uploads");
+  const folderPath = path.join(uploadDir, subfolder);
+
+  try {
+    // Controlla se la sottocartella esiste
+    if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
+      // return res.status(400).send("Sottocartella non valida o non trovata.");
+      return res.json([]); // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
+    }
+
+    // Legge i file nella sottocartella specificata
+    const files = fs.readdirSync(folderPath);
+
+    // Se non ci sono file, restituisce un array vuoto
+    if (files.length === 0) { // <--------------------------------------------------------------------- Ora se non ci sono file, restituisce array vuoto
+      return res.json([]);
+    }
+
+    // Se ci sono file, restituisce i dettagli dei file
+    const fileDetails = files.map((file) => ({
+      name: file,
+      path: `/uploads/${subfolder}/${file}`,
+    }));
+
+    res.json(fileDetails);
+  } catch (error) {
+    console.error("Errore durante la lettura della directory:", error);
+    res.status(500).send("Errore del server durante la lettura dei file.");
+  }
+});
+
+/* Vecchio codice: causa problemi se non esistono file:
+app.get("/api/documents/:docId/files", (req, res) => {
+  const subfolder = req.params.docId;
+  const uploadDir = path.join(__dirname, "uploads");
 
   // Ottiene la lista delle sottocartelle presenti nella cartella uploads
   const availableFolders = fs.readdirSync(uploadDir).filter((item) => {
@@ -277,6 +408,7 @@ app.get("/api/documents/:docId/files", (req, res) => {
 
   res.json(files);
 });
+*/
 
 app.delete("/api/documents", isUrbanPlanner, [], async (req, res) => {
   try {
@@ -443,8 +575,24 @@ app.post(
 
     // Here i manage the (lat, long), float values
     const docId = req.body.docId;
-    const lat = req.body.lat;
-    const lng = req.body.lng;
+    let lat = Number(req.body.lat.toFixed(4));
+    let lng = Number(req.body.lng.toFixed(4));
+    console.log("Sono in server, /api/positions, ho ricevuto la richiesta di addPosition (fixed)", docId, lat, lng);
+    // Prendo tutte le posizioni, e se tra queste c'è una che ha le stesse coordinate allora aggiungo lat+0.00015 e lng+0.00015
+    const tutteLePosizioni = await listPositions();
+    console.log("tutteLePosizioni", tutteLePosizioni);
+    tutteLePosizioni.forEach(async (position) => {
+      const fixedLat = Number(position.latitude.toFixed(4));
+      const fixedLng = Number(position.longitude.toFixed(4));
+      if (fixedLat === lat && fixedLng === lng) {
+        console.log("Ho trovato una posizione con le stesse coordinate, aggiungo lat+0.00015 e lng+0.00015");
+        lat += 0.0002;
+        lng += 0.0002;
+
+        console.log("lat aggiornate, lng", lat, lng);
+      }
+    });
+    console.log("Sto inserendo: docId, lat, lng", docId, lat, lng);
     await addPosition(docId, lat, lng);
 
     res.status(201).end();
@@ -460,9 +608,31 @@ app.get("/api/positions", [], async (req, res) => {
   }
 });
 
+
+
+function calculateCenterOfPolygon(latlngs) {
+  let latSum = 0;
+  let lngSum = 0;
+  const numPoints = latlngs.length;
+
+  // Somma le coordinate
+  latlngs.forEach(latlng => {
+    latSum += latlng.lat;
+    lngSum += latlng.lng;
+  });
+
+  // Calcola la media delle coordinate
+  const centerLat = latSum / numPoints;
+  const centerLng = lngSum / numPoints;
+
+  return [centerLat, centerLng];
+}
+
+
+
+
 app.put(
   "/api/positions/:docId",
-  isUrbanPlanner,
   [check("lat").isFloat(), check("lng").isFloat()],
   async (req, res) => {
     const errors = validationResult(req);
@@ -470,11 +640,52 @@ app.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log("Sono in server, /api/positions/:docId, ho ricevuto la richiesta di updatePosition", req.body);
     // Here i manage the (lat, long), float values
     const docId = req.params.docId;
     const lat = req.body.lat;
     const lng = req.body.lng;
-    await updatePosition(docId, lat, lng);
+
+    let  flagFoundSameAreaAppartenance = false; // mi dovrebbe risolvere l'incubo dei cluster
+    
+    // Ora prendo tutte le aree, e ne calcolo il centroide, se il centroide coincide con queste coordinate che mi sono state passate
+    // allora aggiungo in areaAssociation docId e areaId
+    const tutteLeAree = await listAreas();
+    console.log("tutteLeAree", tutteLeAree);
+    // Calcolo il centroide di ciascuna area:
+    tutteLeAree.forEach(async (area) => {
+      const centroide = calculateCenterOfPolygon(JSON.parse(area.coordinates)[0]);
+      const clat = centroide[0].toFixed(4);
+      const clng = centroide[1].toFixed(4);
+      console.log("centroide", centroide, "clat", clat, "clng", clng);
+
+      if (clat === lat.toFixed(4) && clng === lng.toFixed(4)) {
+        flagFoundSameAreaAppartenance = true;
+        console.log("Sono uguali, aggiungo l'associazione");
+        // Aggiungo l'associazione
+        const areaId = area.areaId;
+        const areaAssociation = {
+          docId: Number(docId),
+          areaId: Number(areaId)
+        };
+        console.log("Ho trovato: areaAssociation", areaAssociation);
+
+        // Rimuovi tutte le vecchie area association:
+        const rispostaDaRemoveArea = await deleteAreaAssociation(Number(areaAssociation.docId));
+
+        console.log("Ho appena rimosso l'associazione:", rispostaDaRemoveArea,areaAssociation.areaId, areaAssociation.docId );
+        const risposta = await addAreaAssociation(areaAssociation.areaId, areaAssociation.docId);
+        // console.log("Ho appena aggiunto l'associazione:", risposta);
+      }
+    });
+
+    if(flagFoundSameAreaAppartenance){
+      await updatePosition(docId, lat + 0.00015, lng + 0.00015);
+    } else {
+      await updatePosition(docId, lat, lng);
+    }
+
+
 
     res.status(200).end();
   }
@@ -601,6 +812,171 @@ app.get("/api/linkTypes", [], async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.get("/api/linkTypes/:id", [], async (req, res) => {
+  try {
+    const type = await getTypeByTypeId(req.params.id);
+    res.status(200).json(type);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+//diagram API
+/*app.get("/api/diagram/nodes", [], async (req, res) => {
+  try {
+    const positions = await getNodesPositions();
+    res.status(200).json(positions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      console.log("ricevo",req.body)
+      await saveNodesPosition(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving nodes positions", e);
+      res.status(500).json({ error: "Error saving nodes positions" });
+  }
+});
+
+app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
+  try {
+      await updateNodePosition(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});*/
+
+app.get("/api/diagram/nodes", [], async (req, res) => {
+  try {
+    const positions = await getTraslatedNodes();
+    res.status(200).json(positions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      await addNodeTraslation(req.body);
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving nodes positions", e);
+      res.status(500).json({ error: "Error saving nodes positions" });
+  }
+});
+
+app.put("/api/diagram/nodes",isUrbanPlanner,[], async (req, res) => {
+  try {
+      await updateNodeTraslation(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+app.delete("/api/diagram/nodes",[], async (req, res) => {
+  try {
+      await clearAllPositions(); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error deleteing node positions", e);
+      res.status(500).json({ error: "Error deleteing node positions" });
+  }
+});
+
+app.get("/api/diagram/xScale", [], async (req, res) => {
+  try {
+    const scale = await getXValues();
+    res.status(200).json(scale);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.get("/api/diagram/yScale", [], async (req, res) => {
+  try {
+    const scale = await getYValues();
+    res.status(200).json(scale);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/xScale/add",[], async (req, res) => {
+  try {
+      
+      await addNewX(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving x scale", e);
+      res.status(500).json({ error: "Error saving x scale" });
+  }
+});
+
+app.post("/api/diagram/yScale/add",[], async (req, res) => {
+  try {
+    //console.log("aggiungo",req.body)
+      await addNewY(req.body); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving y scale", e);
+      res.status(500).json({ error: "Error saving y scale" });
+  }
+});
+
+app.get("/api/diagram/dimensions", [], async (req, res) => {
+  try {
+    const dimensions = await getDimensions();
+    //console.log("ottengo", dimensions)
+    res.status(200).json(dimensions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+app.post("/api/diagram/dimensions",[], async (req, res) => {
+  try {
+      //console.log("salvo le dimensioni",req.body.width, req.body.height)
+      await addDimensions(req.body.width, req.body.height);
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error saving y scale", e);
+      res.status(500).json({ error: "Error saving y scale" });
+  }
+});
+
+app.put("/api/diagram/width",[], async (req, res) => {
+  try {
+      //console.log("update width", req.body.width)
+      await updateWidth(req.body.width); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+app.put("/api/diagram/height",[], async (req, res) => {
+  try {
+      //console.log("update height", req.body.height)
+      await updateHeight(req.body.height); // Assicurati che req.body abbia i dati corretti
+      res.status(200).end();
+  } catch (e) {
+      console.error("Error updating node position", e);
+      res.status(500).json({ error: "Error updating node position" });
+  }
+});
+
+
 
 // Remove comments if you want to run tests for the server (needed for havinf the server running just for the tests)
 //if (require.main === module) {
