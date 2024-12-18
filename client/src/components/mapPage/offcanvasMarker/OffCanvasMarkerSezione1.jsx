@@ -412,7 +412,7 @@ function OffCanvasMarkerSezione1(props) {
                                             <Button variant="secondary" onClick={() => { setNewScale(""); setShowModalAddNewScale(false); }}>
                                                 Close
                                             </Button>
-                                            <Button variant="primary" onClick={() => {
+                                            <Button variant="primary" onClick={ async () => {
 
                                                 // Se la scala non è già presente nell'elenco delle scale, aggiungila
                                                 if (!scaleOptions.some(option => option.label === newScale)) {
@@ -420,11 +420,16 @@ function OffCanvasMarkerSezione1(props) {
 
                                                     // Perchè non faccio aggiungere nuovi architectural scale, perchè si può modificare direttametne solo ASvalue
                                                     setScale(newScale);
+                                                    
                                                     setIsArchitecturalScale(false);
                                                     setAvScale("-");
 
                                                     setNewScale("");
                                                     setShowModalAddNewScale(false);
+
+                                                    // Aggiungo la scala al db, così è riusabile
+                                                    const risposta = await scaleAPI.addScale(newScale);
+
                                                 } else {
                                                     alert("The scale is already present in the list.");
                                                 }
