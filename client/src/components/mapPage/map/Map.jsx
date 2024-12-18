@@ -22,7 +22,7 @@ import associationAPI from "../../../api/associationAPI";
 import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
 import OffcanvasMarker from "../offcanvasMarker/OffcanvasMarker";
-import FilteredSelection from "./filteredSelection/filteredSelection";
+import FilteredSelection from "./filteredSelection/FilteredSelection";
 
 
 const validDocTypes = [

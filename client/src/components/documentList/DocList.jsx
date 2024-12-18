@@ -14,7 +14,7 @@ import associationAPI from "../../api/associationAPI"
 
 
 // va importata da: client\src\components\assets\IconaModificaPosizione.png
-import IconaSearch from "../assets/IconaSearch.png";
+import IconaSearch from "../assets/iconaSearch.png";
 /**<img src={IconaModificaPosizione} alt="search" width="90" height="90" /> */
 
 /**
@@ -243,7 +243,7 @@ function DocumentData(props) {
             gap: "5px" // Aggiunge uno spazio tra il link e l'icona
           }}>
             Map
-            <i class="bi bi-arrow-right-circle"></i>
+            <i className="bi bi-arrow-right-circle"></i>
           </Link>
 
 
@@ -256,7 +256,7 @@ function DocumentData(props) {
             gap: "5px" // Aggiunge uno spazio tra il link e l'icona
           }}>
             Diagram
-            <i class="bi bi-arrow-right-circle"></i>
+            <i className="bi bi-arrow-right-circle"></i>
           </Link>
         </div>
 
