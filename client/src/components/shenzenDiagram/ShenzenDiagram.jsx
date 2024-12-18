@@ -62,7 +62,7 @@ function ShenzenDiagram(props) {
       });
     };
 
-    props.forceRefresh
+    props.forceRefresh()
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -561,8 +561,8 @@ function ShenzenDiagram(props) {
             <text
               key={i}
               x={10}
-              y={yScale(category) + yScale.bandwidth() / 2 - 30}
-              fontSize={10 * k} // Applica la scala del zoom
+              y={yScale(category) + yScale.bandwidth() / 2 - 20}
+              fontSize={10} // Applica la scala del zoom
               textAnchor="start"
               dominantBaseline="middle"
             >
@@ -707,7 +707,7 @@ function ShenzenDiagram(props) {
               {validDocTypes.map((docType) => (
                 <div key={docType} className="legend-item">
                   <img
-                    src={`icons/${docType.toLowerCase().replace(' ', '-')}_others.png`}
+                    src={`/icons/${docType.toLowerCase().replace(' ', '-')}_others.png`}
                     alt={docType}
                     className="legend-icon"
                     style={{ width: "32px", height: "32px", marginRight: "10px" }}

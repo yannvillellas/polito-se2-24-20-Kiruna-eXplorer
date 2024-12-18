@@ -46,12 +46,8 @@ function HomePage(props) {
             }
         }
 
-    }, [docId, props.documents, errorMsg]);
+    }, [docId, props.documents]);
 
-    useEffect(() => {
-        console.log("Sono in HomePage, errorMsg: ", errorMsg);
-
-    }, [errorMsg]);
     return (
         <Container fluid>
             {/*toastCOntainer used to visualize errors messages*/}
