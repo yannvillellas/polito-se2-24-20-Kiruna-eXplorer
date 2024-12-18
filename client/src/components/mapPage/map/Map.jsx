@@ -2,7 +2,11 @@ import "./map.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import PropTypes from 'prop-types';
-import { Container, Modal, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Container, Modal, Button, Tooltip, OverlayTrigger, Form } from "react-bootstrap";
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Select from "react-select";
+
 import DocumentAPI from "../../../api/documentAPI";
 import ChosenPositionMap from "./ChosenPositionMap";
 import 'leaflet/dist/leaflet.css';
@@ -18,6 +22,7 @@ import associationAPI from "../../../api/associationAPI";
 import geojsonData from "../../../data/KirunaMunicipality.json";
 import { Icon, DivIcon } from 'leaflet';
 import OffcanvasMarker from "../offcanvasMarker/OffcanvasMarker";
+import FilteredSelection from "./filteredSelection/filteredSelection";
 
 
 const validDocTypes = [
@@ -55,7 +60,7 @@ const getIcon = (docType, stakeholders) => {
 
 const getCustomIcon = (docType, stakeholders, isHighlighted) => {
   const iconUrl = getIcon(docType, stakeholders).options.iconUrl;
-  const borderColor = isHighlighted ? 'red' : 'rgba(255, 255, 255, 0.9)';
+  const borderColor = isHighlighted ? '#ce661f' : 'rgba(255, 255, 255, 0.9)';
   return new DivIcon({
     html: `
       <div style="position: relative; width: 32px; height: 32px;">
@@ -85,10 +90,11 @@ function CustomMap(props) {
   const [newLan, setNewLan] = useState(null);
   const [newLng, setNewLng] = useState(null);
 
-
-
   // managing the evidence of the document
   const [highlightedDocId, setHighlightedDocId] = useState(null);
+
+  // Filtro 
+  const [specificFilter, setSpecificFilter] = useState("");
 
   // Se ho il parametro in /mapPage/:docId mi prendo il documento e mi apro direttamtne il modal:
   useEffect(() => {
@@ -171,6 +177,8 @@ function CustomMap(props) {
 
 
 
+
+
   const handleModifyPosition = async (newLan, newLng) => {
     console.log("Sono in handleModifyPosition, ecco i parametri:", newLan, newLng);
     if (newLan === null || newLng === null) {
@@ -211,26 +219,26 @@ function CustomMap(props) {
       setVisibleArea(areaAssociation.areaId); // Imposta l'area visibile
     }
 
-    
+
 
   };
 
   const handleMouseOut = () => {
     setVisibleArea(null); // Rimuove l'area visibile
   };
-  
+
   const handleRightClick = (event, docId) => {
 
     // Mi serve per gestire l'evento custom di leaflet del tasto destro
     const nativeEvent = event.originalEvent;
     nativeEvent.preventDefault(); // Per evitare il menu contestuale predefinito del browser
 
-    
+
     const areaAssociation = props.areaAssociations.find((a) => a.docId === docId);
     if (areaAssociation?.areaId) {
       setVisibleAreas([...visibleAreas, areaAssociation.areaId]); // Imposta l'area visibile
     }
-    
+
 
     console.log('Tasto destro su:', docId);
     // Aggiungi qui altre azioni (ad esempio, aprire un menu custom)
@@ -241,7 +249,7 @@ function CustomMap(props) {
     console.log("Visible areas:", visibleAreas);
   }, [visibleAreas]);
 
-  
+
   const bounds = [[67.3062, 17.8498], [69.1099, 23.3367]];
 
   const renderMarkers = (documents) => {
@@ -269,6 +277,21 @@ function CustomMap(props) {
       </Marker>
     ));
   };
+
+
+  const handleShowFilteredDocuments = async (documents) => {
+    
+    // Per convenzione non ci sono documenti.
+    if(documents.length === 0){
+      setFilterOn(false);
+    } else{
+      setFilterOn(true);
+      setDocumentShown(documents);
+    }
+
+  };
+
+
 
   return (
 
@@ -301,6 +324,7 @@ function CustomMap(props) {
         >
           {renderMarkers(filterOn ? documentShown : props.documents)}
         </MarkerClusterGroup>
+
 
         {/**Show all the areas by document: */}
 
@@ -413,23 +437,73 @@ function CustomMap(props) {
         )
       }
 
+      {/* Bottone del filtro:  */}
+      <Button className="filters-documents-map"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.2)", // Sfondo opaco
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Ombra del bottone
+          backdropFilter: "blur(20px)", // Effetto di sfocatura sullo sfondo
+          border: "2px solid white", // Bordo bianco
+          color: "white", // Colore del testo bianco
+          display: "flex", // Usa Flexbox
+          alignItems: "center", // Centra verticalmente
+          justifyContent: "center", // Centra orizzontalmente
+          padding: "1px 5px", // Padding del pulsante
+        }}
+      >
+        <i className="bi bi-filter fs-4"></i> {/* Icona centrata */}
+      </Button>
 
-      {/*} // Filter on the top that permit you to see only link
-      <Form className="search-document">
-        <Form.Group className="mb-3">
-          <Form.Label style={{color: "white"}}>Choose a document so all linked-document will be shown</Form.Label>
-          <Select
-            options={documents.map((doc) => {
-              return { value: doc.docId, label: doc.title }
-            })}
-            isClearable
-            placeholder="Select document"
-            required={true}
-            onChange={(selectedOption) => handleShowAllLinkedDocument(selectedOption?.value || null)}
-          />
-        </Form.Group>
+      <Dropdown className="filters-documents-map"> {/* Dropdown per il filtro ---------------------------------------------------------------------------------------*/}
+        <Dropdown.Toggle variant="success" id="dropdown-basic"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.2)", // Sfondo opaco
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Ombra del bottone
+            backdropFilter: "blur(20px)", // Effetto di sfocatura sullo sfondo
+            border: "2px solid white", // Bordo bianco
+            color: "white", // Colore del testo bianco
+            display: "flex", // Usa Flexbox
+            alignItems: "center", // Centra verticalmente
+            justifyContent: "center", // Centra orizzontalmente
+            padding: "1px 5px", // Padding del pulsante
+          }}
+        >
+          <i className="bi bi-filter fs-4"></i>
+          Filter by
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => setSpecificFilter("Stakeholders")}>Stakeholders</Dropdown.Item>
+          <Dropdown.Item onClick={() => setSpecificFilter("Type")}>Type</Dropdown.Item>
+          <Dropdown.Item onClick={() => setSpecificFilter("Title")}>Title</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+
+
+      {/* // Filter on the top that permit you to see only link      */}
+      <Form className="search-document"
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          backgroundColor: 'transparent', // Sfondo completamente trasparente
+          borderRadius: '10px',
+          boxShadow: 'none' // Rimuove l'ombra
+        }}
+
+      >
+        <FilteredSelection
+          documents={props.documents} /*Per avere tutti i titoli dei documenti */
+
+          specificFilter={specificFilter}
+          handleShowFilteredDocuments={handleShowFilteredDocuments}
+        />
+
       </Form>
-      */}
+
+
+
 
       {/* Modal for the document */}
       {selectedDoc && <OffcanvasMarker
@@ -438,6 +512,7 @@ function CustomMap(props) {
         isUrbanPlanner={props.isUrbanPlanner}
 
         closeDocumentModal={closeDocumentModal}
+        handleForceRefresh={props.handleForceRefresh}
 
         handleChangeMapViewBasedOnDocId={props.handleChangeMapViewBasedOnDocId}
         handleShowAllLinkedDocument={handleShowAllLinkedDocument}

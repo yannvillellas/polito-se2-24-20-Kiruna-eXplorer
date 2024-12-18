@@ -24,6 +24,8 @@ import scaleAPI from './api/scaleAPI';
 import stakeholderAPI from './api/stakeholderAPI';
 
 
+import WelcomePage from './components/welcomePage/WelcomePage';
+
 function App() {
     const [user, setUser] = useState(null);  // Consolidato `user` e `userRole`
     const [authChecked, setAuthChecked] = useState(false);
@@ -35,6 +37,8 @@ function App() {
 
     // Document has been moved here:
     const [documents, setDocuments] = useState([]); // if is here will be easier for tehe shenzen diagram; position is different for the map and for shenzen diagram so will be managed in their componetns
+    const [forceRefresh, setForceRefresh] = useState(false);
+
     const [linksType, setLinksType] = useState([]);
     const [areas, setAreas] = useState([]);
     const [areaAssociations, setAreaAssociations] = useState([]);
@@ -55,7 +59,7 @@ function App() {
             }
         }
         fetchAllAssociations();
-    }, [documents]);
+    }, [documents, forceRefresh]);
 
 
     useEffect(() => {
@@ -68,7 +72,7 @@ function App() {
             setTypeOptions(typeList.map((t) => { return { value: t.type, label: t.type } }))
         }
         fetchOptions();
-    }, [documents])
+    }, [documents, forceRefresh])
 
 
 
@@ -85,13 +89,17 @@ function App() {
             }
         }
         fetchAreas();
-    }, [documents]);
+    }, [documents, forceRefresh]);
 
 
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
                 const documents = await DocumentAPI.listDocuments();
+
+
+                console.log("Sono in App.jsx, fetchDocuments, ho ricevuto documents:", documents);
+
                 const positions = await PositionAPI.listPositions();
                 const updatedDocuments = updateDocumentsWithPositions(documents, positions);
                 setDocuments(updatedDocuments);
@@ -101,7 +109,7 @@ function App() {
             }
         }
         fetchDocuments();
-    }, []);
+    }, [forceRefresh]);
 
     useEffect(() => {
         const fetchLinksType = async () => {
@@ -114,9 +122,11 @@ function App() {
             }
         }
         fetchLinksType();
-    }, [documents]);
+    }, [documents, forceRefresh]);
 
-
+    const handleForceRefresh = () => {
+        setForceRefresh(!forceRefresh);
+    };
 
 
 
@@ -153,6 +163,8 @@ function App() {
             console.log("Sono in Homepage.jsx, handleAddArea, sto spedendo alle API:", document.docId, document.area);
             const areaId = await areaAPI.addArea(document.docId, document.area);
             console.log("Sono in Homepage.jsx, handleAddArea, ho ricevuto dalle API areaId:", areaId);
+            
+            handleForceRefresh(); 
 
             return areaId;
         } catch (error) {
@@ -176,7 +188,7 @@ function App() {
 
 
             const docId = await DocumentAPI.addDocument(document);
-
+            console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento, docId:", document, docId);
             const position = {
                 docId: docId,
                 lat: document.lat,
@@ -214,7 +226,11 @@ function App() {
                 areaId: areaId,
 
             }
+
+
             setDocuments([...documents, stateDocument]);
+
+
             console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento:", stateDocument);
             // adding files to the document
             if (document.files.length > 0) {
@@ -232,7 +248,7 @@ function App() {
     // Si viene aggiunto alla lista correttaemtne (va modificato il conenctions perchè viene aggiunto al file solo al refresh della pagina)
     useEffect(() => {
         console.log("Sono in App.jsx, handleAddDocument, ho aggiunto il documento, documents:", documents);
-    }, [documents]);
+    }, [documents, forceRefresh]);
 
 
 
@@ -372,7 +388,7 @@ function App() {
                 }
             >
 
-                <Route path="/" element={<Navigate replace to={loggedIn ? '/mapPage' : '/mainPage'} />} /> {/*<------------------------------------------------- be careful now ther e is mapPage */}
+                <Route path="/" element={<Navigate replace to={loggedIn ? '/welcomePage' : '/mainPage'} />} /> {/*<------------------------------------------------- be careful now ther e is mapPage */}
                 <Route
                     path="/login"
                     element={loggedIn ? <Navigate replace to="/" /> : <Login login={handleLogin} />}
@@ -380,6 +396,8 @@ function App() {
                 <Route path="/registration" element={<Registration registration={handleRegistration} />} />
                 <Route path="*" element={<PageNotFound />} />
                 <Route path='/mainPage' element={<MainPage loggedIn={loggedIn} role={user?.role} handleLogout={handleLogout} isUrbanPlanner={isUrbanPlanner} />} />
+
+                <Route path='/welcomePage' element={<WelcomePage /> } />
 
 
                 <Route
@@ -395,6 +413,7 @@ function App() {
 
                         handleModifyPosition={handleModifyPosition}
                         handleAddDocument={handleAddDocument}
+                        handleForceRefresh={handleForceRefresh}
 
                         areas={areas}
                         areaAssociations={areaAssociations}
@@ -405,6 +424,7 @@ function App() {
                     element={<DocList
                         documents={documents}
                         positions={positions}
+                        allAssociations={allAssociations}
 
                         stakeholdersOptions={stakeholdersOptions}
                         scaleOptions={scaleOptions}

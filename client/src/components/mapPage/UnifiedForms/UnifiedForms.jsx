@@ -135,10 +135,10 @@ function UnifiedForms(props) {
                     <Button
                         className=" rounded-circle d-flex align-items-center justify-content-center btn-add-document"
                         variant="none"
-                        style={{ width: "50px", height: "50px", }}
+                        style={{ width: "50px", height: "50px", backgroundColor: "#ffff", }}
                         onClick={onBtnSelectAdd}
                     >
-                        <i className="bi bi-plus" style={{ fontSize: "2rem" }}></i>
+                        <i className="bi bi-plus" style={{ fontSize: "2.5rem" }}></i>
                     </Button>
                 </OverlayTrigger>
                 {/*  <---------------------------------------------------------------------------------------------------------------------------------------- ADD LINK BUTTON 

@@ -71,6 +71,7 @@ function HomePage(props) {
                 <Col style={{ position: "relative" }}>
                     {!isDocId && <Map
                         highlightedDocId={Number(docId)} // docId as a promp
+                        handleForceRefresh={props.handleForceRefresh}
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={[67.8558, 20.2253]}
                         zoom={14}
@@ -83,6 +84,7 @@ function HomePage(props) {
                     />}
                     {isDocId && <Map
                         highlightedDocId={Number(docId)} // docId as a promp
+                        handleForceRefresh={props.handleForceRefresh}
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={mapCenter}
                         zoom={16}

@@ -4,13 +4,19 @@ import { useState, useEffect } from "react";
 import { Container, Button, Form } from "react-bootstrap";
 
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, FeatureGroup, Marker,  LayersControl, Polygon, GeoJSON, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, FeatureGroup, Marker, LayersControl, Polygon, GeoJSON, useMapEvents } from 'react-leaflet';
 import { EditControl } from "react-leaflet-draw";
 
 import "leaflet-draw/dist/leaflet.draw.css";
 
 import geojsonData from "../../../../data/KirunaMunicipality.json";
 import areaAPI from "../../../../api/areaAPI";
+
+import IconaAllMunicipality from "../../../assets/iconaAllMunicipality.png";
+import IconaChooseOnTheMap from "../../../assets/iconaChooseOnTheMap.png";
+import IconaManualInsertion from "../../../assets/iconaManualInsertion.png";
+import IconaAddNewArea from "../../../assets/iconaAddNewArea.png";
+import IconaChoosePrexistingArea from "../../../assets/iconaChoosePrexistingArea.png";
 
 function ChosenPosition(props) {
     const [selectedOption, setSelectedOption] = useState('');
@@ -146,7 +152,6 @@ function ChosenPosition(props) {
     }
 
 
-
     const onCreated = (e) => {
         const { layerType, layer } = e;
         let shape;
@@ -158,23 +163,6 @@ function ChosenPosition(props) {
                 latlngs: JSON.stringify(layer.getLatLngs()),
             };
         }
-
-        /*
-        else if (layerType === "circle") {
-            shape = {
-                id: Date.now(),
-                type: layerType,
-                center: JSON.stringify(layer.getLatLng()),
-                radius: JSON.stringify(layer.getRadius()),
-            };
-        } else if (layerType === "circlemarker") {
-            shape = {
-                id: Date.now(),
-                type: layerType,
-                center: JSON.stringify(layer.getLatLng()),
-            };
-           
-        }  */
 
         else {
             console.warn(`Tipo di layer non gestito: ${layerType}`);
@@ -188,27 +176,6 @@ function ChosenPosition(props) {
         if (isAreaContained(areaToGeoJson, geojsonData)) {
             console.log("Sono in ChosenPosition.jsx, l'area è contenuta nel municipio!");
             props.handleSetArea(shape);
-
-            /** Calcolo il centro dell'area TURF (ha problemi con centroide del triangolo) (passo quello come coordinate (lat, lng)*/
-            /*
-            const latlngs = JSON.parse(shape.latlngs)[0];
-            console.log("Sono in ChosenArea.jsx, latlngs dell'area appena disegnata: (JSON.parse) ", latlngs);
-            const polygonGeoJSON = {
-                type: "Feature",
-                geometry: {
-                    type: "Polygon",
-                    coordinates: [latlngs.map(latlng => [latlng.lng, latlng.lat])] // Inverti in [lon, lat]
-                }
-            };
-
-            console.log("Sono in ChosenArea.jsx, polygonGeoJSON, ricavato: ", polygonGeoJSON);
-
-            
-            let centroid = turf.centroid(polygonGeoJSON);
-            console.log("AddDocument.jsx, centroide calcolato con turf (e' un po' strano)", centroid, centroid.geometry.coordinates); // [lon, lat]
-            props.handleSetPostition(centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]); // Inverto in [lat, lon]
-            */
-
 
             // Calcolo il centro dell'area con la media aritmetica delle coordinate (tengo questo)
             const latlngs = JSON.parse(shape.latlngs)[0];
@@ -250,21 +217,42 @@ function ChosenPosition(props) {
 
     return (
         <>
-            <Container fluid className="cp-container">
+            <Container fluid className="cp-container" style={{ width: '90%', height: '45vh' }}>
                 {/**here i put the checkbox/radio */}
-                <Form.Group className="radio-group">
+                <Form.Group className="radio-group" style={{ marginTop: '-0px' }}>
                     <Form.Check
                         type="radio"
-                        label="All municipality"
+                        label={(
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '23px' }}>
+                                All municipality
+                                <img
+                                    src={IconaAllMunicipality}
+                                    alt="icon"
+                                    style={{ width: '80px', height: '80px', marginLeft: '180px' }}
+                                />
+                            </span>
+                        )}
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="allMunicipalities" // value for this specific choice
                         checked={selectedOption === 'allMunicipalities'} // if the selectedOption is equal to this value then the radio button will be checked
                         onChange={handleOptionChange} // when the radio button is clicked the handleOptionChange function will be called
                     />
 
+
+
+
                     <Form.Check
                         type="radio"
-                        label="Choose on the map"
+                        label={(
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '23px' }}>
+                                Choose on map
+                                <img
+                                    src={IconaChooseOnTheMap}
+                                    alt="icon"
+                                    style={{ width: '80px', height: '80px', marginLeft: '170px' }}
+                                />
+                            </span>
+                        )}
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="pointToPoint" // value for this specific choice
                         checked={selectedOption === 'pointToPoint'} // if the selectedOption is equal to this value then the radio button will be checked
@@ -273,7 +261,16 @@ function ChosenPosition(props) {
 
                     <Form.Check
                         type="radio"
-                        label="Manual insertion"
+                        label={(
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '23px' }}>
+                                Manual insertion
+                                <img
+                                    src={IconaManualInsertion}
+                                    alt="icon"
+                                    style={{ width: '100px', height: '80px', marginLeft: '140px' }}
+                                />
+                            </span>
+                        )}
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="manualInsertion" // value for this specific choice
                         checked={selectedOption === 'manualInsertion'} // if the selectedOption is equal to this value then the radio button will be checked
@@ -282,7 +279,16 @@ function ChosenPosition(props) {
 
                     <Form.Check
                         type="radio"
-                        label="Add new area"
+                        label={(
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '23px' }}>
+                                Add new area
+                                <img
+                                    src={IconaAddNewArea}
+                                    alt="icon"
+                                    style={{ width: '80px', height: '80px', marginLeft: '190px' }}
+                                />
+                            </span>
+                        )}
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="addNewArea" // value for this specific choice
                         checked={selectedOption === 'addNewArea'} // if the selectedOption is equal to this value then the radio button will be checked
@@ -291,7 +297,16 @@ function ChosenPosition(props) {
 
                     <Form.Check
                         type="radio"
-                        label="Choose prexisting Area"
+                        label={(
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '23px' }}>
+                                Choose pre-existing area
+                                <img
+                                    src={IconaChoosePrexistingArea}
+                                    alt="icon"
+                                    style={{ width: '80px', height: '80px', marginLeft: '75px' }}
+                                />
+                            </span>
+                        )}
                         name="choosed" // all the radio button must have the same name to be able to select only one
                         value="selectExistingArea" // value for this specific choice
                         checked={selectedOption === 'selectExistingArea'} // if the selectedOption is equal to this value then the radio button will be checked
@@ -304,7 +319,7 @@ function ChosenPosition(props) {
                     {/**Here i put the map for alla municipality */}
                     {selectedOption === 'allMunicipalities' &&
                         <MapContainer center={[68.2558, 20.1240]} zoom={6} style={{ height: "100%", width: "100%" }}>
-                            <LayersControl position="topright">
+                            <LayersControl position="bottomleft">
                                 <LayersControl.BaseLayer checked name="Google Satellite">
                                     <TileLayer
                                         url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
@@ -331,7 +346,7 @@ function ChosenPosition(props) {
                     {/**here i put the map */}
                     {selectedOption === 'pointToPoint' &&
                         <>
-                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
@@ -358,71 +373,104 @@ function ChosenPosition(props) {
                     }
 
                     {/**here i put the form */}
-                    {selectedOption === 'manualInsertion' && showLatLongForm &&
+                    {selectedOption === 'manualInsertion' &&
                         <>
-                            <Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Latitude</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Enter latitude"
-                                        step="0.000001"
-                                        required={true}
-                                        value={position.lat || ''}
-                                        onChange={(e) => setPosition({ lat: parseFloat(e.target.value), lng: position.lng })}
+                            <div style={{ position: "relative", height: "100%", width: "100%" }}>
+                                <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
+                                    <LayersControl position="bottomleft">
+                                        <LayersControl.BaseLayer checked name="Google Satellite">
+                                            <TileLayer
+                                                url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                                                attribution='&copy; <a href="https://maps.google.com">Google</a>'
+                                            />
+                                        </LayersControl.BaseLayer>
+                                        <LayersControl.BaseLayer name="OpenStreetMap">
+                                            <TileLayer
+                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                                            />
+                                        </LayersControl.BaseLayer>
+                                    </LayersControl>
+
+                                    {position.lat && position.lng &&
+                                        <Marker position={position}></Marker>
+                                    }
+
+                                </MapContainer>
+
+
+
+
+                                <Form.Group style={{
+                                    position: "absolute",
+                                    top: "20px",
+                                    left: "20px",
+                                    zIndex: 1000,
+                                    backgroundColor: "rgba(255, 255, 255, 0.2)", // Sfondo semitrasparente per il riquadro
+                                    padding: "20px",
+                                    borderRadius: "8px",
+                                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                                    backdropFilter: "blur(20px)", // Aggiunge l'effetto di sfocatura allo sfondo
+                                    border: "2px solid white", // Bordo bianco
+                                }}>
+
+
+                                    <Form.Group className="mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Enter latitude"
+                                            step="0.000001"
+                                            required={true}
+                                            value={position.lat || ''}
+                                            onChange={(e) => setPosition({ lat: parseFloat(e.target.value), lng: position.lng })}
+                                            size="sm"
+                                        />
+                                    </Form.Group>
+
+                                    <Form.Group className="mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Enter longitude"
+                                            step="0.000001"
+                                            required={true}
+                                            value={position.lng || ''}
+                                            onChange={(e) => setPosition({ lat: position.lat, lng: parseFloat(e.target.value) })}
+                                            size="sm"
+                                        />
+                                    </Form.Group>
+
+
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleLatLongFormSubmit}
+                                        size="sm"
+                                        className="bi bi-floppy"
+                                        style={{
+                                            top: "20px",
+                                            left: "20px",
+                                            zIndex: 1000,
+                                            backgroundColor: "rgba(255, 255, 255, 0.2)", // Sfondo semitrasparente per il bottone
+                                            borderRadius: "8px", // Angoli arrotondati
+                                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Aggiungi una leggera ombra
+                                            backdropFilter: "blur(20px)", // Aggiunge l'effetto di sfocatura allo sfondo
+                                            border: "2px solid white", // Bordo bianco
+                                            color: "white", // Colore del testo del bottone
+                                            fontSize: "14px", // Imposta la dimensione del testo
+                                        }}
                                     />
+
+
                                 </Form.Group>
 
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Longitude</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Enter longitude"
-                                        step="0.000001"
-                                        required={true}
-                                        value={position.lng || ''}
-                                        onChange={(e) => setPosition({ lat: position.lat, lng: parseFloat(e.target.value) })}
-                                    />
-                                </Form.Group>
 
-                                <Button variant="primary" onClick={handleLatLongFormSubmit}>
-                                    Save
-                                </Button>
-                            </Form.Group>
-                        </>
-                    }
-
-
-                    {/**If i choose the (lat, long) i want to see them */}
-                    {selectedOption === 'manualInsertion' && !showLatLongForm &&
-                        <>
-                            {/* <h3 className="mt-5">Latitude: {manualLat}, Longitude: {manualLong}</h3>
-                                <Button variant="primary" onClick={handleResetLatLong}> Change Latitude and longitude</Button> */
-                                console.log("position: ", position)}
-
-                            <div className="showLatLng">
-                                <div className="showLat">
-                                    <p>latitude</p>
-                                    <div className="lat">
-                                        {position.lat}
-                                    </div>
-                                </div>
-                                <div className="showLong">
-                                    <p>longitude</p>
-                                    <div className="long">
-                                        {position.lng}
-                                    </div>
-                                </div>
-
-                                <Button variant="primary" onClick={handleResetLatLong}> Change Latitude and longitude</Button>
                             </div>
-
                         </>
                     }
+
 
                     {selectedOption === 'addNewArea' &&
                         <>
-                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
@@ -469,7 +517,7 @@ function ChosenPosition(props) {
 
                     {selectedOption === 'selectExistingArea' &&
                         <>
-                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "30vh", width: "100%" }}>
+                            <MapContainer center={[67.8558, 20.2253]} zoom={13} style={{ height: "100%", width: "100%" }}>
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
@@ -496,7 +544,7 @@ function ChosenPosition(props) {
                                         try {
                                             const positions = JSON.parse(area.coordinates)[0]; // Parsing delle coordinate
                                             const isSelected = selectedAreaId === area.areaId; // Verifica se l'area è selezionata
-                                            const color = isSelected ? 'red' : 'blue'; // Colore dinamico in base alla selezione
+                                            const color = isSelected ? '#ce661f' : '#5a83b5'; // Colore dinamico in base alla selezione
                                             return (
                                                 <Polygon
                                                     key={index}

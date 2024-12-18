@@ -7,7 +7,7 @@ const listDocuments = async () => {
             method: 'GET',
             credentials: 'include'
         })
-        
+
         if (!response.ok) throw new Error('Failed to fetch documents');
         const documents = await response.json();
         console.log('sono in documentAPI, listDocuments, ho ricevuto la risposta di listDocuments', documents);
@@ -20,31 +20,67 @@ const listDocuments = async () => {
 
 // First Sprint: the first story want just to add documents, and the third wants to add (lan,lng) => no update function
 const addDocument = async (document) => {
-    console.log('sono in documentAPI ',document);
+    console.log('sono in documentAPI ', document);
     const response = await fetch(`${SERVER_URL}`, {
 
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'}, 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
 
-      body: JSON.stringify({
-        
-        title: document.title, stakeholders: document.stakeholders, 
-        scale: document.scale, ASvalue:document.ASvalue, issuanceDate: document.issuanceDate, type: document.type, 
-        connections: document.connections, language: document.language, pages: `${document.pages}`, 
-        description: document.description,
-      }),
+        body: JSON.stringify({
 
-      credentials: 'include'
+            title: document.title, stakeholders: document.stakeholders,
+            scale: document.scale, ASvalue: document.ASvalue, issuanceDate: document.issuanceDate, type: document.type,
+            connections: document.connections, language: document.language, pages: `${document.pages}`,
+            description: document.description,
+        }),
+
+        credentials: 'include'
     });
-    if(!response.ok) {
-      const errMessage = await response.json();
-      throw errMessage;
+    if (!response.ok) {
+        const errMessage = await response.json();
+        throw errMessage;
     } else {
         const documentId = await response.json();
         return documentId;
     }
 
 }
+
+
+const updateDocument = async (document) => {
+    console.log('sono in documentAPI, updateDocument, ho ricevuto document:', document);
+    const response = await fetch(`${SERVER_URL}`, {
+
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+
+        body: JSON.stringify({
+
+            docId: document.docId,
+
+            title: document.title,  
+            
+            description: document.description,
+            scale: document.scale, ASvalue: document.ASvalue,
+            
+            stakeholders: document.stakeholders, issuanceDate: document.issuanceDate, type: document.type,
+
+            connections: document.connections, language: document.language, pages: `${document.pages}`,
+           
+        }),
+
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        const errMessage = await response.json();
+        throw errMessage;
+    } else {
+        const documentId = await response.json();
+        return documentId;
+    }
+}
+
+
 
 const deleteDocument = async (docId) => {
     try {
@@ -57,39 +93,39 @@ const deleteDocument = async (docId) => {
         if (!response.ok) throw new Error('Failed to fetch link types');
         return
         //return await response.json();
-    }catch(e){
+    } catch (e) {
         console.error("Error removing a document:", e);
         throw e;
     }
 
 }
 
-const addFiles = async(docId, files) =>{
-    try{
-        const response= await fetch(`${SERVER_URL}${docId}/files`,{
-            method:'POST',
+const addFiles = async (docId, files) => {
+    try {
+        const response = await fetch(`${SERVER_URL}${docId}/files`, {
+            method: 'POST',
             credentials: 'include',
             body: files,
-            headers:{}
+            headers: {}
         })
         if (!response.ok) throw new Error('Failed to upload files');
         return
-    }catch(e){
+    } catch (e) {
         console.error("Error uploading one or more files:", e);
         throw e;
     }
 }
 
-const getFiles = async(docId) =>{
+const getFiles = async (docId) => {
     try {
         const response = await fetch(`${SERVER_URL}${docId}/files`, {
             method: 'GET',
             //credentials: 'include'
         })
-        if(response.ok){
+        if (response.ok) {
             const filesJson = await response.json();
             return filesJson;
-        }else{
+        } else {
             throw new Error('Error loading files');
         }
     } catch (err) {
@@ -123,7 +159,8 @@ const DocumentAPI = {
     addDocument,
     deleteDocument,
     addFiles,
-    getFiles
+    getFiles,
+    updateDocument,
 }
 
 export default DocumentAPI;
