@@ -114,15 +114,14 @@ sections:
 
 - What caused your errors in estimation (if any)?
 
- The primary cause of our estimation errors was the unexpected complexity of the Shenzhen diagram. However, despite these difficulties, we successfully tackled the problems, and our overall performance improved compared to the previous sprint.
+      The primary cause of our estimation errors was the unexpected complexity of the Shenzhen diagram. However, despite these difficulties, we successfully tackled the problems, and our overall performance improved compared to the previous sprint.
 
 - What lessons did you learn (both positive and negative) in this sprint?
 
        Positive:
-      
-      We successfully completed 6 stories this sprint, showing a marked improvement compared to the previous sprint. This demonstrates growth in our team's capacity and efficiency.
-      Negative:
-      Most of the stories this sprint were related to the Shenzhen diagram, which made it challenging to divide the work effectively among 6 team members.
+       We successfully completed 6 stories this sprint, showing a marked improvement compared to the previous sprint. This demonstrates growth in our team's     capacity and efficiency.
+       Negative:
+       Most of the stories this sprint were related to the Shenzhen diagram, which made it challenging to divide the work effectively among 6 team members.
 
 
 - Which improvement goals set in the previous retrospective were you able to achieve?
@@ -136,10 +135,10 @@ sections:
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
 
-      Analyze the stakeholders' feedback in detail and make the necessary adjustments to the project. Then we make video presentation of our project.
+       Analyze the stakeholders' feedback in detail and make the necessary adjustments to the project. Then we make video presentation of our project.
 
 > Propose one or two
 
 - One thing you are proud of as a Team!!
 
-We are proud of our ability to stay patient and composed in any situation, which allows us to maintain focus on the project and strengthen our teamwork. This mindset has been crucial for overcoming challenges and achieving our goals collaboratively.
+      We are proud of our ability to stay patient and composed in any situation, which allows us to maintain focus on the project and strengthen our teamwork. This mindset has been crucial for overcoming challenges and achieving our goals collaboratively.
