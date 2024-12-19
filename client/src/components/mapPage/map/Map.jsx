@@ -46,11 +46,15 @@ const getIcon = (docType, stakeholders) => {
     ? docType.toLowerCase().replace(' ', '-')
     : "other-document";
 
-  const formattedStakeholder = validStakeholders.includes(stakeholders)
-    ? stakeholders.toLowerCase().replace(' ', '-')
-    : "others";
+  const formattedStakeholders = stakeholders
+    .split(',')
+    .map(stakeholder => validStakeholders.includes(stakeholder.trim())
+      ? stakeholder.trim().toLowerCase().replace(' ', '-')
+      : "others")
+    .sort((a, b) => validStakeholders.indexOf(a) - validStakeholders.indexOf(b))
+    .join('_');
 
-  const iconUrl = `/icons/${formattedDocType}_${formattedStakeholder}.png`;
+  const iconUrl = `/icons/${formattedDocType}_${formattedStakeholders}.png`;
 
   return new Icon({
     iconUrl,
