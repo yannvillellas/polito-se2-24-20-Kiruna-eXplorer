@@ -25,7 +25,7 @@ const Links = ({ links, nodes, xScale, yScale, verticalSpacing, horizontalSpacin
             }
             const { x: nx, y: ny } = nodePositions[node.id];
             //console.log(nx,ny)
-            if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 2) {
+            if (Math.sqrt((x - nx) ** 2 + (y - ny) ** 2) < nodeRadius * 4) {
                 if (ny >= y) {
                     return 1; // Nodo sopra
                 } else {
