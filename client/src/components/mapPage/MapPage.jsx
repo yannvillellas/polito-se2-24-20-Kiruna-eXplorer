@@ -88,7 +88,7 @@ function HomePage(props) {
                         handleForceRefresh={props.handleForceRefresh}
                         handleChangeMapViewBasedOnDocId={handleChangeMapViewBasedOnDocId}
                         mapCenter={mapCenter}
-                        zoom={16}
+                        zoom={18}
                         isUrbanPlanner={isUrbanPlanner}
                         documents={props.documents}
                         linksType={props.linksType}
